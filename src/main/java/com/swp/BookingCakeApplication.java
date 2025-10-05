@@ -11,7 +11,7 @@ public class BookingCakeApplication {
     }
 
     // git pull: lấy code ms nhất ở trên local chưa
-
+    // git add .: Add các thay đổi của các file
 
     public static void main2(String[] args) {
         System.out.println("Test");
