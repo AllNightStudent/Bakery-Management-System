@@ -3,6 +3,9 @@ package com.swp.repository;
 import com.swp.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface UserRepository extends JpaRepository<UserEntity,Long> {
+import java.util.Optional;
 
+public interface UserRepository extends JpaRepository<UserEntity, Long> {
+    boolean existsByEmail(String email);
+    Optional<UserEntity> findByEmail(String email);
 }
