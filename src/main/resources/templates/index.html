@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::main}, 'Trang chủ - Bakery', ~{::extraHead}, ~{::extraScripts})}">
+<head>
+    <!-- Tiêu đề này sẽ không được sử dụng, vì nó được truyền trực tiếp trong th:replace -->
+    <title>Trang chủ - Bakery</title>
+    <th:block th:fragment="extraHead">
+    </th:block>
+</head>
+<body>
+<!-- Hero Section -->
+<main>
+    <section class="hero">
+        <div class="hero-content">
+            <h1>BÁNH TRUNG THU<br><span class="highlight">ANH HOA 2025</span></h1>
+            <p>ĐẬM ĐÀ HƯƠNG VỊ, MẬN NÀ TÌNH THÂN</p>
+            <a href="products.html" class="cta-button">XEM SẢN PHẨM</a>
+        </div>
+        <div class="hero-image">
+            <img src="/placeholder.svg?height=400&width=600" alt="Bánh Trung Thu 2025">
+        </div>
+    </section>
+
+    <!-- Featured Products -->
+    <section class="featured-products">
+        <div class="container">
+            <h2>BST BÁNH TRUNG THU 2025</h2>
+            <p class="subtitle">ĐẬM ĐÀ HƯƠNG VỊ, MẬN NÀ TÌNH THÂN</p>
+
+            <div class="product-grid">
+                <div class="product-card">
+                    <img src="/placeholder.svg?height=250&width=250" alt="Bánh Trung Thu Cao Cấp">
+                    <h3>BÁNH TRUNG THU CAO CẤP</h3>
+                    <p class="price">85.000₫</p>
+                    <button class="add-to-cart">THÊM VÀO GIỎ</button>
+                </div>
+                <div class="product-card">
+                    <img src="/placeholder.svg?height=250&width=250" alt="Bánh Trung Thu Truyền Thống">
+                    <h3>BÁNH TRUNG THU TRUYỀN THỐNG</h3>
+                    <p class="price">65.000₫</p>
+                    <button class="add-to-cart">THÊM VÀO GIỎ</button>
+                </div>
+                <div class="product-card">
+                    <img src="/placeholder.svg?height=250&width=250" alt="Bánh Trung Thu Đặc Biệt">
+                    <h3>BÁNH TRUNG THU ĐẶC BIỆT</h3>
+                    <p class="price">95.000₫</p>
+                    <button class="add-to-cart">THÊM VÀO GIỎ</button>
+                </div>
+                <div class="product-card">
+                    <img src="/placeholder.svg?height=250&width=250" alt="Bánh Trung Thu Thượng Hạng">
+                    <h3>BÁNH TRUNG THU THƯỢNG HẠNG</h3>
+                    <p class="price">115.000₫</p>
+                    <button class="add-to-cart">THÊM VÀO GIỎ</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Popular Products -->
+    <section class="popular-products">
+        <div class="container">
+            <h2>SẢN PHẨM NỔI BẬT</h2>
+            <div class="product-grid">
+                <div class="product-card">
+                    <img src="/placeholder.svg?height=200&width=200" alt="Petit Four">
+                    <h3>PETIT FOUR</h3>
+                    <p class="price">45.000₫</p>
+                    <button class="add-to-cart">THÊM VÀO GIỎ</button>
+                </div>
+                <div class="product-card">
+                    <img src="/placeholder.svg?height=200&width=200" alt="Tiramisu Cake">
+                    <h3>TIRAMISU CAKE</h3>
+                    <p class="price">350.000₫</p>
+                    <button class="add-to-cart">THÊM VÀO GIỎ</button>
+                </div>
+                <div class="product-card">
+                    <img src="/placeholder.svg?height=200&width=200" alt="Fruit Cake">
+                    <h3>FRUIT CAKE</h3>
+                    <p class="price">300.000₫</p>
+                    <button class="add-to-cart">THÊM VÀO GIỎ</button>
+                </div>
+                <div class="product-card">
+                    <img src="/placeholder.svg?height=200&width=200" alt="Chocolate Cake">
+                    <h3>CHOCOLATE CAKE</h3>
+                    <p class="price">320.000₫</p>
+                    <button class="add-to-cart">THÊM VÀO GIỎ</button>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<th:block th:fragment="extraScripts">
+    <script>
+
+    </script>
+</th:block>
+</body>
+</html>

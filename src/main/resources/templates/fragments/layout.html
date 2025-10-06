@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:fragment="layout(main_content, pageTitle, extraHead, extraScripts)">
+<head>
+    <meta charset="UTF-8">
+    <!-- Sử dụng tiêu đề được truyền vào, nếu không có thì dùng title mặc định -->
+    <title th:text="${pageTitle} ?: 'Bakery'">Bakery</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <th:block th:replace="${extraHead}"></th:block>
+</head>
+
+<body>
+<header class="header">
+    <div class="container">
+        <div class="header-top">
+            <div class="contact-info">
+                <span>📞 0901 462 179</span>
+                <span>📍 Hà Nội</span>
+            </div>
+            <!-- Nếu đã login -->
+            <div sec:authorize="isAuthenticated()" class="user-dropdown-wrapper user-actions">
+                <div class="user-dropdown">
+                    <span class="user-dropdown-toggle">
+                        Xin chào, <span sec:authentication="name"></span> ▼
+                    </span>
+                    <ul class="user-dropdown-menu">
+                        <li><a th:href="@{/profile}">Profile</a></li>
+                        <li><a th:href="@{/change-password}">Đổi mật khẩu</a></li>
+                        <li><a th:href="@{/logout}">Đăng xuất</a></li>
+                    </ul>
+                </div>
+                <a th:href="@{/cart}" class="cart-link">🛒 Giỏ hàng</a>
+            </div>
+
+
+            <!-- Nếu chưa login -->
+            <div sec:authorize="!isAuthenticated()" class="user-actions">
+                <a th:href="@{/login}" class="active">Đăng nhập</a>
+                <a th:href="@{/cart}">🛒 Giỏ hàng</a>
+            </div>
+        </div>
+        <nav class="navbar">
+            <div class="logo">
+                <span>ANH HOA BAKERY</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">TRANG CHỦ</a></li>
+                <li><a href="products.html">BÁNH TRUNG THU 2025</a></li>
+                <li><a href="products.html">BÁNH MÌ NGỌT</a></li>
+                <li><a href="products.html">BÁNH KEM & BÁNH SINH NHẬT</a></li>
+                <li><a href="products.html">COOKIES & MACARONS</a></li>
+                <li><a href="contact.html">LIÊN HỆ</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<div>
+    <div th:replace="${main_content}"></div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>ANH HOA BAKERY</h3>
+                <p>Chuyên sản xuất bánh trung thu, bánh ngọt và các loại bánh cao cấp</p>
+            </div>
+            <div class="footer-section">
+                <h3>LIÊN HỆ</h3>
+                <p>📞 0901 462 179</p>
+                <p>📍 Hà Nội, Việt Nam</p>
+                <p>✉️ info@anhhoabakery.vn</p>
+            </div>
+            <div class="footer-section">
+                <h3>THEO DÕI CHÚNG TÔI</h3>
+                <div class="social-links">
+                    <a href="#">Facebook</a>
+                    <a href="#">Instagram</a>
+                    <a href="#">Zalo</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Anh Hoa Bakery. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+<th:block th:replace="${extraScripts}"></th:block>
+</body>
+</html>
