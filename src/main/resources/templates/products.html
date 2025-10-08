@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::main}, 'Sản Phẩm - Bakery', ~{::extraHead}, ~{::extraScripts})}">
+<head>
+    <!-- Tiêu đề này sẽ không được sử dụng, vì nó được truyền trực tiếp trong th:replace -->
+    <title>Sản Phẩm -  Bakery</title>
+    <th:block th:fragment="extraHead">
+        <link rel="stylesheet" th:href="@{/css/login.css}">
+        <style>
+            .nav-menu a.active {
+                color: #FFD700;
+            }
+
+            .products-page {
+                padding: 60px 0;
+                background: #f8f9fa;
+            }
+
+            .page-header {
+                text-align: center;
+                margin-bottom: 50px;
+            }
+
+            .page-header h1 {
+                font-size: 42px;
+                color: #8B4513;
+                margin-bottom: 10px;
+            }
+
+            .page-header p {
+                font-size: 18px;
+                color: #666;
+            }
+
+            .category-filter {
+                display: flex;
+                justify-content: center;
+                gap: 15px;
+                margin-bottom: 40px;
+                flex-wrap: wrap;
+            }
+
+            .filter-btn {
+                background: white;
+                border: 2px solid #8B4513;
+                color: #8B4513;
+                padding: 10px 20px;
+                border-radius: 25px;
+                cursor: pointer;
+                font-weight: bold;
+                transition: all 0.3s;
+            }
+
+            .filter-btn.active,
+            .filter-btn:hover {
+                background: #8B4513;
+                color: white;
+            }
+
+            .products-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 30px;
+            }
+
+            .product-item {
+                transition: opacity 0.3s;
+            }
+
+            .product-item.hidden {
+                display: none;
+            }
+
+            .product-info {
+                padding: 20px;
+            }
+
+            .product-description {
+                color: #666;
+                margin-bottom: 15px;
+                font-size: 14px;
+            }
+
+            .product-variants {
+                margin-top: 10px;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .btn-variant {
+                display: inline-block;
+                padding: 8px 12px;
+                background: #f8f8f8;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                font-size: 14px;
+                color: #333;
+                text-decoration: none;
+                transition: all 0.2s ease;
+            }
+
+            .btn-variant:hover {
+                background: #ffe6e6;
+                border-color: #ff9999;
+                color: #c00;
+            }
+
+
+            .variant {
+                display: inline-block;
+                background: #f0f0f0;
+                padding: 5px 10px;
+                border-radius: 15px;
+                font-size: 12px;
+                margin: 2px;
+                color: #8B4513;
+                font-weight: bold;
+            }
+
+            .product-actions {
+                display: flex;
+                gap: 10px;
+            }
+
+            .view-details {
+                background: transparent;
+                border: 2px solid #8B4513;
+                color: #8B4513;
+                padding: 10px 15px;
+                border-radius: 5px;
+                cursor: pointer;
+                font-weight: bold;
+                transition: all 0.3s;
+                flex: 1;
+            }
+
+            .view-details:hover {
+                background: #8B4513;
+                color: white;
+            }
+
+            .add-to-cart {
+                flex: 1;
+            }
+
+            @media (max-width: 768px) {
+                .products-grid {
+                    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                    gap: 20px;
+                }
+
+                .product-actions {
+                    flex-direction: column;
+                }
+            }
+            .search-box {
+                display: flex;
+                justify-content: flex-start; /* căn trái */
+                margin-bottom: 30px;
+            }
+
+            .search-input {
+                padding: 8px 15px;
+                border-radius: 20px;
+                border: 1px solid #8B4513;
+                margin-right: 10px;
+                min-width: 250px;
+            }
+
+        </style>
+    </th:block>
+
+</head>
+<body>
+<!-- Hero Section -->
+<main>
+    <section class="products-page">
+        <div class="container">
+            <div class="page-header">
+                <h1>Chào mừng đến với tiệm bánh Brew Cake</h1>
+                <p>Khám phá bộ sưu tập bánh ngọt cao cấp của chúng tôi</p>
+            </div>
+
+
+            <!-- Category Filter -->
+            <div class="category-filter">
+                <form th:action="@{/products}" method="get">
+                    <button type="submit" name="categoryId" value=""
+                            th:classappend="${selectedCategoryId == null} ? ' active'"
+                            class="filter-btn">Tất cả</button>
+                </form>
+                <form th:each="category : ${categories}"
+                      th:action="@{/products}" method="get">
+                    <button type="submit" name="categoryId" th:value="${category.id}"
+                            th:text="${category.description}"
+                            th:classappend="${selectedCategoryId == category.id} ? ' active'"
+                            class="filter-btn"></button>
+                </form>
+
+            </div>
+            <div class="search-box">
+                <form th:action="@{/products}" method="get">
+                    <!-- Ô nhập search -->
+                    <input type="text" name="search" placeholder="Tìm sản phẩm..."
+                           th:value="${search}" class="search-input">
+
+                    <!-- Ẩn categoryId để giữ filter -->
+                    <input type="hidden" name="categoryId" th:value="${selectedCategoryId}">
+
+                    <button type="submit" class="filter-btn">Tìm</button>
+                </form>
+            </div>
+
+
+
+            <!-- Products Grid -->
+            <div class="products-grid">
+                <!-- Mooncakes -->
+                <div th:each="product : ${products}" class="product-item">
+                    <div class="product-card">
+                        <img th:src="@{${product.imgUrl}}" alt="ảnh">
+                        <div class="product-info">
+                            <h3 th:text="${product.name}"></h3>
+                            <p th:text="${product.shortDescription}"></p>
+                                <div class="product-variants">
+                                    <div th:each="variant : ${product.variants}" class="variant-btn">
+                                        <a th:href="@{/cart/add(variantId=${variant.variantId})}"
+                                           class="btn-variant">
+                                            <span th:text="${#numbers.formatDecimal(variant.price, 0, 'COMMA', 0, 'POINT')}"></span> ₫
+                                        </a>
+                                    </div>
+                                </div>
+                            <div class="product-actions">
+                                <button class="add-to-cart">THÊM VÀO GIỎ</button>
+                                <a th:href="@{/products/{id}(id=${product.productId})}" class="view-details">XEM CHI TIẾT</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+</main>
+
+<th:block th:fragment="extraScripts">
+    <script>
+
+    </script>
+</th:block>
+
+</body>
+</html>
