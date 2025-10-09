@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:fragment="layout(main_content, pageTitle, extraHead, extraScripts)">
+<head>
+    <meta charset="UTF-8">
+    <!-- Sử dụng tiêu đề được truyền vào, nếu không có thì dùng title mặc định -->
+    <title th:text="${pageTitle} ?: 'Admin Bakery'">Admin Bakery</title>
+    <link rel="stylesheet" th:href="@{/css/admin-style.css}">
+    <th:block th:replace="${extraHead}"></th:block>
+</head>
+
+<body>
+<!-- Admin Header -->
+<header class="admin-header">
+    <div class="admin-container">
+        <div class="admin-logo">
+            <img src="/placeholder.svg?height=40&width=40" alt="Admin">
+            <span>ADMIN PANEL</span>
+        </div>
+        <div class="admin-user">
+            <span>Xin chào, Admin</span>
+            <a th:href="@{/logout}" class="logout-btn">Đăng xuất</a>
+        </div>
+    </div>
+</header>
+
+<div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+        <nav class="admin-nav">
+            <ul>
+                <li><a href="/admin/products" class="active">📊 Dashboard</a></li>
+                <li><a href="/admin/products">📦 Quản lý sản phẩm</a></li>
+                <li><a href="/admin/categories">📦 Quản lý danh mục</a></li>
+                <li><a href="orders.html">🛒 Quản lý đơn hàng</a></li>
+                <li><a href="users.html">👥 Quản lý khách hàng</a></li>
+                <li><a href="inventory.html">📋 Quản lý kho</a></li>
+                <li><a href="materials.html">🧾 Nguyên liệu</a></li>
+                <li><a href="suppliers.html">🏪 Nhà cung cấp</a></li>
+                <li><a href="promotions.html">🎁 Khuyến mãi</a></li>
+                <li><a href="reviews.html">⭐ Đánh giá</a></li>
+                <li><a href="reports.html">📈 Báo cáo</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+        <div>
+            <div th:replace="${main_content}"></div>
+        </div>
+    </main>
+</div>
+
+<th:block th:replace="${extraScripts}"></th:block>
+</body>
+</html>
