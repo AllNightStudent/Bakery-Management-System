@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout-admin :: layout(~{::main}, 'Trang chủ - Bakery', ~{::extraHead}, ~{::extraScripts})}">
+<head>
+    <!-- Tiêu đề này sẽ không được sử dụng, vì nó được truyền trực tiếp trong th:replace -->
+    <title>Admin Dashboard - Bakery</title>
+    <th:block th:fragment="extraHead">
+    </th:block>
+</head>
+<body>
+<!-- Hero Section -->
+<!-- Main Content -->
+<main class="admin-main">
+    <div class="admin-content">
+        <div class="page-header">
+            <h1>Dashboard</h1>
+            <p>Tổng quan hoạt động kinh doanh</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">💰</div>
+                <div class="stat-info">
+                    <h3>Doanh thu hôm nay</h3>
+                    <p class="stat-value">15.750.000₫</p>
+                    <span class="stat-change positive">+12.5%</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🛒</div>
+                <div class="stat-info">
+                    <h3>Đơn hàng mới</h3>
+                    <p class="stat-value">24</p>
+                    <span class="stat-change positive">+8.3%</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📦</div>
+                <div class="stat-info">
+                    <h3>Sản phẩm bán chạy</h3>
+                    <p class="stat-value">156</p>
+                    <span class="stat-change negative">-2.1%</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-info">
+                    <h3>Khách hàng mới</h3>
+                    <p class="stat-value">12</p>
+                    <span class="stat-change positive">+15.7%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts and Tables -->
+        <div class="dashboard-grid">
+            <!-- Recent Orders -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h3>Đơn hàng gần đây</h3>
+                    <a href="orders.html">Xem tất cả</a>
+                </div>
+                <div class="table-container">
+                    <table class="admin-table">
+                        <thead>
+                        <tr>
+                            <th>Mã đơn</th>
+                            <th>Khách hàng</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>#ORD001</td>
+                            <td>Nguyễn Văn A</td>
+                            <td>450.000₫</td>
+                            <td><span class="status pending">Chờ xử lý</span></td>
+                        </tr>
+                        <tr>
+                            <td>#ORD002</td>
+                            <td>Trần Thị B</td>
+                            <td>320.000₫</td>
+                            <td><span class="status processing">Đang xử lý</span></td>
+                        </tr>
+                        <tr>
+                            <td>#ORD003</td>
+                            <td>Lê Văn C</td>
+                            <td>180.000₫</td>
+                            <td><span class="status completed">Hoàn thành</span></td>
+                        </tr>
+                        <tr>
+                            <td>#ORD004</td>
+                            <td>Phạm Thị D</td>
+                            <td>275.000₫</td>
+                            <td><span class="status shipped">Đã giao</span></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Low Stock Alert -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h3>Cảnh báo tồn kho</h3>
+                    <a href="inventory.html">Xem chi tiết</a>
+                </div>
+                <div class="alert-list">
+                    <div class="alert-item">
+                        <div class="alert-icon">⚠️</div>
+                        <div class="alert-info">
+                            <h4>Bánh Trung Thu Cao Cấp</h4>
+                            <p>Còn lại: 5 sản phẩm</p>
+                        </div>
+                    </div>
+                    <div class="alert-item">
+                        <div class="alert-icon">🔴</div>
+                        <div class="alert-info">
+                            <h4>Bột mì cao cấp</h4>
+                            <p>Còn lại: 2kg</p>
+                        </div>
+                    </div>
+                    <div class="alert-item">
+                        <div class="alert-icon">⚠️</div>
+                        <div class="alert-info">
+                            <h4>Trứng gà tươi</h4>
+                            <p>Còn lại: 20 quả</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Products -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h3>Sản phẩm bán chạy</h3>
+                    <a href="products.html">Xem tất cả</a>
+                </div>
+                <div class="product-list">
+                    <div class="product-item">
+                        <img src="/placeholder.svg?height=50&width=50" alt="Product">
+                        <div class="product-info">
+                            <h4>Bánh Trung Thu Cao Cấp</h4>
+                            <p>Đã bán: 45 hộp</p>
+                        </div>
+                        <div class="product-revenue">3.825.000₫</div>
+                    </div>
+                    <div class="product-item">
+                        <img src="/placeholder.svg?height=50&width=50" alt="Product">
+                        <div class="product-info">
+                            <h4>Tiramisu Cake</h4>
+                            <p>Đã bán: 12 chiếc</p>
+                        </div>
+                        <div class="product-revenue">4.200.000₫</div>
+                    </div>
+                    <div class="product-item">
+                        <img src="/placeholder.svg?height=50&width=50" alt="Product">
+                        <div class="product-info">
+                            <h4>Petit Four</h4>
+                            <p>Đã bán: 28 hộp</p>
+                        </div>
+                        <div class="product-revenue">1.260.000₫</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<th:block th:fragment="extraScripts">
+    <script>
+
+    </script>
+</th:block>
+</body>
+</html>

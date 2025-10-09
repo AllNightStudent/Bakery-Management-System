@@ -1,7 +1,8 @@
 package com.swp.exception;
 
-public class BadRequestException extends RuntimeException {
-    public BadRequestException(final String message) {
+
+public class BadRequestException extends RuntimeException{
+    public BadRequestException(String message) {
         super(message);
     }
 }

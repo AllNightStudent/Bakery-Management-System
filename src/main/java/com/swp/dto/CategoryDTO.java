@@ -24,5 +24,6 @@ public class CategoryDTO {
     private Boolean active;
 
     private LocalDateTime createdAt;
+
 }
 
