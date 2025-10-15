@@ -2,602 +2,602 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{fragments/layout-admin :: layout(~{::main}, 'Quản lý danh mục - Bakery', ~{::extraHead}, ~{::extraScripts})}">
 <head>
-    <title>Quản lý danh mục - Bakery</title>
-    <th:block th:fragment="extraHead">
-        <style>
-            .admin-main {
-                padding: 2rem;
-                background: #f8f9fa;
-                min-height: 100vh;
-            }
+  <title>Quản lý danh mục - Bakery</title>
+  <th:block th:fragment="extraHead">
+    <style>
+      .admin-main {
+        padding: 2rem;
+        background: #f8f9fa;
+        min-height: 100vh;
+      }
 
-            .admin-content {
-                max-width: 1400px;
-                margin: 0 auto;
-            }
+      .admin-content {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
 
-            .page-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 2rem;
-            }
+      .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+      }
 
-            .page-header h1 {
-                font-size: 2rem;
-                font-weight: 700;
-                color: #2d3748;
-            }
+      .page-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2d3748;
+      }
 
-            .btn-primary {
-                background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-                color: white;
-                padding: 0.75rem 1.5rem;
-                border: none;
-                border-radius: 8px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all 0.3s ease;
-            }
+      .btn-primary {
+        background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
 
-            .btn-primary:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
-            }
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+      }
 
-            .btn-secondary {
-                background: #e2e8f0;
-                color: #2d3748;
-                padding: 0.75rem 1.5rem;
-                border: none;
-                border-radius: 8px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all 0.3s ease;
-            }
+      .btn-secondary {
+        background: #e2e8f0;
+        color: #2d3748;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
 
-            .btn-secondary:hover {
-                background: #cbd5e0;
-            }
+      .btn-secondary:hover {
+        background: #cbd5e0;
+      }
 
-            .filters {
-                background: white;
-                padding: 1.5rem;
-                border-radius: 12px;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-                margin-bottom: 1.5rem;
-            }
+      .filters {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+      }
 
-            .filter-group {
-                display: flex;
-                gap: 1rem;
-                align-items: center;
-                flex-wrap: wrap;
-            }
+      .filter-group {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
 
-            .filter-select, .search-input {
-                padding: 0.75rem;
-                border: 1px solid #e2e8f0;
-                border-radius: 8px;
-                font-size: 0.95rem;
-            }
+      .filter-select, .search-input {
+        padding: 0.75rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+      }
 
-            .filter-select {
-                min-width: 200px;
-            }
+      .filter-select {
+        min-width: 200px;
+      }
 
-            .search-input {
-                flex: 1;
-                min-width: 250px;
-            }
+      .search-input {
+        flex: 1;
+        min-width: 250px;
+      }
 
-            .table-card {
-                background: white;
-                border-radius: 12px;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-                overflow: hidden;
-            }
+      .table-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+      }
 
-            .table-container {
-                overflow-x: auto;
-            }
+      .table-container {
+        overflow-x: auto;
+      }
 
-            .admin-table {
-                width: 100%;
-                border-collapse: collapse;
-            }
+      .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
 
-            .admin-table thead {
-                background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-                color: white;
-            }
+      .admin-table thead {
+        background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+        color: white;
+      }
 
-            .admin-table th {
-                padding: 1rem;
-                text-align: left;
-                font-weight: 600;
-                white-space: nowrap;
-            }
+      .admin-table th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        white-space: nowrap;
+      }
 
-            .admin-table td {
-                padding: 1rem;
-                border-bottom: 1px solid #e2e8f0;
-            }
+      .admin-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+      }
 
-            .admin-table tbody tr:hover {
-                background: #f7fafc;
-            }
+      .admin-table tbody tr:hover {
+        background: #f7fafc;
+      }
 
-            .status {
-                padding: 0.4rem 0.8rem;
-                border-radius: 20px;
-                font-size: 0.85rem;
-                font-weight: 600;
-                display: inline-block;
-            }
+      .status {
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+      }
 
-            .status.active {
-                background: #c6f6d5;
-                color: #22543d;
-            }
+      .status.active {
+        background: #c6f6d5;
+        color: #22543d;
+      }
 
-            .status.inactive {
-                background: #fed7d7;
-                color: #742a2a;
-            }
+      .status.inactive {
+        background: #fed7d7;
+        color: #742a2a;
+      }
 
-            .action-buttons {
-                display: flex;
-                gap: 0.5rem;
-            }
+      .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+      }
 
-            .btn-edit, .btn-view, .btn-delete, .btn-toggle {
-                padding: 0.5rem 0.75rem;
-                border: none;
-                border-radius: 6px;
-                cursor: pointer;
-                font-size: 1rem;
-                transition: all 0.2s ease;
-            }
+      .btn-edit, .btn-view, .btn-delete, .btn-toggle {
+        padding: 0.5rem 0.75rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+      }
 
-            .btn-edit {
-                background: #bee3f8;
-                color: #2c5282;
-            }
+      .btn-edit {
+        background: #bee3f8;
+        color: #2c5282;
+      }
 
-            .btn-edit:hover {
-                background: #90cdf4;
-            }
+      .btn-edit:hover {
+        background: #90cdf4;
+      }
 
-            .btn-view {
-                background: #c6f6d5;
-                color: #22543d;
-            }
+      .btn-view {
+        background: #c6f6d5;
+        color: #22543d;
+      }
 
-            .btn-view:hover {
-                background: #9ae6b4;
-            }
+      .btn-view:hover {
+        background: #9ae6b4;
+      }
 
-            .btn-delete {
-                background: #fed7d7;
-                color: #742a2a;
-            }
+      .btn-delete {
+        background: #fed7d7;
+        color: #742a2a;
+      }
 
-            .btn-delete:hover {
-                background: #fc8181;
-            }
+      .btn-delete:hover {
+        background: #fc8181;
+      }
 
-            .btn-toggle {
-                background: #feebc8;
-                color: #7c2d12;
-            }
+      .btn-toggle {
+        background: #feebc8;
+        color: #7c2d12;
+      }
 
-            .btn-toggle:hover {
-                background: #fbd38d;
-            }
+      .btn-toggle:hover {
+        background: #fbd38d;
+      }
 
-            .pagination {
-                display: flex;
-                justify-content: center;
-                gap: 0.5rem;
-                margin-top: 2rem;
-                flex-wrap: wrap;
-            }
+      .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+      }
 
-            .page-btn {
-                padding: 0.5rem 1rem;
-                border: 1px solid #e2e8f0;
-                background: white;
-                border-radius: 6px;
-                cursor: pointer;
-                transition: all 0.2s ease;
-            }
+      .page-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid #e2e8f0;
+        background: white;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
 
-            .page-btn:hover {
-                background: #f7fafc;
-                border-color: #ff6b35;
-            }
+      .page-btn:hover {
+        background: #f7fafc;
+        border-color: #ff6b35;
+      }
 
-            .page-btn.active {
-                background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-                color: white;
-                border-color: #ff6b35;
-            }
+      .page-btn.active {
+        background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+        color: white;
+        border-color: #ff6b35;
+      }
 
-            .page-btn:disabled {
-                opacity: 0.5;
-                cursor: not-allowed;
-            }
+      .page-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
 
-            .modal {
-                display: none;
-                position: fixed;
-                z-index: 1000;
-                left: 0;
-                top: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.5);
-                backdrop-filter: blur(4px);
-            }
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+      }
 
-            .modal-content {
-                background: white;
-                margin: 5% auto;
-                padding: 0;
-                border-radius: 16px;
-                width: 90%;
-                max-width: 600px;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-                animation: slideDown 0.3s ease;
-            }
+      .modal-content {
+        background: white;
+        margin: 5% auto;
+        padding: 0;
+        border-radius: 16px;
+        width: 90%;
+        max-width: 600px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideDown 0.3s ease;
+      }
 
-            @keyframes slideDown {
-                from {
-                    transform: translateY(-50px);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateY(0);
-                    opacity: 1;
-                }
-            }
+      @keyframes slideDown {
+        from {
+          transform: translateY(-50px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
 
-            .modal-header {
-                background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-                color: white;
-                padding: 1.5rem;
-                border-radius: 16px 16px 0 0;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
+      .modal-header {
+        background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 16px 16px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
 
-            .modal-header h2 {
-                margin: 0;
-                font-size: 1.5rem;
-            }
+      .modal-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+      }
 
-            .close {
-                font-size: 2rem;
-                font-weight: 300;
-                cursor: pointer;
-                transition: transform 0.2s ease;
-            }
+      .close {
+        font-size: 2rem;
+        font-weight: 300;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+      }
 
-            .close:hover {
-                transform: rotate(90deg);
-            }
+      .close:hover {
+        transform: rotate(90deg);
+      }
 
-            .category-form {
-                padding: 2rem;
-            }
+      .category-form {
+        padding: 2rem;
+      }
 
-            .form-group {
-                margin-bottom: 1.5rem;
-            }
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
 
-            .form-group label {
-                display: block;
-                margin-bottom: 0.5rem;
-                font-weight: 600;
-                color: #2d3748;
-            }
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #2d3748;
+      }
 
-            .form-group input,
-            .form-group textarea,
-            .form-group select {
-                width: 100%;
-                padding: 0.75rem;
-                border: 1px solid #e2e8f0;
-                border-radius: 8px;
-                font-size: 1rem;
-                transition: all 0.2s ease;
-            }
+      .form-group input,
+      .form-group textarea,
+      .form-group select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+      }
 
-            .form-group input:focus,
-            .form-group textarea:focus,
-            .form-group select:focus {
-                outline: none;
-                border-color: #ff6b35;
-                box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
-            }
+      .form-group input:focus,
+      .form-group textarea:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: #ff6b35;
+        box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+      }
 
-            .form-group textarea {
-                resize: vertical;
-                min-height: 100px;
-            }
+      .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+      }
 
-            .form-actions {
-                display: flex;
-                gap: 1rem;
-                justify-content: flex-end;
-                margin-top: 2rem;
-            }
+      .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+      }
 
-            .alert {
-                padding: 1rem 1.5rem;
-                border-radius: 8px;
-                margin-bottom: 1.5rem;
-                font-weight: 500;
-            }
+      .alert {
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        font-weight: 500;
+      }
 
-            .alert-success {
-                background: #c6f6d5;
-                color: #22543d;
-                border-left: 4px solid #38a169;
-            }
+      .alert-success {
+        background: #c6f6d5;
+        color: #22543d;
+        border-left: 4px solid #38a169;
+      }
 
-            .alert-error {
-                background: #fed7d7;
-                color: #742a2a;
-                border-left: 4px solid #e53e3e;
-            }
+      .alert-error {
+        background: #fed7d7;
+        color: #742a2a;
+        border-left: 4px solid #e53e3e;
+      }
 
-            .checkbox-group {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-            }
+      .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
 
-            .checkbox-group input[type="checkbox"] {
-                width: auto;
-                cursor: pointer;
-            }
+      .checkbox-group input[type="checkbox"] {
+        width: auto;
+        cursor: pointer;
+      }
 
-            .empty-state {
-                text-align: center;
-                padding: 3rem;
-                color: #718096;
-            }
+      .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #718096;
+      }
 
-            .empty-state svg {
-                width: 80px;
-                height: 80px;
-                margin-bottom: 1rem;
-                opacity: 0.5;
-            }
-        </style>
-    </th:block>
+      .empty-state svg {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+      }
+    </style>
+  </th:block>
 </head>
 <body>
 <main class="admin-main">
-    <div class="admin-content">
-        <div class="page-header">
-            <h1>Quản lý danh mục</h1>
-            <button class="btn-primary" onclick="showAddModal()">+ Thêm danh mục mới</button>
-        </div>
+  <div class="admin-content">
+    <div class="page-header">
+      <h1>Quản lý danh mục</h1>
+      <button class="btn-primary" onclick="showAddModal()">+ Thêm danh mục mới</button>
+    </div>
 
-        <!-- Alert Messages -->
-        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+    <!-- Alert Messages -->
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
-        <!-- Filters -->
-        <div class="filters">
-            <form class="filter-group" method="get" th:action="@{/admin/categories}">
-                <select name="active" class="filter-select" onchange="this.form.submit()">
-                    <option value="">Tất cả trạng thái</option>
-                    <option value="true" th:selected="${activeFilter != null && activeFilter}">Đang hoạt động</option>
-                    <option value="false" th:selected="${activeFilter != null && !activeFilter}">Tạm ngưng</option>
-                </select>
-                <input type="text" name="keyword" placeholder="Tìm kiếm danh mục..."
-                       class="search-input" th:value="${keyword}">
-                <button type="submit" class="btn-secondary">Tìm kiếm</button>
-            </form>
-        </div>
+    <!-- Filters -->
+    <div class="filters">
+      <form class="filter-group" method="get" th:action="@{/admin/categories}">
+        <select name="active" class="filter-select" onchange="this.form.submit()">
+          <option value="">Tất cả trạng thái</option>
+          <option value="true" th:selected="${activeFilter != null && activeFilter}">Đang hoạt động</option>
+          <option value="false" th:selected="${activeFilter != null && !activeFilter}">Tạm ngưng</option>
+        </select>
+        <input type="text" name="keyword" placeholder="Tìm kiếm danh mục..."
+               class="search-input" th:value="${keyword}">
+        <button type="submit" class="btn-secondary">Tìm kiếm</button>
+      </form>
+    </div>
 
-        <!-- Categories Table -->
-        <div class="table-card">
-            <div class="table-container">
-                <table class="admin-table" th:if="${categoryPage.hasContent()}">
-                    <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>
-                            <a th:href="@{/admin/categories(page=${currentPage}, size=10, sortBy='name', sortDir=${reverseSortDir})}"
-                               style="color: white; text-decoration: none;">
-                                Tên danh mục
-                            </a>
-                        </th>
-                        <th>Mô tả</th>
-                        <th>Trạng thái</th>
-                        <th>Ngày tạo</th>
-                        <th>Thao tác</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="category : ${categoryPage.content}">
-                        <td th:text="${category.id}">1</td>
-                        <td>
-                            <strong th:text="${category.name}">Bánh Trung Thu</strong>
-                        </td>
-                        <td th:text="${category.description ?: 'Chưa có mô tả'}">Mô tả danh mục</td>
-                        <td>
+    <!-- Categories Table -->
+    <div class="table-card">
+      <div class="table-container">
+        <table class="admin-table" th:if="${categoryPage.hasContent()}">
+          <thead>
+          <tr>
+            <th>ID</th>
+            <th>
+              <a th:href="@{/admin/categories(page=${currentPage}, size=10, sortBy='name', sortDir=${reverseSortDir})}"
+                 style="color: white; text-decoration: none;">
+                Tên danh mục
+              </a>
+            </th>
+            <th>Mô tả</th>
+            <th>Trạng thái</th>
+            <th>Ngày tạo</th>
+            <th>Thao tác</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="category : ${categoryPage.content}">
+            <td th:text="${category.id}">1</td>
+            <td>
+              <strong th:text="${category.name}">Bánh Trung Thu</strong>
+            </td>
+            <td th:text="${category.description ?: 'Chưa có mô tả'}">Mô tả danh mục</td>
+            <td>
                             <span class="status"
                                   th:classappend="${category.active ? 'active' : 'inactive'}"
                                   th:text="${category.active ? 'Đang hoạt động' : 'Tạm ngưng'}">
                                 Đang hoạt động
                             </span>
-                        </td>
-                        <td th:text="${#temporals.format(category.createdAt, 'dd/MM/yyyy HH:mm') ?: 'N/A'}">01/01/2024
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="btn-edit"
-                                        th:data-id="${category.id}"
-                                        th:data-name="${category.name}"
-                                        th:data-description="${category.description}"
-                                        th:data-active="${category.active}"
-                                        onclick="editCategory(this)">
-                                    ✏️
-                                </button>
-                                <form th:action="@{/admin/categories/toggle-status/{id}(id=${category.id})}"
-                                      method="post" style="display: inline;">
-                                    <button type="submit" class="btn-toggle"
-                                            th:title="${category.active ? 'Tạm ngưng' : 'Kích hoạt'}">
-                                        🔄
-                                    </button>
-                                </form>
-                                <form th:action="@{/admin/categories/delete/{id}(id=${category.id})}"
-                                      method="post" style="display: inline;"
-                                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa danh mục này?');">
-                                    <button type="submit" class="btn-delete">🗑️</button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-
-                <div th:unless="${categoryPage.hasContent()}" class="empty-state">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
-                    </svg>
-                    <h3>Không tìm thấy danh mục nào</h3>
-                    <p>Hãy thêm danh mục đầu tiên của bạn!</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Pagination -->
-        <div class="pagination" th:if="${totalPages > 1}">
-            <button class="page-btn"
-                    th:disabled="${currentPage == 0}"
-                    th:onclick="'window.location.href=\'/admin/categories?page=' + ${currentPage - 1} + '&size=10\''">
-                « Trước
-            </button>
-
-            <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
-                <button class="page-btn"
-                        th:classappend="${i == currentPage ? 'active' : ''}"
-                        th:onclick="'window.location.href=\'/admin/categories?page=' + ${i} + '&size=10\''"
-                        th:text="${i + 1}">
-                    1
+            </td>
+            <td th:text="${#temporals.format(category.createdAt, 'dd/MM/yyyy HH:mm') ?: 'N/A'}">01/01/2024
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn-edit"
+                        th:data-id="${category.id}"
+                        th:data-name="${category.name}"
+                        th:data-description="${category.description}"
+                        th:data-active="${category.active}"
+                        onclick="editCategory(this)">
+                  ✏️
                 </button>
-            </th:block>
+                <form th:action="@{/admin/categories/toggle-status/{id}(id=${category.id})}"
+                      method="post" style="display: inline;">
+                  <button type="submit" class="btn-toggle"
+                          th:title="${category.active ? 'Tạm ngưng' : 'Kích hoạt'}">
+                    🔄
+                  </button>
+                </form>
+                <form th:action="@{/admin/categories/delete/{id}(id=${category.id})}"
+                      method="post" style="display: inline;"
+                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa danh mục này?');">
+                  <button type="submit" class="btn-delete">🗑️</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          </tbody>
+        </table>
 
-            <button class="page-btn"
-                    th:disabled="${currentPage == totalPages - 1}"
-                    th:onclick="'window.location.href=\'/admin/categories?page=' + ${currentPage + 1} + '&size=10\''">
-                Sau »
-            </button>
+        <div th:unless="${categoryPage.hasContent()}" class="empty-state">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+          </svg>
+          <h3>Không tìm thấy danh mục nào</h3>
+          <p>Hãy thêm danh mục đầu tiên của bạn!</p>
         </div>
-
-        <div style="text-align: center; margin-top: 1rem; color: #718096;">
-            Hiển thị <strong th:text="${categoryPage.numberOfElements}">10</strong> trong tổng số
-            <strong th:text="${totalItems}">50</strong> danh mục
-        </div>
+      </div>
     </div>
 
-    <!-- Add/Edit Category Modal -->
-    <div id="categoryModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTitle">Thêm danh mục mới</h2>
-                <span class="close" onclick="closeModal()">&times;</span>
-            </div>
-            <form id="categoryForm" class="category-form" method="post">
-                <input type="hidden" id="categoryId" name="id">
+    <!-- Pagination -->
+    <div class="pagination" th:if="${totalPages > 1}">
+      <button class="page-btn"
+              th:disabled="${currentPage == 0}"
+              th:onclick="'window.location.href=\'/admin/categories?page=' + ${currentPage - 1} + '&size=10\''">
+        « Trước
+      </button>
 
-                <div class="form-group">
-                    <label for="name">Tên danh mục <span style="color: red;">*</span></label>
-                    <input type="text" id="name" name="name" required
-                           placeholder="VD: Bánh Trung Thu">
-                </div>
+      <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+        <button class="page-btn"
+                th:classappend="${i == currentPage ? 'active' : ''}"
+                th:onclick="'window.location.href=\'/admin/categories?page=' + ${i} + '&size=10\''"
+                th:text="${i + 1}">
+          1
+        </button>
+      </th:block>
 
-                <div class="form-group">
-                    <label for="description">Mô tả</label>
-                    <textarea id="description" name="description"
-                              placeholder="Mô tả chi tiết về danh mục..."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="active" name="active" checked>
-                        <label for="active" style="margin: 0;">Đang hoạt động</label>
-                    </div>
-                </div>
-
-                <div class="form-actions">
-                    <button type="button" class="btn-secondary" onclick="closeModal()">Hủy</button>
-                    <button type="submit" class="btn-primary">Lưu danh mục</button>
-                </div>
-            </form>
-        </div>
+      <button class="page-btn"
+              th:disabled="${currentPage == totalPages - 1}"
+              th:onclick="'window.location.href=\'/admin/categories?page=' + ${currentPage + 1} + '&size=10\''">
+        Sau »
+      </button>
     </div>
+
+    <div style="text-align: center; margin-top: 1rem; color: #718096;">
+      Hiển thị <strong th:text="${categoryPage.numberOfElements}">10</strong> trong tổng số
+      <strong th:text="${totalItems}">50</strong> danh mục
+    </div>
+  </div>
+
+  <!-- Add/Edit Category Modal -->
+  <div id="categoryModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Thêm danh mục mới</h2>
+        <span class="close" onclick="closeModal()">&times;</span>
+      </div>
+      <form id="categoryForm" class="category-form" method="post">
+        <input type="hidden" id="categoryId" name="id">
+
+        <div class="form-group">
+          <label for="name">Tên danh mục <span style="color: red;">*</span></label>
+          <input type="text" id="name" name="name" required
+                 placeholder="VD: Bánh Trung Thu">
+        </div>
+
+        <div class="form-group">
+          <label for="description">Mô tả</label>
+          <textarea id="description" name="description"
+                    placeholder="Mô tả chi tiết về danh mục..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <div class="checkbox-group">
+            <input type="checkbox" id="active" name="active" checked>
+            <label for="active" style="margin: 0;">Đang hoạt động</label>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" onclick="closeModal()">Hủy</button>
+          <button type="submit" class="btn-primary">Lưu danh mục</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </main>
 
 <th:block th:fragment="extraScripts">
-    <script th:inline="javascript">
-        function showAddModal() {
-            document.getElementById('modalTitle').textContent = 'Thêm danh mục mới';
-            document.getElementById('categoryForm').action = '/admin/categories/create';
-            document.getElementById('categoryForm').reset();
-            document.getElementById('categoryId').value = '';
-            document.getElementById('active').checked = true;
-            document.getElementById('categoryModal').style.display = 'block';
-        }
+  <script th:inline="javascript">
+    function showAddModal() {
+      document.getElementById('modalTitle').textContent = 'Thêm danh mục mới';
+      document.getElementById('categoryForm').action = '/admin/categories/create';
+      document.getElementById('categoryForm').reset();
+      document.getElementById('categoryId').value = '';
+      document.getElementById('active').checked = true;
+      document.getElementById('categoryModal').style.display = 'block';
+    }
 
-        function editCategory(button) {
-            // Get data from button's data attributes
-            const id = button.getAttribute('data-id');
-            const name = button.getAttribute('data-name');
-            const description = button.getAttribute('data-description');
-            const active = button.getAttribute('data-active') === 'true';
+    function editCategory(button) {
+      // Get data from button's data attributes
+      const id = button.getAttribute('data-id');
+      const name = button.getAttribute('data-name');
+      const description = button.getAttribute('data-description');
+      const active = button.getAttribute('data-active') === 'true';
 
-            // Populate form
-            document.getElementById('modalTitle').textContent = 'Chỉnh sửa danh mục';
-            document.getElementById('categoryForm').action = '/admin/categories/update/' + id;
-            document.getElementById('categoryId').value = id;
-            document.getElementById('name').value = name;
-            document.getElementById('description').value = description || '';
-            document.getElementById('active').checked = active;
-            document.getElementById('categoryModal').style.display = 'block';
-        }
+      // Populate form
+      document.getElementById('modalTitle').textContent = 'Chỉnh sửa danh mục';
+      document.getElementById('categoryForm').action = '/admin/categories/update/' + id;
+      document.getElementById('categoryId').value = id;
+      document.getElementById('name').value = name;
+      document.getElementById('description').value = description || '';
+      document.getElementById('active').checked = active;
+      document.getElementById('categoryModal').style.display = 'block';
+    }
 
-        function closeModal() {
-            document.getElementById('categoryModal').style.display = 'none';
-        }
+    function closeModal() {
+      document.getElementById('categoryModal').style.display = 'none';
+    }
 
-        // Close modal when clicking outside
-        window.onclick = function (event) {
-            const modal = document.getElementById('categoryModal');
-            if (event.target == modal) {
-                modal.style.display = 'none';
-            }
-        }
+    // Close modal when clicking outside
+    window.onclick = function (event) {
+      const modal = document.getElementById('categoryModal');
+      if (event.target == modal) {
+        modal.style.display = 'none';
+      }
+    }
 
-        // Auto-hide alerts after 5 seconds
-        setTimeout(function () {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                alert.style.transition = 'opacity 0.5s ease';
-                alert.style.opacity = '0';
-                setTimeout(() => alert.remove(), 500);
-            });
-        }, 5000);
-    </script>
+    // Auto-hide alerts after 5 seconds
+    setTimeout(function () {
+      const alerts = document.querySelectorAll('.alert');
+      alerts.forEach(alert => {
+        alert.style.transition = 'opacity 0.5s ease';
+        alert.style.opacity = '0';
+        setTimeout(() => alert.remove(), 500);
+      });
+    }, 5000);
+  </script>
 </th:block>
 </body>
 </html>

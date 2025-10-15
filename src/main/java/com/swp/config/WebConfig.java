@@ -15,7 +15,7 @@ public class WebConfig implements WebMvcConfigurer {
         // Serve uploaded images from C:\UploadImg
         Path uploadDir = Paths.get("C:/UploadImg");
         String uploadPath = uploadDir.toFile().getAbsolutePath();
-        
+
         registry.addResourceHandler("/images/**")
                 .addResourceLocations("file:" + uploadPath + "/");
     }

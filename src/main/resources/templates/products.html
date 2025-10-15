@@ -1,254 +1,1525 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{fragments/layout :: layout(~{::main}, 'Sản Phẩm - Bakery', ~{::extraHead}, ~{::extraScripts})}">
+      th:replace="~{fragments/layout-admin :: layout(~{::main}, 'Trang chủ - Bakery', ~{::extraHead}, ~{::extraScripts})}">
 <head>
-    <!-- Tiêu đề này sẽ không được sử dụng, vì nó được truyền trực tiếp trong th:replace -->
-    <title>Sản Phẩm -  Bakery</title>
-    <th:block th:fragment="extraHead">
-        <link rel="stylesheet" th:href="@{/css/login.css}">
-        <style>
-            .nav-menu a.active {
-                color: #FFD700;
-            }
+  <!-- Tiêu đề này sẽ không được sử dụng, vì nó được truyền trực tiếp trong th:replace -->
+  <title>Admin Dashboard - Bakery</title>
+  <th:block th:fragment="extraHead">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+      /* Include admin styles from dashboard.html */
+      .admin-header {
+        background: #2c3e50;
+        color: white;
+        padding: 15px 0;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+      }
 
-            .products-page {
-                padding: 60px 0;
-                background: #f8f9fa;
-            }
+      .admin-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
 
-            .page-header {
-                text-align: center;
-                margin-bottom: 50px;
-            }
+      .admin-logo {
+        display: flex;
+        align-items: center;
+        font-size: 20px;
+        font-weight: bold;
+      }
 
-            .page-header h1 {
-                font-size: 42px;
-                color: #8B4513;
-                margin-bottom: 10px;
-            }
+      .admin-logo img {
+        margin-right: 10px;
+      }
 
-            .page-header p {
-                font-size: 18px;
-                color: #666;
-            }
+      .admin-user {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
 
-            .category-filter {
-                display: flex;
-                justify-content: center;
-                gap: 15px;
-                margin-bottom: 40px;
-                flex-wrap: wrap;
-            }
+      .logout-btn {
+        background: #e74c3c;
+        color: white;
+        padding: 8px 15px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 14px;
+      }
 
-            .filter-btn {
-                background: white;
-                border: 2px solid #8B4513;
-                color: #8B4513;
-                padding: 10px 20px;
-                border-radius: 25px;
-                cursor: pointer;
-                font-weight: bold;
-                transition: all 0.3s;
-            }
+      .admin-layout {
+        display: flex;
+        margin-top: 70px;
+        min-height: calc(100vh - 70px);
+      }
 
-            .filter-btn.active,
-            .filter-btn:hover {
-                background: #8B4513;
-                color: white;
-            }
+      .admin-sidebar {
+        width: 250px;
+        background: #34495e;
+        color: white;
+        position: fixed;
+        height: calc(100vh - 70px);
+        overflow-y: auto;
+      }
 
-            .products-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-                gap: 30px;
-            }
+      .admin-nav ul {
+        list-style: none;
+        padding: 20px 0;
+      }
 
-            .product-item {
-                transition: opacity 0.3s;
-            }
+      .admin-nav li {
+        margin-bottom: 5px;
+      }
 
-            .product-item.hidden {
-                display: none;
-            }
+      .admin-nav a {
+        display: block;
+        color: white;
+        text-decoration: none;
+        padding: 12px 20px;
+        transition: background 0.3s;
+      }
 
-            .product-info {
-                padding: 20px;
-            }
+      .admin-nav a:hover,
+      .admin-nav a.active {
+        background: #2c3e50;
+      }
 
-            .product-description {
-                color: #666;
-                margin-bottom: 15px;
-                font-size: 14px;
-            }
+      .admin-main {
+        flex: 1;
+        margin-left: 250px;
+        background: #f8f9fa;
+      }
 
-            .product-variants {
-                margin-top: 10px;
-                display: flex;
-                flex-wrap: wrap;
-                gap: 8px;
-            }
+      .admin-content {
+        padding: 30px;
+      }
 
-            .btn-variant {
-                display: inline-block;
-                padding: 8px 12px;
-                background: #f8f8f8;
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                font-size: 14px;
-                color: #333;
-                text-decoration: none;
-                transition: all 0.2s ease;
-            }
+      .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+      }
 
-            .btn-variant:hover {
-                background: #ffe6e6;
-                border-color: #ff9999;
-                color: #c00;
-            }
+      .page-header h1 {
+        font-size: 32px;
+        color: #2c3e50;
+      }
+
+      .btn-primary {
+        background: #3498db;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+
+      .btn-secondary {
+        background: #95a5a6;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .btn-danger {
+        background: #e74c3c;
+        color: #fff;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .btn-success {
+        background: #27ae60;
+        color: #fff;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 25px;
+      }
 
 
-            .variant {
-                display: inline-block;
-                background: #f0f0f0;
-                padding: 5px 10px;
-                border-radius: 15px;
-                font-size: 12px;
-                margin: 2px;
-                color: #8B4513;
-                font-weight: bold;
-            }
+      .filters {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
 
-            .product-actions {
-                display: flex;
-                gap: 10px;
-            }
+      .filter-group {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+      }
 
-            .view-details {
-                background: transparent;
-                border: 2px solid #8B4513;
-                color: #8B4513;
-                padding: 10px 15px;
-                border-radius: 5px;
-                cursor: pointer;
-                font-weight: bold;
-                transition: all 0.3s;
-                flex: 1;
-            }
+      .filter-select,
+      .search-input {
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
 
-            .view-details:hover {
-                background: #8B4513;
-                color: white;
-            }
+      .search-input {
+        flex: 1;
+        max-width: 300px;
+      }
 
-            .add-to-cart {
-                flex: 1;
-            }
+      .table-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-bottom: 20px;
+      }
 
-            @media (max-width: 768px) {
-                .products-grid {
-                    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-                    gap: 20px;
-                }
+      .table-container {
+        overflow-x: auto;
+      }
 
-                .product-actions {
-                    flex-direction: column;
-                }
-            }
-            .search-box {
-                display: flex;
-                justify-content: flex-start; /* căn trái */
-                margin-bottom: 30px;
-            }
+      .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
 
-            .search-input {
-                padding: 8px 15px;
-                border-radius: 20px;
-                border: 1px solid #8B4513;
-                margin-right: 10px;
-                min-width: 250px;
-            }
+      .admin-table th,
+      .admin-table td {
+        padding: 15px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+      }
 
-        </style>
-    </th:block>
+      .admin-table th {
+        background: #f8f9fa;
+        font-weight: bold;
+        color: #2c3e50;
+      }
 
+      .product-image-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 60px;
+        height: 60px;
+      }
+
+      .product-thumb {
+        width: 60px;
+        height: 60px;
+        border-radius: 8px;
+        object-fit: cover;
+      }
+
+      .product-placeholder {
+        width: 60px;
+        height: 60px;
+        border: 2px dashed #ddd;
+        border-radius: 8px;
+        display: flex;products
+      flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9fa;
+        color: #6c757d;
+      }
+
+      .product-placeholder span {
+        font-size: 20px;
+        margin-bottom: 2px;
+      }
+
+      .product-placeholder small {
+        font-size: 10px;
+      }
+
+      .product-name h4 {
+        color: #2c3e50;
+        margin-bottom: 5px;
+      }
+
+      .product-name p {
+        color: #7f8c8d;
+        font-size: 14px;
+      }
+
+      .category-tag {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: bold;
+      }
+
+      .category-tag.mooncake {
+        background: #fff3cd;
+        color: #856404;
+      }
+
+      .category-tag.cake {
+        background: #f8d7da;
+        color: #721c24;
+      }
+
+      .category-tag.petit {
+        background: #d1ecf1;
+        color: #0c5460;
+      }
+
+      .variants-table-container {
+        max-width: 250px;
+      }
+
+      .variants-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+        margin: 0;
+      }
+
+      .variants-table th,
+      .variants-table td {
+        padding: 4px 6px;
+        text-align: left;
+        border-bottom: 1px solid #e9ecef;
+        font-size: 11px;
+      }
+
+      .variants-table th {
+        background: #f8f9fa;
+        font-weight: 600;
+        color: #495057;
+        font-size: 10px;
+        text-transform: uppercase;
+      }
+
+      .variants-table tbody tr:hover {
+        background: #f8f9fa;
+      }
+
+      .variants-table td:first-child {
+        font-weight: 600;
+        color: #2c3e50;
+      }
+
+      .variants-table td:nth-child(2) {
+        color: #28a745;
+        font-weight: 500;
+      }
+
+      .variants-table td:nth-child(3) {
+        color: #007bff;
+        font-weight: 500;
+      }
+
+      .no-variants {
+        font-size: 12px;
+        color: #6c757d;
+        font-style: italic;
+      }
+
+      .stock-info {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .stock-number {
+        font-size: 18px;
+        font-weight: bold;
+        color: #2c3e50;
+      }
+
+      .stock-status {
+        font-size: 12px;
+        padding: 2px 6px;
+        border-radius: 8px;
+      }
+
+      .stock-status.good {
+        background: #d4edda;
+        color: #155724;
+      }
+
+      .stock-status.low {
+        background: #fff3cd;
+        color: #856404;
+      }
+
+      .stock-status.out {
+        background: #f8d7da;
+        color: #721c24;
+      }
+
+      .status {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: bold;
+      }
+
+      .status.active {
+        background: #d4edda;
+        color: #155724;
+      }
+
+      .status.inactive {
+        background: #f8d7da;
+        color: #721c24;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 5px;
+      }
+
+      .btn-edit,
+      .btn-view,
+      .btn-delete {
+        background: none;
+        border: none;
+        padding: 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+
+      .btn-edit {
+        background: #fff3cd;
+      }
+
+      .btn-view {
+        background: #d1ecf1;
+      }
+
+      .btn-delete {
+        background: #f8d7da;
+      }
+
+      .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .page-btn {
+        background: white;
+        border: 1px solid #ddd;
+        padding: 8px 12px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .page-btn.active {
+        background: #3498db;
+        color: white;
+        border-color: #3498db;
+      }
+
+      /* Modal Styles */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 2000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+
+      .modal-content {
+        background-color: white;
+        margin: 5% auto;
+        padding: 0;
+        border-radius: 10px;
+        width: 80%;
+        max-width: 800px;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid #eee;
+      }
+
+      .close {
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .product-form {
+        padding: 20px;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 35px;
+      }
+
+      .form-group {
+        margin-bottom: 30px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 14px;
+      }
+
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+        transition: border-color 0.3s ease;
+      }
+
+      .form-group select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 16px;
+        padding-right: 40px;
+      }
+
+      .variant-item .form-group input,
+      .variant-item .form-group select,
+      .variant-item .form-group textarea {
+        border: none;
+        background: transparent;
+        border-bottom: 1px solid #ddd;
+        border-radius: 0;
+        padding-left: 0;
+        padding-right: 0;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus,
+      .form-group textarea:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+      }
+
+      .error-message {
+        color: #dc3545;
+        font-size: 12px;
+        margin-top: 4px;
+        display: block;
+      }
+
+      .form-group input.error,
+      .form-group select.error,
+      .form-group textarea.error {
+        border-color: #dc3545;
+      }
+
+      .variants-section {
+        border: none;
+        border-radius: 0;
+        padding: 0;
+        margin: 35px 0;
+        background: transparent;
+      }
+
+      .variant-item {
+        margin-bottom: 30px;
+        padding: 25px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        background: white;
+      }
+
+      .variant-item:last-of-type {
+        margin-bottom: 0;
+      }
+
+      .variants-section h3 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+      }
+
+      .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+      }
+
+      /* remove button row spans all columns and right-align */
+      .variant-item .remove-container {
+        grid-column: 1 / -1;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+      }
+
+      @media (max-width: 768px) {
+        .admin-sidebar {
+          transform: translateX(-100%);
+        }
+
+        .admin-main {
+          margin-left: 0;
+        }
+
+        .filter-group {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .form-row {
+          grid-template-columns: 1fr;
+        }
+
+        .modal-content {
+          width: 95%;
+          margin: 2% auto;
+        }
+      }
+    </style>
+  </th:block>
 </head>
 <body>
 <!-- Hero Section -->
-<main>
-    <section class="products-page">
-        <div class="container">
-            <div class="page-header">
-                <h1>Chào mừng đến với tiệm bánh Brew Cake</h1>
-                <p>Khám phá bộ sưu tập bánh ngọt cao cấp của chúng tôi</p>
-            </div>
+<!-- Main Content -->
+<!-- Main Content -->
+<main class="admin-main">
+  <div class="admin-content">
+    <div class="page-header">
+      <h1>Quản lý sản phẩm</h1>
+      <button class="btn-primary" onclick="showAddProductModal()">+ Thêm sản phẩm mới</button>
+    </div>
+    <div th:if="${successMessage}" style="margin-bottom: 16px; padding: 12px; background:#d4edda; color:#155724; border-radius:6px;">
+      <span th:text="${successMessage}"></span>
+    </div>
 
+    <div th:if="${errorMessage}" style="margin-bottom: 16px; padding: 12px; background:#f8d7da; color:#721c24; border-radius:6px;">
+      <span th:text="${errorMessage}"></span>
+    </div>
 
-            <!-- Category Filter -->
-            <div class="category-filter">
-                <form th:action="@{/products}" method="get">
-                    <button type="submit" name="categoryId" value=""
-                            th:classappend="${selectedCategoryId == null} ? ' active'"
-                            class="filter-btn">Tất cả</button>
-                </form>
-                <form th:each="category : ${categories}"
-                      th:action="@{/products}" method="get">
-                    <button type="submit" name="categoryId" th:value="${category.id}"
-                            th:text="${category.description}"
-                            th:classappend="${selectedCategoryId == category.id} ? ' active'"
-                            class="filter-btn"></button>
-                </form>
-
-            </div>
-            <div class="search-box">
-                <form th:action="@{/products}" method="get">
-                    <!-- Ô nhập search -->
-                    <input type="text" name="search" placeholder="Tìm sản phẩm..."
-                           th:value="${search}" class="search-input">
-
-                    <!-- Ẩn categoryId để giữ filter -->
-                    <input type="hidden" name="categoryId" th:value="${selectedCategoryId}">
-
-                    <button type="submit" class="filter-btn">Tìm</button>
-                </form>
-            </div>
-
-
-
-            <!-- Products Grid -->
-            <div class="products-grid">
-                <!-- Mooncakes -->
-                <div th:each="product : ${products}" class="product-item">
-                    <div class="product-card">
-                        <img th:src="@{${product.imgUrl}}" alt="ảnh">
-                        <div class="product-info">
-                            <h3 th:text="${product.name}"></h3>
-                            <p th:text="${product.shortDescription}"></p>
-                                <div class="product-variants">
-                                    <div th:each="variant : ${product.variants}" class="variant-btn">
-                                        <a th:href="@{/cart/add(variantId=${variant.variantId})}"
-                                           class="btn-variant">
-                                            <span th:text="${#numbers.formatDecimal(variant.price, 0, 'COMMA', 0, 'POINT')}"></span> ₫
-                                        </a>
-                                    </div>
-                                </div>
-                            <div class="product-actions">
-                                <button class="add-to-cart">THÊM VÀO GIỎ</button>
-                                <a th:href="@{/products/{id}(id=${product.productId})}" class="view-details">XEM CHI TIẾT</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
+    <!-- Filters -->
+    <div class="filters">
+      <form method="get" action="/admin/products" id="searchForm">
+        <div class="filter-group">
+          <select name="category" class="filter-select" onchange="submitSearchForm()">
+            <option value="">Tất cả danh mục</option>
+            <option th:each="cat : ${categories}"
+                    th:value="${cat.name}"
+                    th:text="${cat.name}"
+                    th:selected="${param.category != null && param.category[0] == cat.name}">
+            </option>
+          </select>
+          <input type="text"
+                 name="search"
+                 placeholder="Tìm kiếm sản phẩm, SKU..."
+                 class="search-input"
+                 th:value="${param.search != null ? param.search[0] : ''}"
+                 onkeypress="if(event.key==='Enter') submitSearchForm()">
+          <button type="submit" class="btn-secondary">Tìm kiếm</button>
+          <button type="button" class="btn-secondary" onclick="clearSearch()" style="background: #6c757d;">Xóa bộ lọc</button>
         </div>
-    </section>
+      </form>
+    </div>
+
+    <!-- Products Table -->
+    <div class="table-card">
+      <div class="table-container">
+        <table class="admin-table">
+          <thead>
+          <tr>
+            <th>Hình ảnh</th>
+            <th>Tên sản phẩm</th>
+            <th>Mã sản phẩm</th>
+            <th>Danh mục</th>
+            <th>Biến thể</th>
+            <th>Tồn kho</th>
+            <th>Trạng thái</th>
+            <th>Thao tác</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="p : ${productPage}">
+            <td>
+              <div class="product-image-container">
+                <img th:if="${p.imgUrl != null and !#strings.isEmpty(p.imgUrl)}"
+                     th:src="${p.imgUrl}"
+                     alt="Product"
+                     class="product-thumb"
+                     style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="product-placeholder"
+                     style="width: 60px; height: 60px; display: none; flex-direction: column; align-items: center; justify-content: center; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;"
+                     th:styleappend="${p.imgUrl == null or #strings.isEmpty(p.imgUrl)} ? ';display:flex' : ''">
+                  <span>📷</span>
+                  <small>No Image</small>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="product-name">
+                <h4 th:text="${p.name}">Tên SP</h4>
+                <p th:text="${p.shortDescription}">Mô tả ngắn</p>
+              </div>
+            </td>
+            <td th:text="${p.productId}">ID</td>
+            <td>
+              <span class="category-tag" th:text="${p.categoryId != null ? p.categoryId.name : '—'}">Danh mục</span>
+            </td>
+            <td>
+              <div class="variants-table-container">
+                <table th:if="${variantsByProduct != null and variantsByProduct.containsKey(p.productId) and !variantsByProduct.get(p.productId).empty}"
+                       class="variants-table">
+                  <thead>
+                  <tr>
+                    <th>SKU</th>
+                    <th>Giá</th>
+                    <th>SL</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <tr th:each="variant : ${variantsByProduct.get(p.productId)}">
+                    <td th:text="${variant.sku}">SKU</td>
+                    <td th:text="${variant.price} + ' ₫'">Giá</td>
+                    <td th:text="${variant.stock}">Tồn kho</td>
+                  </tr>
+                  </tbody>
+                </table>
+                <span th:if="${variantsByProduct == null or !variantsByProduct.containsKey(p.productId) or variantsByProduct.get(p.productId).empty}"
+                      class="no-variants">Chưa có biến thể</span>
+              </div>
+            </td>
+            <td>
+                            <span class="stock-info">
+                                <span class="stock-number"
+                                      th:text="${variantsByProduct != null and variantsByProduct.containsKey(p.productId) and !variantsByProduct.get(p.productId).empty} ?
+                                              ${#aggregates.sum(variantsByProduct.get(p.productId).![stock])} : 0">0</span>
+                                <span class="stock-status"
+                                      th:classappend="${variantsByProduct != null and variantsByProduct.containsKey(p.productId) and !variantsByProduct.get(p.productId).empty and #aggregates.sum(variantsByProduct.get(p.productId).![stock]) > 0} ? 'good' : 'out'"
+                                      th:text="${variantsByProduct != null and variantsByProduct.containsKey(p.productId) and !variantsByProduct.get(p.productId).empty and #aggregates.sum(variantsByProduct.get(p.productId).![stock]) > 0} ? 'Có hàng' : 'Hết hàng'">Trạng thái</span>
+                            </span>
+            </td>
+            <td>
+              <span class="status active">Đang bán</span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn-view"
+                        th:data-product-id="${p.productId}"
+                        th:data-product-name="${p.name}"
+                        th:data-product-short-description="${p.shortDescription}"
+                        th:data-product-description="${p.description}"
+                        th:data-product-category-id="${p.categoryId.id}"
+                        th:data-product-img-url="${p.imgUrl}"
+                        onclick="editProduct(this)"
+                        title="Chỉnh sửa">✏️</button>
+                <button class="btn-delete"
+                        th:data-product-id="${p.productId}"
+                        th:data-product-name="${p.name}"
+                        onclick="deleteProduct(this.dataset.productId, this.dataset.productName)"
+                        title="Xóa">🗑️</button>
+              </div>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- No products message -->
+    <div th:if="${productPage != null and productPage.content.empty}" class="no-products-message" style="text-align: center; padding: 40px; color: #6c757d;">
+      <div style="font-size: 48px; margin-bottom: 16px;">📦</div>
+      <h3 style="margin-bottom: 8px; color: #495057;">Không tìm thấy sản phẩm nào</h3>
+      <p style="margin-bottom: 16px;">Thử thay đổi bộ lọc hoặc tìm kiếm khác</p>
+      <button class="btn-primary" onclick="clearSearch()">Xóa bộ lọc</button>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" th:if="${productPage != null and productPage.totalPages > 1 and !productPage.content.empty}">
+      <a class="page-btn" th:if="${!productPage.first}"
+         th:href="@{'/admin/products'(page=${productPage.number - 1}, size=${productPage.size})}">« Trước</a>
+      <span th:each="i : ${#numbers.sequence(0, productPage.totalPages - 1)}">
+                <a class="page-btn" th:href="@{'/admin/products'(page=${i}, size=${productPage.size})}"
+                   th:text="${i + 1}"
+                   th:classappend="${i} == ${productPage.number} ? ' active' : ''"></a>
+            </span>
+      <a class="page-btn" th:if="${!productPage.last}"
+         th:href="@{'/admin/products'(page=${productPage.number + 1}, size=${productPage.size})}">Sau »</a>
+    </div>
+  </div>
+  <!-- Add Product Modal -->
+  <div id="addProductModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Thêm sản phẩm mới</h2>
+        <span class="close" onclick="closeModal()">&times;</span>
+      </div>
+      <form class="product-form" th:action="@{/admin/products/create}" method="post" enctype="multipart/form-data" th:object="${createProductRequest}">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tên sản phẩm</label>
+            <input type="text" th:field="*{name}" required>
+          </div>
+          <div class="form-group">
+            <label>Mô tả ngắn</label>
+            <input type="text" th:field="*{shortDescription}">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Mô tả</label>
+          <textarea rows="3" th:field="*{description}"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Danh mục</label>
+            <select th:field="*{categoryId}" required>
+              <option value="">Chọn danh mục</option>
+              <option th:each="c : ${categories}"
+                      th:value="${c.id}"
+                      th:text="${c.name}"></option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Hình ảnh</label>
+            <input type="file" accept="image/*" th:field="*{imageFile}">
+          </div>
+        </div>
+        <div class="variants-section" id="variants-section">
+          <h3>Biến thể sản phẩm</h3>
+          <div class="variant-item" data-index="0">
+            <div class="form-row">
+              <div class="form-group">
+                <label>SKU</label>
+                <input type="text" placeholder="VD: LAK90" name="variants[0].sku" required>
+              </div>
+              <div class="form-group">
+                <label>Hạn sử dụng</label>
+                <input type="date" name="variants[0].expiryDate">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Trọng lượng (g)</label>
+                <input type="number" min="0" name="variants[0].weight" required>
+              </div>
+              <div class="form-group">
+                <label>Giá (₫)</label>
+                <input type="number" step="0.01" min="0" name="variants[0].price" required>
+              </div>
+              <div class="form-group">
+                <label>Tồn kho</label>
+                <input type="number" min="0" name="variants[0].stock" required>
+              </div>
+              <div class="remove-container">
+                <button type="button" class="btn-danger remove-variant-btn" onclick="removeVariantRow(this)">Xóa biến thể</button>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="btn-success add-variant-btn" onclick="addVariantRow()">+ Thêm biến thể</button>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" onclick="closeModal()">Hủy</button>
+          <button type="submit" class="btn-primary">Lưu sản phẩm</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Product Modal -->
+  <div id="editProductModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Chỉnh sửa sản phẩm</h2>
+        <span class="close" onclick="closeEditModal()">&times;</span>
+      </div>
+      <form class="product-form" id="editForm" method="post" enctype="multipart/form-data" action="" onsubmit="saveProduct(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tên sản phẩm <span style="color: red;">*</span></label>
+            <input type="text" id="editName" name="name" required>
+            <div id="nameError" class="error-message" style="color: red; font-size: 12px; margin-top: 4px;"></div>
+          </div>
+          <div class="form-group">
+            <label>Mô tả ngắn</label>
+            <input type="text" id="editShortDescription" name="shortDescription">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Mô tả</label>
+          <textarea rows="3" id="editDescription" name="description"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Danh mục <span style="color: red;">*</span></label>
+            <select id="editCategoryId" name="categoryId" required>
+              <option value="">Chọn danh mục</option>
+              <option th:each="c : ${categories}"
+                      th:value="${c.id}"
+                      th:text="${c.name}"></option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Hình ảnh</label>
+            <div class="image-preview">
+              <img id="editImagePreview" src="" alt="Preview" style="max-width: 100px; max-height: 100px; display: none;">
+              <input type="file" id="editImageFile" name="imageFile" accept="image/*">
+            </div>
+          </div>
+        </div>
+        <div class="variants-section" id="editVariantsSection">
+          <h3>Biến thể sản phẩm</h3>
+          <div id="editVariantsContainer">
+            <!-- Variants will be loaded here -->
+          </div>
+          <button type="button" class="btn-success add-variant-btn" onclick="addEditVariantRow()">+ Thêm biến thể</button>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" onclick="closeEditModal()">Hủy</button>
+          <button type="submit" class="btn-primary">Lưu thay đổi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
 </main>
 
 <th:block th:fragment="extraScripts">
-    <script>
+  <script>
 
-    </script>
+    function showAddProductModal() {
+      document.getElementById('addProductModal').style.display = 'block';
+    }
+
+    function closeModal() {
+      document.getElementById('addProductModal').style.display = 'none';
+    }
+
+    function editProduct(id) {
+      alert('Chỉnh sửa sản phẩm ID: ' + id);
+    }
+
+    function viewProduct(id) {
+      alert('Xem chi tiết sản phẩm ID: ' + id);
+    }
+
+    function deleteProduct(id) {
+      if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
+        alert('Đã xóa sản phẩm ID: ' + id);
+      }
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function (event) {
+      const modal = document.getElementById('addProductModal');
+      if (event.target == modal) {
+        modal.style.display = 'none';
+      }
+    }
+
+    function addVariantRow() {
+      const container = document.getElementById('variants-section');
+      const items = container.querySelectorAll('.variant-item');
+      const idx = items.length;
+      const div = document.createElement('div');
+      div.className = 'variant-item';
+      div.setAttribute('data-index', String(idx));
+      div.innerHTML = `
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>SKU</label>
+                        <input type="text" name="variants[${idx}].sku" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Hạn sử dụng</label>
+                        <input type="date" name="variants[${idx}].expiryDate">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Trọng lượng (g)</label>
+                        <input type="number" min="0" name="variants[${idx}].weight" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Giá (₫)</label>
+                        <input type="number" step="0.01" min="0" name="variants[${idx}].price" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tồn kho</label>
+                        <input type="number" min="0" name="variants[${idx}].stock" required>
+                    </div>
+                    <div class="remove-container">
+                        <button type="button" class="btn-danger remove-variant-btn" onclick="removeVariantRow(this)">Xóa biến thể</button>
+                    </div>
+                </div>
+            `;
+      container.insertBefore(div, container.lastElementChild);
+      updateRemoveButtons();
+    }
+
+    function removeVariantRow(btn) {
+      const item = btn.closest('.variant-item');
+      const container = document.getElementById('variants-section');
+      const items = Array.from(container.querySelectorAll('.variant-item'));
+      if (items.length <= 1) {
+        // luôn giữ lại ít nhất 1 dòng để binding thuận tiện
+        item.querySelectorAll('input').forEach(i => i.value = '');
+        return;
+      }
+      item.remove();
+      // Re-index names to keep variants[0..n]
+      const remaining = container.querySelectorAll('.variant-item');
+      remaining.forEach((el, i) => {
+        el.setAttribute('data-index', String(i));
+        el.querySelectorAll('input').forEach((input) => {
+          input.name = input.name.replace(/variants\[\d+\]/, `variants[${i}]`);
+        });
+      });
+      updateRemoveButtons();
+    }
+
+    function updateRemoveButtons() {
+      const container = document.getElementById('variants-section');
+      const items = container.querySelectorAll('.variant-item');
+      const show = items.length > 1;
+      container.querySelectorAll('.remove-variant-btn').forEach(btn => {
+        btn.style.display = show ? 'inline-block' : 'none';
+      });
+    }
+
+    // init on load
+    document.addEventListener('DOMContentLoaded', function() {
+      updateRemoveButtons();
+      processProductImages();
+      setupValidation();
+    });
+
+    function setupValidation() {
+      // Validate product name on input
+      const nameInput = document.querySelector('input[name="name"]');
+      if (nameInput) {
+        nameInput.addEventListener('blur', validateProductName);
+      }
+
+      // Validate SKUs on input
+      document.addEventListener('blur', function(e) {
+        if (e.target.name && e.target.name.includes('sku')) {
+          validateSKU(e.target);
+        }
+      }, true);
+    }
+
+    function validateProductName() {
+      const nameInput = document.querySelector('input[name="name"]');
+      const name = nameInput.value.trim();
+
+      if (name === '') return;
+
+      // Check for duplicate product names (you can implement AJAX call here)
+      // For now, we'll validate on form submission
+      clearValidationError(nameInput);
+    }
+
+    function validateSKU(skuInput) {
+      const sku = skuInput.value.trim();
+
+      if (sku === '') return;
+
+      // Check for duplicate SKUs (you can implement AJAX call here)
+      // For now, we'll validate on form submission
+      clearValidationError(skuInput);
+    }
+
+    function clearValidationError(input) {
+      input.style.borderColor = '#ddd';
+      const errorMsg = input.parentNode.querySelector('.error-message');
+      if (errorMsg) {
+        errorMsg.remove();
+      }
+    }
+
+    function showError(input, message) {
+      input.style.borderColor = '#dc3545';
+      const errorMsg = document.createElement('div');
+      errorMsg.className = 'error-message';
+      errorMsg.style.color = '#dc3545';
+      errorMsg.style.fontSize = '12px';
+      errorMsg.style.marginTop = '4px';
+      errorMsg.textContent = message;
+      input.parentNode.appendChild(errorMsg);
+    }
+
+    function submitSearchForm() {
+      document.getElementById('searchForm').submit();
+    }
+
+    function clearSearch() {
+      document.querySelector('select[name="category"]').value = '';
+      document.querySelector('input[name="search"]').value = '';
+      document.getElementById('searchForm').submit();
+    }
+
+    let currentProductId = null;
+    let currentProductName = '';
+
+    // Edit Product - opens modal in edit mode directly
+    function editProduct(button) {
+      try {
+        // Clear previous errors
+        clearValidationErrors();
+
+        // Get data from button's data attributes
+        const productId = button.getAttribute('data-product-id');
+        const productName = button.getAttribute('data-product-name') || '';
+        const shortDescription = button.getAttribute('data-product-short-description') || '';
+        const description = button.getAttribute('data-product-description') || '';
+        const categoryId = button.getAttribute('data-product-category-id') || '';
+        const imgUrl = button.getAttribute('data-product-img-url') || '';
+
+        // Populate form with product data
+        document.getElementById('editName').value = productName;
+        document.getElementById('editShortDescription').value = shortDescription;
+        document.getElementById('editDescription').value = description;
+        document.getElementById('editCategoryId').value = categoryId;
+
+        // Handle image
+        const imagePreview = document.getElementById('editImagePreview');
+        console.log('Image URL from data attribute:', imgUrl);
+
+        if (imgUrl && imgUrl.trim() !== '') {
+          // Ensure the image URL is properly formatted
+          let imageSrc = imgUrl;
+          if (!imageSrc.startsWith('/') && !imageSrc.startsWith('http')) {
+            imageSrc = '/' + imageSrc;
+          }
+
+          imagePreview.src = imageSrc;
+          imagePreview.style.display = 'block';
+          imagePreview.onerror = function() {
+            console.log('Image failed to load:', imageSrc);
+            this.style.display = 'none';
+          };
+          console.log('Setting image src to:', imageSrc);
+        } else {
+          imagePreview.style.display = 'none';
+          console.log('No image URL provided');
+        }
+
+        // Set current product ID and name
+        currentProductId = parseInt(productId);
+        currentProductName = productName;
+
+        // Set form action
+        document.getElementById('editForm').action = `/admin/products/${currentProductId}/update`;
+
+        // Clear variants container
+        document.getElementById('editVariantsContainer').innerHTML = '';
+
+        // Load product variants via API (we still need this for variants)
+        loadProductVariants(currentProductId);
+
+        // Show modal
+        document.getElementById('editProductModal').style.display = 'block';
+
+      } catch (error) {
+        console.error('Error loading product:', error);
+        Swal.fire({
+          title: 'Lỗi!',
+          text: 'Không thể tải thông tin sản phẩm: ' + error.message,
+          icon: "error"
+        });
+      }
+    }
+
+    // Load product variants
+    async function loadProductVariants(productId) {
+      try {
+        console.log('Loading variants for product ID:', productId);
+        const response = await fetch(`/admin/products/${productId}/variants`);
+        console.log('Response status:', response.status);
+
+        if (!response.ok) {
+          throw new Error('Không thể tải biến thể sản phẩm');
+        }
+        const variants = await response.json();
+        console.log('Loaded variants:', variants);
+
+        const container = document.getElementById('editVariantsContainer');
+        container.innerHTML = '';
+
+        if (variants && variants.length > 0) {
+          variants.forEach((variant, index) => {
+            console.log('Adding variant:', variant, 'at index:', index);
+            addEditVariantRow(variant, index);
+          });
+          updateEditRemoveButtons();
+        } else {
+          container.innerHTML = '<p style="color: #6c757d; font-style: italic;">Chưa có biến thể nào</p>';
+        }
+
+      } catch (error) {
+        console.error('Error loading variants:', error);
+        document.getElementById('editVariantsContainer').innerHTML = '<p style="color: #dc3545;">Lỗi tải biến thể: ' + error.message + '</p>';
+      }
+    }
+
+    // Add variant row for edit modal (match Add modal UI)
+    function addEditVariantRow(variant = null, index = null) {
+      const container = document.getElementById('editVariantsContainer');
+
+      // If index is not provided, calculate it based on current variants
+      if (index === null) {
+        const existingItems = container.querySelectorAll('.variant-item');
+        index = existingItems.length;
+      }
+
+      const variantDiv = document.createElement('div');
+      variantDiv.className = 'variant-item';
+      variantDiv.setAttribute('data-index', index);
+
+      variantDiv.innerHTML = `
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>SKU</label>
+                        <input type="text" name="variants[${index}].sku" placeholder="VD: LAK90" required
+                               value="${variant ? (variant.sku || '') : ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>Hạn sử dụng</label>
+                        <input type="date" name="variants[${index}].expiryDate"
+                               value="${variant ? (variant.expiryDate || '') : ''}">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Trọng lượng (g)</label>
+                        <input type="number" min="0" name="variants[${index}].weight" required
+                               value="${variant ? (variant.weight || '') : ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>Giá (₫)</label>
+                        <input type="number" step="0.01" min="0" name="variants[${index}].price" required
+                               value="${variant ? (variant.price || '') : ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>Tồn kho</label>
+                        <input type="number" min="0" name="variants[${index}].stock" required
+                               value="${variant ? (variant.stock || '') : ''}">
+                    </div>
+                    <div class="remove-container">
+                        <button type="button" class="btn-danger remove-variant-btn" onclick="removeEditVariantRow(this)">Xóa biến thể</button>
+                    </div>
+                </div>
+            `;
+
+      container.appendChild(variantDiv);
+      updateEditRemoveButtons();
+    }
+
+    // Remove variant row (same logic as add modal)
+    function removeEditVariantRow(btn) {
+      const item = btn.closest('.variant-item');
+      const container = document.getElementById('editVariantsContainer');
+      const items = Array.from(container.querySelectorAll('.variant-item'));
+
+      if (items.length <= 1) {
+        // Always keep at least 1 row for easy binding
+        item.querySelectorAll('input').forEach(i => i.value = '');
+        return;
+      }
+
+      item.remove();
+
+      // Re-index names to keep variants[0..n]
+      const remaining = container.querySelectorAll('.variant-item');
+      remaining.forEach((el, i) => {
+        el.setAttribute('data-index', String(i));
+        el.querySelectorAll('input').forEach((input) => {
+          input.name = input.name.replace(/variants\[\d+\]/, `variants[${i}]`);
+        });
+      });
+
+      updateEditRemoveButtons();
+    }
+
+    // Update remove buttons visibility (same logic as add modal)
+    function updateEditRemoveButtons() {
+      const container = document.getElementById('editVariantsContainer');
+      const items = container.querySelectorAll('.variant-item');
+      const show = items.length > 1;
+      container.querySelectorAll('.remove-variant-btn').forEach(btn => {
+        btn.style.display = show ? 'inline-block' : 'none';
+      });
+    }
+
+    // Validation functions
+    function clearValidationErrors() {
+      document.getElementById('nameError').textContent = '';
+      document.querySelectorAll('.sku-error').forEach(error => {
+        error.textContent = '';
+      });
+    }
+
+
+    function validateForm() {
+      // Validate product name
+      const name = document.getElementById('editName').value.trim();
+      if (!name) {
+        Swal.fire({
+          title: 'Lỗi!',
+          text: 'Tên sản phẩm không được để trống',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+        return false;
+      }
+
+      // Validate category
+      const category = document.getElementById('editCategoryId').value;
+      if (category === '') {
+        Swal.fire({
+          title: 'Lỗi!',
+          text: 'Vui lòng chọn danh mục',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+        return false;
+      }
+
+      // Validate SKUs within the same product
+      const skuInputs = document.querySelectorAll('#editVariantsContainer input[name*="variants"][name*="sku"]');
+      const skuValues = new Set();
+
+      for (const input of skuInputs) {
+        const sku = input.value.trim();
+        if (sku) { // Only check non-empty SKUs
+          if (skuValues.has(sku)) {
+            Swal.fire({
+              title: 'Lỗi!',
+              text: 'SKU không được trùng lặp trong cùng sản phẩm: ' + sku,
+              icon: 'error',
+              confirmButtonText: 'OK'
+            });
+            return false;
+          }
+          skuValues.add(sku);
+        }
+      }
+
+      return true;
+    }
+
+    // Save product changes with validation
+    function saveProduct(event) {
+      if (!currentProductId) return;
+
+      const isValid = validateForm();
+      if (!isValid) {
+        event.preventDefault();
+        return;
+      }
+
+      // Show loading
+      Swal.fire({
+        title: "Đang cập nhật...",
+        text: "Vui lòng chờ",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      // Form will submit normally, let it proceed
+      return true;
+    }
+
+    // Check for success message on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const successMessage = document.querySelector('.alert-success');
+      if (successMessage) {
+        Swal.fire({
+          title: 'Thành công!',
+          text: successMessage.textContent.trim(),
+          icon: 'success',
+          confirmButtonText: 'OK'
+        });
+      }
+    });
+
+    // Delete Product with SweetAlert
+    function deleteProduct(productId, productName) {
+      // Convert string to number for API call
+      const productIdNum = parseInt(productId);
+
+      Swal.fire({
+        title: "Xác nhận xóa sản phẩm",
+        text: `Bạn có chắc chắn muốn xóa sản phẩm "${productName}"?`,
+        html: `Bạn có chắc chắn muốn xóa sản phẩm <strong>"${productName}"</strong>?<br><br><span style="color: #dc3545; font-size: 14px;">⚠️ Hành động này sẽ xóa tất cả biến thể của sản phẩm và không thể hoàn tác!</span>`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#dc3545",
+        cancelButtonColor: "#6c757d",
+        confirmButtonText: "Xóa",
+        cancelButtonText: "Hủy"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Show loading
+          Swal.fire({
+            title: "Đang xóa...",
+            text: "Vui lòng chờ",
+            allowOutsideClick: false,
+            didOpen: () => {
+              Swal.showLoading();
+            }
+          });
+
+          // Perform delete
+          const formData = new FormData();
+          fetch(`/admin/products/${productIdNum}/delete`, {
+            method: 'POST',
+            body: formData
+          })
+                  .then(response => {
+                    if (response.ok) {
+                      Swal.fire({
+                        title: "Đã xóa!",
+                        text: "Sản phẩm đã được xóa thành công",
+                        icon: "success"
+                      }).then(() => {
+                        location.reload();
+                      });
+                    } else {
+                      Swal.fire({
+                        title: "Lỗi!",
+                        text: "Có lỗi xảy ra khi xóa sản phẩm",
+                        icon: "error"
+                      });
+                    }
+                  })
+                  .catch(error => {
+                    Swal.fire({
+                      title: "Lỗi!",
+                      text: "Lỗi: " + error.message,
+                      icon: "error"
+                    });
+                  });
+        }
+      });
+    }
+
+    // Close modals
+    function closeEditModal() {
+      document.getElementById('editProductModal').style.display = 'none';
+      document.getElementById('editForm').reset();
+      document.getElementById('editForm').action = '';
+      document.getElementById('editVariantsContainer').innerHTML = '';
+      document.getElementById('editImagePreview').style.display = 'none';
+      currentProductId = null;
+      currentProductName = '';
+      clearValidationErrors();
+    }
+
+
+  </script>
+
+  <style>
+    /* Action buttons styling */
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-buttons button {
+      background: none;
+      border: none;
+      padding: 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.2s;
+    }
+
+    .btn-edit {
+      background: #fff3cd;
+    }
+
+    .btn-edit:hover {
+      background: #ffeaa7;
+    }
+
+    .btn-view {
+      background: #d1ecf1;
+    }
+
+    .btn-view:hover {
+      background: #bee5eb;
+    }
+
+    .btn-delete {
+      background: #f8d7da;
+    }
+
+    .btn-delete:hover {
+      background: #f5c6cb;
+    }
+
+    /* Modal styling */
+    .modal-body {
+      padding: 20px;
+    }
+
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .btn-danger:hover {
+      background: #c82333;
+    }
+
+    /* Image preview styling */
+    .image-preview {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 10px;
+      background: #f8f9fa;
+      min-height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
 </th:block>
-
 </body>
 </html>
