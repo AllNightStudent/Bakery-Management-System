@@ -7,6 +7,7 @@ import com.swp.entity.ProductVariantEntity;
 import com.swp.repository.ProductRepository;
 import com.swp.repository.ProductVariantRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -174,6 +175,14 @@ public class ProductService {
         } catch (IOException e) {
             throw new RuntimeException("Lưu ảnh thất bại", e);
         }
+    }
+
+    public List<ProductEntity> getAllProducts() {
+        return productRepository.findAllWithVariants();
+    }
+
+    public ProductEntity getProductVariantsById(Long productId) {
+        return productRepository.findAllWithVariantsById(productId);
     }
 
 }
