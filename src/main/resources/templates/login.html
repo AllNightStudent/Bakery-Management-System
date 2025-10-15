@@ -2,204 +2,203 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{fragments/layout :: layout(~{::main}, 'Đăng Nhập - Bakery', ~{::extraHead}, ~{::extraScripts})}">
 <head>
-  <!-- Tiêu đề này sẽ không được sử dụng, vì nó được truyền trực tiếp trong th:replace -->
-  <title>Đăng Nhập - Bakery</title>
-  <th:block th:fragment="extraHead">
-    <!-- CSS riêng cho login -->
-    <link rel="stylesheet" th:href="@{/css/login.css}">
-    <style>
-      .auth-page {
-        padding: 60px 0;
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        min-height: 70vh;
-      }
+    <!-- Tiêu đề này sẽ không được sử dụng, vì nó được truyền trực tiếp trong th:replace -->
+    <title>Đăng Nhập - Bakery</title>
+    <th:block th:fragment="extraHead">
+        <!-- CSS riêng cho login -->
+        <link rel="stylesheet" th:href="@{/css/login.css}">
+        <style>
+            .auth-page {
+                padding: 60px 0;
+                background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                min-height: 70vh;
+            }
 
-      .auth-container {
-        max-width: 500px;
-        margin: 0 auto;
-        background: white;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-      }
+            .auth-container {
+                max-width: 500px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 15px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
 
-      .auth-tabs {
-        display: flex;
-        background: #8B4513;
-      }
+            .auth-tabs {
+                display: flex;
+                background: #8B4513;
+            }
 
-      .tab-btn {
-        flex: 1;
-        background: transparent;
-        border: none;
-        color: white;
-        padding: 15px;
-        cursor: pointer;
-        font-weight: bold;
-        transition: background 0.3s;
-      }
+            .tab-btn {
+                flex: 1;
+                background: transparent;
+                border: none;
+                color: white;
+                padding: 15px;
+                cursor: pointer;
+                font-weight: bold;
+                transition: background 0.3s;
+            }
 
-      .tab-btn.active {
-        background: rgba(255, 255, 255, 0.2);
-      }
+            .tab-btn.active {
+                background: rgba(255, 255, 255, 0.2);
+            }
 
-      .auth-form {
-        padding: 40px;
-      }
+            .auth-form {
+                padding: 40px;
+            }
 
-      .auth-form h2 {
-        text-align: center;
-        color: #8B4513;
-        margin-bottom: 30px;
-      }
+            .auth-form h2 {
+                text-align: center;
+                color: #8B4513;
+                margin-bottom: 30px;
+            }
 
-      .form-group {
-        margin-bottom: 20px;
-      }
+            .form-group {
+                margin-bottom: 20px;
+            }
 
-      .form-group label {
-        display: block;
-        margin-bottom: 5px;
-        color: #333;
-        font-weight: bold;
-      }
+            .form-group label {
+                display: block;
+                margin-bottom: 5px;
+                color: #333;
+                font-weight: bold;
+            }
 
-      .form-group input {
-        width: 100%;
-        padding: 12px;
-        border: 2px solid #ddd;
-        border-radius: 8px;
-        font-size: 16px;
-        transition: border-color 0.3s;
-      }
+            .form-group input {
+                width: 100%;
+                padding: 12px;
+                border: 2px solid #ddd;
+                border-radius: 8px;
+                font-size: 16px;
+                transition: border-color 0.3s;
+            }
 
-      .form-group input:focus {
-        outline: none;
-        border-color: #8B4513;
-      }
+            .form-group input:focus {
+                outline: none;
+                border-color: #8B4513;
+            }
 
-      .form-options {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 25px;
-        font-size: 14px;
-      }
+            .form-options {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 25px;
+                font-size: 14px;
+            }
 
-      .checkbox {
-        display: flex;
-        align-items: center;
-        cursor: pointer;
-      }
+            .checkbox {
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+            }
 
-      .checkbox input {
-        width: auto;
-        margin-right: 8px;
-      }
+            .checkbox input {
+                width: auto;
+                margin-right: 8px;
+            }
 
-      .forgot-password {
-        color: #8B4513;
-        text-decoration: none;
-      }
+            .forgot-password {
+                color: #8B4513;
+                text-decoration: none;
+            }
 
-      .auth-btn {
-        width: 100%;
-        background: #8B4513;
-        color: white;
-        border: none;
-        padding: 15px;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: background 0.3s;
-      }
+            .auth-btn {
+                width: 100%;
+                background: #8B4513;
+                color: white;
+                border: none;
+                padding: 15px;
+                border-radius: 8px;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: background 0.3s;
+            }
 
-      .auth-btn:hover {
-        background: #A0522D;
-      }
+            .auth-btn:hover {
+                background: #A0522D;
+            }
 
-      @media (max-width: 768px) {
-        .auth-container {
-          margin: 0 20px;
-        }
+            @media (max-width: 768px) {
+                .auth-container {
+                    margin: 0 20px;
+                }
 
-        .auth-form {
-          padding: 30px 20px;
-        }
+                .auth-form {
+                    padding: 30px 20px;
+                }
 
-        .form-options {
-          flex-direction: column;
-          gap: 10px;
-          align-items: flex-start;
-        }
-      }
-    </style>
-  </th:block>
-
+                .form-options {
+                    flex-direction: column;
+                    gap: 10px;
+                    align-items: flex-start;
+                }
+            }
+        </style>
+    </th:block>
 
 </head>
 <body>
 <!-- Hero Section -->
 <main>
-  <section class="auth-page">
-    <div class="container">
-      <div class="auth-container">
-        <div class="auth-tabs">
-          <button class="tab-btn active" onclick="showLogin()">ĐĂNG NHẬP</button>
-          <button class="tab-btn" onclick="showRegister()">ĐĂNG KÝ</button>
+    <section class="auth-page">
+        <div class="container">
+            <div class="auth-container">
+                <div class="auth-tabs">
+                    <button class="tab-btn active" onclick="showLogin()">ĐĂNG NHẬP</button>
+                    <button class="tab-btn" onclick="showRegister()">ĐĂNG KÝ</button>
+                </div>
+
+                <!-- Login Form -->
+                <div id="login-form" class="auth-form">
+                    <h2>Đăng Nhập Tài Khoản</h2>
+                    <div th:if="${param.error}">
+                        <p style="color:red;">Sai tài khoản hoặc mật khẩu!</p>
+                    </div>
+
+                    <div th:if="${param.logout}">
+                        <p style="color:green;">Bạn đã đăng xuất thành công!</p>
+                    </div>
+
+                    <div th:if="${param.success}">
+                        <p style="color:green;">Đăng ký thành công, mời bạn đăng nhập!</p>
+                    </div>
+                    <form th:action="@{/login}" method="post">
+                        <div class="form-group">
+                            <label for="login-email">Email</label>
+                            <input type="email" name="username" id="login-email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="login-password">Mật khẩu</label>
+                            <input type="password" name="password" id="login-password" required>
+                        </div>
+                        <div class="form-options">
+                            <a href="#" class="forgot-password">Quên mật khẩu?</a>
+                        </div>
+                        <button type="submit" class="auth-btn">ĐĂNG NHẬP</button>
+                    </form>
+                </div>
+
+
+            </div>
         </div>
-
-        <!-- Login Form -->
-        <div id="login-form" class="auth-form">
-          <h2>Đăng Nhập Tài Khoản</h2>
-          <div th:if="${param.error}">
-            <p style="color:red;">Sai tài khoản hoặc mật khẩu!</p>
-          </div>
-
-          <div th:if="${param.logout}">
-            <p style="color:green;">Bạn đã đăng xuất thành công!</p>
-          </div>
-
-          <div th:if="${param.success}">
-            <p style="color:green;">Đăng ký thành công, mời bạn đăng nhập!</p>
-          </div>
-          <form th:action="@{/login}" method="post">
-            <div class="form-group">
-              <label for="login-email">Email</label>
-              <input type="email" name="username" id="login-email" required>
-            </div>
-            <div class="form-group">
-              <label for="login-password">Mật khẩu</label>
-              <input type="password" name="password" id="login-password" required>
-            </div>
-            <div class="form-options">
-              <a href="#" class="forgot-password">Quên mật khẩu?</a>
-            </div>
-            <button type="submit" class="auth-btn">ĐĂNG NHẬP</button>
-          </form>
-        </div>
-
-
-      </div>
-    </div>
-  </section>
+    </section>
 </main>
 
 <th:block th:fragment="extraScripts">
-  <!-- JS riêng cho login -->
-  <script>
-    function showLogin() {
-      document.getElementById('login-form').style.display = 'block';
-      document.getElementById('register-form').style.display = 'none';
-      document.querySelectorAll('.tab-btn')[0].classList.add('active');
-      document.querySelectorAll('.tab-btn')[1].classList.remove('active');
-    }
+    <!-- JS riêng cho login -->
+    <script>
+        function showLogin() {
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('register-form').style.display = 'none';
+            document.querySelectorAll('.tab-btn')[0].classList.add('active');
+            document.querySelectorAll('.tab-btn')[1].classList.remove('active');
+        }
 
-    function showRegister() {
-      window.location.href = "/register";
-    }
-  </script>
+        function showRegister() {
+            window.location.href = "/register";
+        }
+    </script>
 </th:block>
 
 </body>

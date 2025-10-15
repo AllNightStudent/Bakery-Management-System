@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout-admin :: layout(~{::main}, 'Quản lý nguyên liệu - Bakery', ~{::extraHead}, ~{::extraScripts})}">
+<head>
+    <title>Quản lý nguyên liệu - Bakery</title>
+    <th:block th:fragment="extraHead">
+        <style>
+            .admin-main { padding: 2rem; background: #f8f9fa; min-height: 100vh; }
+            .admin-content { max-width: 1400px; margin: 0 auto; }
+            .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+            .page-header h1 { font-size: 2rem; font-weight: 700; color: #2d3748; }
+            .btn-primary { background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
+            .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3); }
+            .btn-secondary { background: #e2e8f0; color: #2d3748; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
+            .filters { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 1.5rem; }
+            .filter-group { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+            .search-input { flex: 1; min-width: 250px; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.95rem; }
+            .filter-select { min-width: 220px; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; background: white; }
+            .table-card { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden; }
+            .table-container { overflow-x: auto; }
+            .admin-table { width: 100%; border-collapse: collapse; }
+            .admin-table thead { background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); color: white; }
+            .admin-table th { padding: 1rem; text-align: left; font-weight: 600; white-space: nowrap; }
+            .admin-table td { padding: 1rem; border-bottom: 1px solid #e2e8f0; }
+            .action-buttons { display: flex; gap: 0.5rem; }
+            .btn-edit { background: #bee3f8; color: #2c5282; padding: 0.5rem 0.75rem; border: none; border-radius: 6px; cursor: pointer; }
+            .btn-delete { background: #fed7d7; color: #742a2a; padding: 0.5rem 0.75rem; border: none; border-radius: 6px; cursor: pointer; }
+            .pagination { display: flex; justify-content: center; gap: 0.5rem; margin-top: 2rem; flex-wrap: wrap; }
+            .page-btn { padding: 0.5rem 1rem; border: 1px solid #e2e8f0; background: white; border-radius: 6px; cursor: pointer; }
+            .page-btn.active { background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); color: white; border-color: #ff6b35; }
+            .page-btn.disabled { opacity: 0.5; pointer-events: none; }
+            .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
+            .modal-content { background: white; margin: 2% auto; padding: 0; border-radius: 16px; width: 90%; max-width: 600px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+            .modal-header { background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); color: white; padding: 1.5rem; border-radius: 16px 16px 0 0; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+            .category-form { padding: 2rem; overflow-y: auto; flex: 1; }
+            .form-group { margin-bottom: 1.5rem; }
+            .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #2d3748; }
+            .form-group input { width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem; }
+            .alert { padding: 1rem 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; font-weight: 500; }
+            .alert-success { background: #c6f6d5; color: #22543d; border-left: 4px solid #38a169; }
+            .alert-error { background: #fed7d7; color: #742a2a; border-left: 4px solid #e53e3e; }
+            .empty-state { text-align: center; padding: 3rem; color: #718096; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+            .empty-state svg { width: 80px; height: 80px; margin-bottom: 1rem; opacity: 0.5; }
+            .form-actions { display: flex; gap: 1rem; justify-content: flex-end; padding: 1.5rem 2rem; background: white; border-top: 1px solid #e2e8f0; position: sticky; bottom: 0; margin: 0 -2rem -2rem; border-radius: 0 0 16px 16px; }
+        </style>
+    </th:block>
+</head>
+<body>
+<main class="admin-main">
+    <div class="admin-content">
+        <div class="page-header">
+            <h1>Quản lý nguyên liệu</h1>
+            <button class="btn-primary" onclick="showAddModal()">+ Thêm nguyên liệu</button>
+        </div>
+
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <div class="filters">
+            <form class="filter-group" method="get" th:action="@{/admin/materials}">
+                <input type="text" name="keyword" placeholder="Tìm kiếm theo tên..." class="search-input" th:value="${keyword}">
+                <select id="sortSelect" class="filter-select" name="sortOption" onchange="onSortChange(this.value)">
+                    <option value="" th:selected="${sortBy == null}">-- Sắp xếp --</option>
+                    <option value="cost:asc" th:selected="${sortBy=='cost' and sortDir=='asc'}">Giá tăng dần</option>
+                    <option value="cost:desc" th:selected="${sortBy=='cost' and sortDir=='desc'}">Giá giảm dần</option>
+                    <option value="expiryDate:asc" th:selected="${sortBy=='expiryDate' and sortDir=='asc'}">Hạn dùng tăng dần</option>
+                    <option value="expiryDate:desc" th:selected="${sortBy=='expiryDate' and sortDir=='desc'}">Hạn dùng giảm dần</option>
+                </select>
+                <input type="hidden" id="sortByInput" name="sortBy" th:value="${sortBy}">
+                <input type="hidden" id="sortDirInput" name="sortDir" th:value="${sortDir}">
+                <input type="hidden" name="size" th:value="${size}">
+                <button type="submit" class="btn-secondary">Tìm kiếm</button>
+            </form>
+        </div>
+
+        <div class="table-card">
+            <div class="table-container">
+                <table class="admin-table" th:if="${materialPage.hasContent()}">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên</th>
+                        <th>Số lượng</th>
+                        <th>Đơn vị</th>
+                        <th>Giá</th>
+                        <th>Hạn dùng</th>
+                        <th>Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="m : ${materialPage.content}">
+                        <td th:text="${m.materialId}">1</td>
+                        <td th:text="${m.name}">Bột mì</td>
+                        <td th:text="${m.stock}">100</td>
+                        <td th:text="${m.unit}">kg</td>
+                        <td th:text="${#numbers.formatDecimal(m.cost, 0, 'COMMA', 2, 'POINT')} + ' VND'">0.00 VND</td>
+                        <td th:text="${m.expiryDate != null ? #temporals.format(m.expiryDate, 'dd/MM/yyyy') : 'N/A'}">N/A</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-edit" th:data-id="${m.materialId}"
+                                        th:data-name="${m.name}"
+                                        th:data-stock="${m.stock}"
+                                        th:data-unit="${m.unit}"
+                                        th:data-cost="${m.cost}"
+                                        th:data-expiry="${m.expiryDate}"
+                                        onclick="editMaterial(this)">✏️</button>
+                                <form th:action="@{/admin/materials/delete/{id}(id=${m.materialId})}" method="post" style="display:inline;"
+                                      onsubmit="return confirm('Xác nhận xóa nguyên liệu?');">
+                                    <button type="submit" class="btn-delete">🗑️</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div th:unless="${materialPage.hasContent()}" class="empty-state">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                    </svg>
+                    <h3>Chưa có nguyên liệu</h3>
+                    <p>Hãy thêm nguyên liệu đầu tiên của bạn!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="pagination" th:if="${totalPages > 1}">
+            <a class="page-btn" th:classappend="${currentPage == 0} ? ' disabled' : ''"
+               th:href="@{/admin/materials(page=${currentPage - 1}, size=${size}, keyword=${keyword}, sortBy=${sortBy}, sortDir=${sortDir})}">« Trước</a>
+            <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                <a class="page-btn" th:classappend="${i == currentPage} ? ' active' : ''"
+                   th:href="@{/admin/materials(page=${i}, size=${size}, keyword=${keyword}, sortBy=${sortBy}, sortDir=${sortDir})}"
+                   th:text="${i + 1}">1</a>
+            </th:block>
+            <a class="page-btn" th:classappend="${currentPage == totalPages - 1} ? ' disabled' : ''"
+               th:href="@{/admin/materials(page=${currentPage + 1}, size=${size}, keyword=${keyword}, sortBy=${sortBy}, sortDir=${sortDir})}">Sau »</a>
+        </div>
+
+        <div style="text-align:center; margin-top:1rem; color:#718096;">
+            Hiển thị <strong th:text="${materialPage.numberOfElements}">0</strong> trong tổng số
+            <strong th:text="${totalItems}">0</strong> nguyên liệu
+        </div>
+    </div>
+
+    <div id="materialModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Thêm nguyên liệu</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <form id="materialForm" class="category-form" method="post">
+                <input type="hidden" id="materialId" name="materialId">
+
+                <div class="form-group">
+                    <label for="name">Tên</label>
+                    <input id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="stock">Số lượng</label>
+                    <input id="stock" name="stock" type="number" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="unit">Đơn vị</label>
+                    <input id="unit" name="unit" required>
+                </div>
+                <div class="form-group">
+                    <label for="cost">Giá</label>
+                    <input id="cost" name="cost" type="number" min="0" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="expiryDate">Hạn dùng</label>
+                    <input id="expiryDate" name="expiryDate" type="date">
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal()">Hủy</button>
+                    <button type="submit" class="btn-primary">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<th:block th:fragment="extraScripts">
+    <script th:inline="javascript">
+        function onSortChange(value) {
+            if (!value) return;
+            const parts = value.split(':');
+            document.getElementById('sortByInput').value = parts[0];
+            document.getElementById('sortDirInput').value = parts[1];
+            // submit current form to keep keyword and apply sort
+            document.querySelector('.filter-group').submit();
+        }
+        function showAddModal() {
+            document.getElementById('modalTitle').textContent = 'Thêm nguyên liệu';
+            document.getElementById('materialForm').action = '/admin/materials/create';
+            document.getElementById('materialForm').reset();
+            document.getElementById('materialId').value = '';
+            document.getElementById('materialModal').style.display = 'block';
+        }
+        function editMaterial(btn) {
+            document.getElementById('modalTitle').textContent = 'Chỉnh sửa nguyên liệu';
+            const id = btn.getAttribute('data-id');
+            document.getElementById('materialForm').action = '/admin/materials/update/' + id;
+            document.getElementById('materialId').value = id;
+            document.getElementById('name').value = btn.getAttribute('data-name');
+            document.getElementById('stock').value = btn.getAttribute('data-stock');
+            document.getElementById('unit').value = btn.getAttribute('data-unit');
+            document.getElementById('cost').value = btn.getAttribute('data-cost');
+            const exp = btn.getAttribute('data-expiry');
+            document.getElementById('expiryDate').value = exp ? exp : '';
+            document.getElementById('materialModal').style.display = 'block';
+        }
+        function closeModal(){ document.getElementById('materialModal').style.display='none'; }
+        window.onclick = function (e) { const m = document.getElementById('materialModal'); if (e.target === m) m.style.display = 'none'; }
+        setTimeout(() => { document.querySelectorAll('.alert').forEach(a => { a.style.transition='opacity .5s'; a.style.opacity='0'; setTimeout(()=>a.remove(), 500); }) }, 5000);
+    </script>
+</th:block>
+</body>
+</html>

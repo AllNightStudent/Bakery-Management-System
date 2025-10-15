@@ -63,6 +63,8 @@ public class CategoryService {
                 .name(categoryDTO.getName())
                 .description(categoryDTO.getDescription())
                 .active(categoryDTO.getActive() != null ? categoryDTO.getActive() : true)
+                .timeUnit(categoryDTO.getTimeUnit())
+                .expireTime(categoryDTO.getExpireTime())
                 .build();
 
         CategoryEntity savedCategory = categoryRepository.save(category);
@@ -81,6 +83,8 @@ public class CategoryService {
         category.setName(categoryDTO.getName());
         category.setDescription(categoryDTO.getDescription());
         category.setActive(categoryDTO.getActive());
+        category.setTimeUnit(categoryDTO.getTimeUnit());
+        category.setExpireTime(categoryDTO.getExpireTime());
 
         CategoryEntity updatedCategory = categoryRepository.save(category);
         return convertToDTO(updatedCategory);
@@ -109,6 +113,12 @@ public class CategoryService {
                 .description(entity.getDescription())
                 .active(entity.getActive())
                 .createdAt(entity.getCreatedAt())
+                .expireTime(entity.getExpireTime())
+                .timeUnit(entity.getTimeUnit())
                 .build();
+    }
+
+    public List<CategoryEntity> getAllCategoriesActivated() {
+        return categoryRepository.getAllActivated();
     }
 }

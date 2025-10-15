@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::main}, 'Kết quả thanh toán - Bakery', ~{::extraHead}, ~{::extraScripts})}">
+<head>
+    <meta charset="UTF-8">
+    <title>Kết quả thanh toán - Bakery</title>
+    <th:block th:fragment="extraHead">
+        <link rel="stylesheet" th:href="@{/css/login.css}">
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            body {
+                background-color: #f5f0e8;
+                font-family: 'Arial', sans-serif;
+            }
+        </style>
+    </th:block>
+</head>
+
+<body class="min-h-screen">
+<main>
+    <div class="w-full h-2 bg-gradient-to-r from-green-600 via-red-600 to-gray-800"></div>
+
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center mb-12 tracking-wider">KẾT QUẢ THANH TOÁN</h1>
+
+        <div class="bg-white p-8 rounded-lg shadow-sm">
+            <!-- Status Icon -->
+            <div class="text-center mb-6">
+                <div th:if="${isSuccess}" class="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full">
+                    <svg class="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <div th:unless="${isSuccess}" class="inline-flex items-center justify-center w-20 h-20 bg-red-100 rounded-full">
+                    <svg class="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Status Message -->
+            <h2 class="text-2xl font-bold text-center mb-8"
+                th:classappend="${isSuccess} ? 'text-green-600' : 'text-red-600'">
+                <span th:if="${isSuccess}">Thanh toán thành công!</span>
+                <span th:unless="${isSuccess}">Thanh toán không thành công!</span>
+            </h2>
+
+            <!-- Transaction Details -->
+            <div class="space-y-3 text-gray-700">
+                <div class="flex justify-between py-2 border-b">
+                    <span class="font-medium">Mã giao dịch thanh toán:</span>
+                    <span th:text="${vnp_TxnRef}"></span>
+                </div>
+
+                <div class="flex justify-between py-2 border-b">
+                    <span class="font-medium">Số tiền:</span>
+                    <span th:text="${#numbers.formatDecimal(vnp_Amount, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+                </div>
+
+                <div class="flex justify-between py-2 border-b">
+                    <span class="font-medium">Mô tả giao dịch:</span>
+                    <span class="text-right break-words max-w-md" style="font-family: Arial, sans-serif;">Thanh toán đơn hàng: <span th:text="${vnp_OrderInfo}"></span></span>
+                </div>
+
+                <div class="flex justify-between py-2 border-b">
+                    <span class="font-medium">Mã thanh toán:</span>
+                    <span th:text="${vnp_ResponseCode}"></span>
+                </div>
+
+                <div class="flex justify-between py-2 border-b" th:if="${vnp_TransactionNo}">
+                    <span class="font-medium">Mã giao dịch tại VNPAY:</span>
+                    <span th:text="${vnp_TransactionNo}"></span>
+                </div>
+
+                <div class="flex justify-between py-2 border-b" th:if="${vnp_BankCode}">
+                    <span class="font-medium">Mã ngân hàng thanh toán:</span>
+                    <span th:text="${vnp_BankCode}"></span>
+                </div>
+
+                <div class="flex justify-between py-2 border-b" th:if="${vnp_PayDate}">
+                    <span class="font-medium">Thời gian thanh toán:</span>
+                    <span th:text="${vnp_PayDate}"></span>
+                </div>
+
+                <div class="flex justify-between py-2 border-b">
+                    <span class="font-medium">Tình trạng giao dịch:</span>
+                    <span th:if="${validSignature && isSuccess}" class="text-green-600 font-semibold">Thành công</span>
+                    <span th:if="${validSignature && !isSuccess}" class="text-red-600 font-semibold">Không thành công</span>
+                    <span th:unless="${validSignature}" class="text-red-600 font-semibold">Chữ ký không hợp lệ</span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="mt-8 flex justify-center gap-4">
+                <a th:href="@{/}" class="px-8 py-3 bg-gray-800 text-white rounded hover:bg-gray-700 transition">
+                    Về trang chủ
+                </a>
+                <a th:href="@{/cart/orders}" class="px-8 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 transition" th:if="${isSuccess}">
+                    Xem đơn hàng
+                </a>
+                <a th:href="@{/products}" class="px-8 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+                    Tiếp tục mua sắm
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<th:block th:fragment="extraScripts">
+</th:block>
+
+</body>
+</html>
+

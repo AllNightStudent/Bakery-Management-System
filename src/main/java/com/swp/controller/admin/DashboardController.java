@@ -14,5 +14,4 @@ public class DashboardController {
     }
 
     // Moved products listing to ProductAdminController. Keep only dashboard here.
-
 }

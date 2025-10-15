@@ -228,8 +228,8 @@
                 height: 60px;
                 border: 2px dashed #ddd;
                 border-radius: 8px;
-                display: flex;products
-            flex-direction: column;
+                display: flex;
+                flex-direction: column;
                 align-items: center;
                 justify-content: center;
                 background: #f8f9fa;
@@ -708,7 +708,7 @@
                                     <tbody>
                                     <tr th:each="variant : ${variantsByProduct.get(p.productId)}">
                                         <td th:text="${variant.sku}">SKU</td>
-                                        <td th:text="${variant.price} + ' ₫'">Giá</td>
+                                        <td th:text="${#numbers.formatDecimal(variant.price, 0, 'COMMA', 0, 'POINT')} + ' ₫'">Giá</td>
                                         <td th:text="${variant.stock}">Tồn kho</td>
                                     </tr>
                                     </tbody>
@@ -819,10 +819,6 @@
                             <div class="form-group">
                                 <label>SKU</label>
                                 <input type="text" placeholder="VD: LAK90" name="variants[0].sku" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Hạn sử dụng</label>
-                                <input type="date" name="variants[0].expiryDate">
                             </div>
                         </div>
                         <div class="form-row">
@@ -956,10 +952,6 @@
                     <div class="form-group">
                         <label>SKU</label>
                         <input type="text" name="variants[${idx}].sku" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Hạn sử dụng</label>
-                        <input type="date" name="variants[${idx}].expiryDate">
                     </div>
                 </div>
                 <div class="form-row">
@@ -1210,11 +1202,6 @@
                         <label>SKU</label>
                         <input type="text" name="variants[${index}].sku" placeholder="VD: LAK90" required
                                value="${variant ? (variant.sku || '') : ''}">
-                    </div>
-                    <div class="form-group">
-                        <label>Hạn sử dụng</label>
-                        <input type="date" name="variants[${index}].expiryDate"
-                               value="${variant ? (variant.expiryDate || '') : ''}">
                     </div>
                 </div>
                 <div class="form-row">

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::main}, 'Sản Phẩm - Bakery', ~{::extraHead}, ~{::extraScripts})}">
+
+<head>
+    <title>Sản Phẩm - Bakery</title>
+
+    <th:block th:fragment="extraHead">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Cupcake Trung Thu - Chi Tiết Sản Phẩm</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="stylesheet" th:href="@{/css/login.css}">
+        <style>
+            .product-actions {
+                display: flex;
+                gap: 10px;
+            }
+
+            .view-details {
+                background: transparent;
+                border: 2px solid #8B4513;
+                color: #8B4513;
+                padding: 10px 15px;
+                border-radius: 5px;
+                cursor: pointer;
+                font-weight: bold;
+                transition: all 0.3s;
+                flex: 1;
+            }
+
+            .view-details:hover {
+                background: #8B4513;
+                color: white;
+            }
+
+            .add-to-cart {
+                flex: 1;
+            }
+
+            @media (max-width: 768px) {
+                .products-grid {
+                    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                    gap: 20px;
+                }
+
+                .product-actions {
+                    flex-direction: column;
+                }
+            }
+
+
+            .product-variants {
+                margin-top: 10px;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .btn-variant {
+                display: inline-block;
+                padding: 8px 12px;
+                background: #f8f8f8;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                font-size: 14px;
+                color: #333;
+                text-decoration: none;
+                transition: all 0.2s ease;
+            }
+
+
+            .btn-variant:hover {
+                background: #ffe6e6;
+                border-color: #ff9999;
+                color: #c00;
+            }
+
+            .btn-variant.active {
+                background: #8B4513;
+                color: white;
+                border-color: #8B4513;
+                font-weight: bold;
+            }
+
+
+            .variant {
+                display: inline-block;
+                background: #f0f0f0;
+                padding: 5px 10px;
+                border-radius: 15px;
+                font-size: 12px;
+                margin: 2px;
+                color: #8B4513;
+                font-weight: bold;
+            }
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            }
+            .product-thumbnail {
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+            .product-thumbnail:hover {
+                transform: scale(1.05);
+            }
+            .product-thumbnail.active {
+                border-color: #78350f;
+            }
+            .tab-button {
+                transition: all 0.3s ease;
+            }
+            .tab-button.active {
+                background-color: #78350f;
+                color: white;
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+<th:block th:fragment="main">
+    <!-- Nội dung trang chính -->
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- Product Detail Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+            <!-- Product Images -->
+            <div class="space-y-4">
+                <!-- Main Image -->
+                <div class="bg-white rounded-lg shadow-lg p-4">
+                    <img
+                            id="mainImage"
+                            src="/placeholder.svg?height=400&width=400"
+                            alt="Cupcake Trung Thu"
+                            class="w-full h-auto rounded-lg"
+                    />
+                </div>
+            </div>
+
+            <!-- Product Info -->
+            <div class="bg-white rounded-lg shadow-lg p-8">
+                <h1 class="text-3xl font-bold text-gray-800 mb-4 uppercase" th:text="${productDetail.name}"></h1>
+
+                <!-- Price -->
+                <p class="mb-3 text-lg">
+                    Giá:
+                    <span id="displayPrice" class="font-bold text-amber-900">
+        0₫
+    </span>
+                </p>
+                <div class="product-variants">
+                    <div th:each="variant : ${productDetail.variants}">
+                        <button type="button"
+                                class="btn-variant"
+                                th:text="${variant.weight} + 'gram'"
+                                th:data-variant-id="${variant.variantId}"
+                                th:data-price="${variant.price}"
+                                onclick="selectVariant(this)">
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quantity Selector -->
+                <div class="mb-6">
+                    <label class="text-gray-700 font-medium mb-2 block">Số lượng:</label>
+                    <div class="flex items-center gap-3">
+                        <button type="button" onclick="decreaseQuantity()" class="w-10 h-10 flex items-center justify-center border-2 border-gray-300 rounded hover:bg-gray-100 transition">
+                            <span class="text-xl">−</span>
+                        </button>
+                        <input type="number" id="quantity" value="1" min="1" class="w-16 h-10 text-center border-2 border-gray-300 rounded focus:outline-none focus:border-amber-900"/>
+                        <button type="button" onclick="increaseQuantity()" class="w-10 h-10 flex items-center justify-center border-2 border-gray-300 rounded hover:bg-gray-100 transition">
+                            <span class="text-xl">+</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="product-actions">
+                    <form id="buyNowForm" th:action="@{/products/buy-now}" method="post" style="flex: 1;">
+                        <input type="hidden" name="variantId" id="buyNowVariantId" />
+                        <input type="hidden" name="quantity" id="buyNowQuantity" value="1"/>
+                        <button type="submit" class="view-details" style="width: 100%;">MUA NGAY</button>
+                    </form>
+                    <form id="addToCartForm" th:action="@{'/products/' + ${productDetail.productId} + '/add'}" method="get">
+                        <input type="hidden" name="variantId" id="selectedVariantId" />
+                        <input type="hidden" name="quantity" id="selectedQuantity" value="1"/>
+                        <button type="submit" class="add-to-cart">THÊM VÀO GIỎ</button>
+                    </form>
+                </div>
+
+                <!-- Stock Status -->
+                <!--                <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">-->
+                <!--                    <p class="text-red-600 font-medium">Tạm hết hàng</p>-->
+                <!--                </div>-->
+            </div>
+        </div>
+
+        <!-- Tabs Section -->
+        <div class="bg-white rounded-lg shadow-lg mb-16">
+            <div class="flex border-b">
+                <button
+                        class="tab-button active px-8 py-4 font-bold text-sm uppercase tracking-wide"
+                        onclick="switchTab('description')"
+                        id="descTab"
+                >
+                    Mô tả chung
+                </button>
+                <button
+                        class="tab-button px-8 py-4 font-medium text-sm uppercase tracking-wide bg-gray-100 text-gray-700"
+                        onclick="switchTab('comments')"
+                        id="commentsTab"
+                >
+                    Bình luận
+                </button>
+            </div>
+
+            <div class="p-8">
+                <div id="descriptionContent" class="tab-content">
+                    <p class="text-gray-600" th:utext="${productDetail.description}"></p>
+                </div>
+                <div id="commentsContent" class="tab-content hidden">
+                    <p class="text-gray-600">Chưa có bình luận nào</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Products Section -->
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold mb-2" style="color: #a3b18a;">CÓ THỂ BẠN THÍCH</h2>
+            <p class="text-gray-700 font-medium uppercase tracking-wide">Sản phẩm cùng loại</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div th:each="product : ${products}" class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition">
+                <div class="p-4">
+                    <img th:src="${product.imgUrl}"
+                         class="w-full h-64 object-cover rounded-lg mb-4"/>
+                </div>
+                <div class="px-4 pb-4">
+                    <h3 class="text-center font-bold text-gray-800 mb-2 uppercase text-sm" th:text="${product.name}"></h3>
+                    <p class="text-center text-gray-500 text-xs mb-3" th:text="${product.shortDescription}"></p>
+                    <div class="flex gap-2">
+                        <!--                        <button class="flex-1 bg-[#a3b18a] text-white py-2 px-4 rounded font-bold text-sm hover:bg-[#8a9a75] transition"-->
+                        <!--                                th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'POINT')} + '₫'">-->
+                        <!--                        </button>-->
+                        <button class="w-10 h-10 bg-[#78350f] text-white rounded flex items-center justify-center hover:bg-[#5a2709] transition">
+                            🛒
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</th:block>
+
+<th:block th:fragment="extraScripts">
+    <script>
+        let selectedVariantId = null;
+        let selectedPrice = 0;
+
+        function formatPrice(price) {
+            return price.toLocaleString('vi-VN') + '₫';
+        }
+
+        function selectVariant(button) {
+            // Lấy variantId và giá từ thuộc tính data
+            selectedVariantId = button.getAttribute('data-variant-id');
+            selectedPrice = parseFloat(button.getAttribute('data-price'));
+
+            // Bỏ active cũ, thêm active mới
+            document.querySelectorAll('.btn-variant').forEach(b => b.classList.remove('active'));
+            button.classList.add('active');
+
+            updateDisplayedPrice();
+        }
+
+        function increaseQuantity() {
+            const input = document.getElementById('quantity');
+            input.value = parseInt(input.value) + 1;
+            updateQuantityInput(input.value);
+            updateDisplayedPrice();
+        }
+
+        function decreaseQuantity() {
+            const input = document.getElementById('quantity');
+            if (parseInt(input.value) > 1) {
+                input.value = parseInt(input.value) - 1;
+                updateQuantityInput(input.value);
+                updateDisplayedPrice();
+            }
+        }
+
+        function updateQuantityInput(value) {
+            document.getElementById('selectedQuantity').value = value;
+            document.getElementById('buyNowQuantity').value = value;
+        }
+
+        function updateDisplayedPrice() {
+            const qty = parseInt(document.getElementById('quantity').value);
+            const total = selectedPrice * qty;
+            document.getElementById('displayPrice').innerText = formatPrice(total);
+        }
+
+        // Khi submit form thêm vào giỏ hàng
+        document.getElementById('addToCartForm').addEventListener('submit', function(e) {
+            if (!selectedVariantId) {
+                e.preventDefault();
+                alert("Vui lòng chọn 1 biến thể trước khi thêm vào giỏ hàng.");
+                return;
+            }
+            document.getElementById('selectedVariantId').value = selectedVariantId;
+
+            const productId = /*[[${productDetail.productId}]]*/ '1';
+            this.action = `/products/${productId}/add/${selectedVariantId}`;
+        });
+
+        // Khi submit form mua ngay
+        document.getElementById('buyNowForm').addEventListener('submit', function(e) {
+            if (!selectedVariantId) {
+                e.preventDefault();
+                alert("Vui lòng chọn 1 biến thể trước khi mua.");
+                return;
+            }
+            document.getElementById('buyNowVariantId').value = selectedVariantId;
+        });
+    </script>
+
+
+</th:block>
+</body>
+</html>

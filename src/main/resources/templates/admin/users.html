@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout-admin :: layout(~{::main}, 'Trang chủ - Bakery', ~{::extraHead}, ~{::extraScripts})}">
+<head>
+    <!-- Tiêu đề này sẽ không được sử dụng, vì nó được truyền trực tiếp trong th:replace -->
+    <title>Admin Dashboard - Bakery</title>
+    <th:block th:fragment="extraHead">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <style>
+
+            .modal { display: none; /* mặc định ẩn */ }
+            .modal.show { display: block; } /* hiện khi có lỗi */
+
+            /* Include admin styles from dashboard.html */
+            .admin-header {
+                background: #2c3e50;
+                color: white;
+                padding: 15px 0;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 1000;
+            }
+
+            .admin-container {
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 0 20px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .admin-logo {
+                display: flex;
+                align-items: center;
+                font-size: 20px;
+                font-weight: bold;
+            }
+
+            .admin-logo img {
+                margin-right: 10px;
+            }
+
+            .admin-user {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .logout-btn {
+                background: #e74c3c;
+                color: white;
+                padding: 8px 15px;
+                border-radius: 5px;
+                text-decoration: none;
+                font-size: 14px;
+            }
+
+            .admin-layout {
+                display: flex;
+                margin-top: 70px;
+                min-height: calc(100vh - 70px);
+            }
+
+            .admin-sidebar {
+                width: 250px;
+                background: #34495e;
+                color: white;
+                position: fixed;
+                height: calc(100vh - 70px);
+                overflow-y: auto;
+            }
+
+            .admin-nav ul {
+                list-style: none;
+                padding: 20px 0;
+            }
+
+            .admin-nav li {
+                margin-bottom: 5px;
+            }
+
+            .admin-nav a {
+                display: block;
+                color: white;
+                text-decoration: none;
+                padding: 12px 20px;
+                transition: background 0.3s;
+            }
+
+            .admin-nav a:hover,
+            .admin-nav a.active {
+                background: #2c3e50;
+            }
+
+            .admin-main {
+                flex: 1;
+                margin-left: 250px;
+                background: #f8f9fa;
+            }
+
+            .admin-content {
+                padding: 30px;
+            }
+
+            .page-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 30px;
+            }
+
+            .page-header h1 {
+                font-size: 32px;
+                color: #2c3e50;
+            }
+
+            .btn-primary {
+                background: #3498db;
+                color: white;
+                border: none;
+                padding: 12px 20px;
+                border-radius: 5px;
+                cursor: pointer;
+                font-weight: bold;
+            }
+
+            .btn-secondary {
+                background: #95a5a6;
+                color: white;
+                border: none;
+                padding: 10px 15px;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+
+            .btn-danger {
+                background: #e74c3c;
+                color: #fff;
+                border: none;
+                padding: 10px 15px;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+
+            .btn-success {
+                background: #27ae60;
+                color: #fff;
+                border: none;
+                padding: 10px 15px;
+                border-radius: 5px;
+                cursor: pointer;
+                margin-top: 25px;
+            }
+
+
+            .filters {
+                background: white;
+                padding: 20px;
+                border-radius: 10px;
+                margin-bottom: 20px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .filter-group {
+                display: flex;
+                gap: 15px;
+                align-items: center;
+            }
+
+            .filter-select,
+            .search-input {
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+            }
+
+            .search-input {
+                flex: 1;
+                max-width: 300px;
+            }
+
+            .table-card {
+                background: white;
+                border-radius: 10px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+                margin-bottom: 20px;
+            }
+
+            .table-container {
+                overflow-x: auto;
+            }
+
+            .admin-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            .admin-table th,
+            .admin-table td {
+                padding: 15px;
+                text-align: left;
+                border-bottom: 1px solid #eee;
+            }
+
+            .admin-table th {
+                background: #f8f9fa;
+                font-weight: bold;
+                color: #2c3e50;
+            }
+
+            .product-image-container {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 60px;
+                height: 60px;
+            }
+
+            .product-thumb {
+                width: 60px;
+                height: 60px;
+                border-radius: 8px;
+                object-fit: cover;
+            }
+
+            .product-placeholder {
+                width: 60px;
+                height: 60px;
+                border: 2px dashed #ddd;
+                border-radius: 8px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                background: #f8f9fa;
+                color: #6c757d;
+            }
+
+            .product-placeholder span {
+                font-size: 20px;
+                margin-bottom: 2px;
+            }
+
+            .product-placeholder small {
+                font-size: 10px;
+            }
+
+            .product-name h4 {
+                color: #2c3e50;
+                margin-bottom: 5px;
+            }
+
+            .product-name p {
+                color: #7f8c8d;
+                font-size: 14px;
+            }
+
+            .category-tag {
+                padding: 4px 8px;
+                border-radius: 12px;
+                font-size: 12px;
+                font-weight: bold;
+            }
+
+            .category-tag.mooncake {
+                background: #fff3cd;
+                color: #856404;
+            }
+
+            .category-tag.cake {
+                background: #f8d7da;
+                color: #721c24;
+            }
+
+            .category-tag.petit {
+                background: #d1ecf1;
+                color: #0c5460;
+            }
+
+            .variants-table-container {
+                max-width: 250px;
+            }
+
+            .variants-table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 12px;
+                margin: 0;
+            }
+
+            .variants-table th,
+            .variants-table td {
+                padding: 4px 6px;
+                text-align: left;
+                border-bottom: 1px solid #e9ecef;
+                font-size: 11px;
+            }
+
+            .variants-table th {
+                background: #f8f9fa;
+                font-weight: 600;
+                color: #495057;
+                font-size: 10px;
+                text-transform: uppercase;
+            }
+
+            .variants-table tbody tr:hover {
+                background: #f8f9fa;
+            }
+
+            .variants-table td:first-child {
+                font-weight: 600;
+                color: #2c3e50;
+            }
+
+            .variants-table td:nth-child(2) {
+                color: #28a745;
+                font-weight: 500;
+            }
+
+            .variants-table td:nth-child(3) {
+                color: #007bff;
+                font-weight: 500;
+            }
+
+            .no-variants {
+                font-size: 12px;
+                color: #6c757d;
+                font-style: italic;
+            }
+
+            .stock-info {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .stock-number {
+                font-size: 18px;
+                font-weight: bold;
+                color: #2c3e50;
+            }
+
+            .stock-status {
+                font-size: 12px;
+                padding: 2px 6px;
+                border-radius: 8px;
+            }
+
+            .stock-status.good {
+                background: #d4edda;
+                color: #155724;
+            }
+
+            .stock-status.low {
+                background: #fff3cd;
+                color: #856404;
+            }
+
+            .stock-status.out {
+                background: #f8d7da;
+                color: #721c24;
+            }
+
+            .status {
+                padding: 4px 8px;
+                border-radius: 12px;
+                font-size: 12px;
+                font-weight: bold;
+            }
+
+            .status.active {
+                background: #d4edda;
+                color: #155724;
+            }
+
+            .status.inactive {
+                background: #f8d7da;
+                color: #721c24;
+            }
+
+            .action-buttons {
+                display: flex;
+                gap: 5px;
+            }
+
+            .btn-edit,
+            .btn-view,
+            .btn-delete {
+                background: none;
+                border: none;
+                padding: 8px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 16px;
+            }
+
+            .btn-edit {
+                background: #fff3cd;
+            }
+
+            .btn-view {
+                background: #d1ecf1;
+            }
+
+            .btn-delete {
+                background: #f8d7da;
+            }
+
+            .pagination {
+                display: flex;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .page-btn {
+                background: white;
+                border: 1px solid #ddd;
+                padding: 8px 12px;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+
+            .page-btn.active {
+                background: #3498db;
+                color: white;
+                border-color: #3498db;
+            }
+
+            /* Modal Styles */
+            .modal {
+                display: none;
+                position: fixed;
+                z-index: 2000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+            }
+
+            .modal-content {
+                background-color: white;
+                margin: 5% auto;
+                padding: 0;
+                border-radius: 10px;
+                width: 80%;
+                max-width: 800px;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+
+            .modal-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 20px;
+                border-bottom: 1px solid #eee;
+            }
+
+            .close {
+                font-size: 28px;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+            .product-form {
+                padding: 20px;
+            }
+
+            .form-row {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 30px;
+                margin-bottom: 35px;
+            }
+
+            .form-group {
+                margin-bottom: 30px;
+            }
+
+            .form-group label {
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 600;
+                color: #2c3e50;
+                font-size: 14px;
+            }
+
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                width: 100%;
+                padding: 12px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                font-size: 14px;
+                transition: border-color 0.3s ease;
+            }
+
+            .form-group select {
+                appearance: none;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+                background-repeat: no-repeat;
+                background-position: right 12px center;
+                background-size: 16px;
+                padding-right: 40px;
+            }
+
+            .variant-item .form-group input,
+            .variant-item .form-group select,
+            .variant-item .form-group textarea {
+                border: none;
+                background: transparent;
+                border-bottom: 1px solid #ddd;
+                border-radius: 0;
+                padding-left: 0;
+                padding-right: 0;
+            }
+
+            .form-group input:focus,
+            .form-group select:focus,
+            .form-group textarea:focus {
+                outline: none;
+                border-color: #3498db;
+                box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+            }
+
+            .error-message {
+                color: #dc3545;
+                font-size: 12px;
+                margin-top: 4px;
+                display: block;
+            }
+
+            .form-group input.error,
+            .form-group select.error,
+            .form-group textarea.error {
+                border-color: #dc3545;
+            }
+
+            .variants-section {
+                border: none;
+                border-radius: 0;
+                padding: 0;
+                margin: 35px 0;
+                background: transparent;
+            }
+
+            .variant-item {
+                margin-bottom: 30px;
+                padding: 25px;
+                border: 1px solid #ddd;
+                border-radius: 10px;
+                background: white;
+            }
+
+            .variant-item:last-of-type {
+                margin-bottom: 0;
+            }
+
+            .variants-section h3 {
+                color: #2c3e50;
+                margin-bottom: 15px;
+            }
+
+            .form-actions {
+                display: flex;
+                justify-content: flex-end;
+                gap: 15px;
+                padding-top: 20px;
+                border-top: 1px solid #eee;
+            }
+
+            /* remove button row spans all columns and right-align */
+            .variant-item .remove-container {
+                grid-column: 1 / -1;
+                display: flex;
+                justify-content: flex-end;
+                align-items: center;
+            }
+
+            @media (max-width: 768px) {
+                .admin-sidebar {
+                    transform: translateX(-100%);
+                }
+
+                .admin-main {
+                    margin-left: 0;
+                }
+
+                .filter-group {
+                    flex-direction: column;
+                    align-items: stretch;
+                }
+
+                .form-row {
+                    grid-template-columns: 1fr;
+                }
+
+                .modal-content {
+                    width: 95%;
+                    margin: 2% auto;
+                }
+            }
+
+
+            /*style modal*/
+
+
+        </style>
+    </th:block>
+</head>
+<body>
+<!-- Hero Section -->
+<!-- Main Content -->
+<!-- Main Content -->
+<main class="admin-main">
+    <div class="admin-content">
+        <div class="page-header">
+            <h1>Quản lý người dùng</h1>
+            <button class="btn-primary" onclick="showAddUserModal()">+ Thêm người dùng mới</button>
+        </div>
+
+        <!-- Thông báo -->
+        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+        <!-- Bộ lọc & tìm kiếm -->
+        <div class="filters">
+
+            <form method="get" th:action="@{/admin/user}">
+                <select name="roleId" class="filter-select" onchange="submitSearchForm()">
+                    <option value="">Tất cả vai trò</option>
+                    <option th:each="role : ${roles}"
+                            th:value="${role.id}"
+                            th:text="${role.name}"
+                            th:selected="${param.role != null && param.role[0] == role.name}">
+                    </option>
+                </select>
+                <div class="filter-group">
+                    <input type="text" name="search"
+                           placeholder="Tìm theo tên người dùng..."
+                           th:value="${search}" class="search-input">
+                    <button type="submit" class="btn-secondary">Tìm kiếm</button>
+                    <a th:href="@{/admin/user}" class="btn-secondary" style="background:#6c757d;">Xóa bộ lọc</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Bảng người dùng -->
+        <div class="table-card">
+            <div class="table-container">
+                <table class="admin-table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên</th>
+                        <th>Email</th>
+                        <th>Số điện thoại</th>
+                        <th>Vai trò</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="u : ${users}">
+                        <td th:text="${u.id}">1</td>
+                        <td th:text="${u.name}">Tên</td>
+                        <td th:text="${u.email}">email@example.com</td>
+                        <td th:text="${u.phone != null ? u.phone : '—'}">SĐT</td>
+                        <td th:text="${u.role != null ? u.role.name : '—'}">Vai trò</td>
+                        <td>
+                            <span th:classappend="${u.status} ? 'status active' : 'status inactive'"
+                                  th:text="${u.status} ? 'Hoạt động' : 'Bị khóa'"></span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button type="button"
+                                        class="btn btn-warning btn-sm"
+                                        th:data-id="${u.id}"
+                                        th:data-fullname="${u.name}"
+                                        th:data-email="${u.email}"
+                                        th:data-phone="${u.phone}"
+                                        th:data-roleid="${u.role != null ? u.role.id : ''}"
+                                        onclick="openUpdateModalFromButton(this)">
+                                    ✏️
+                                </button>
+
+
+
+
+                                <button class="btn-delete"
+                                        th:data-id="${u.id}"
+                                        th:data-name="${u.name}"
+                                        onclick="deleteUser(this.dataset.id, this.dataset.name)">🗑️</button>
+
+                                <!-- ✅ Nút bật/tắt trạng thái -->
+                                <button class="btn-status"
+                                        th:data-id="${u.id}"
+                                        th:data-status="${u.status}"
+                                        th:data-name="${u.name}"
+                                        th:text="${u.status} ? '🚫 Suspend' : '✅ Activate'"
+                                        onclick="toggleStatus(this)">
+                                </button>
+                            </div>
+
+
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Nếu không có người dùng -->
+        <div th:if="${users == null or #lists.isEmpty(users)}"
+             style="text-align: center; padding: 40px; color: #6c757d;">
+            <div style="font-size: 48px; margin-bottom: 16px;">👤</div>
+            <h3>Không tìm thấy người dùng nào</h3>
+            <p>Hãy thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+        </div>
+
+        <!-- Phân trang -->
+        <div class="pagination" th:if="${totalPages > 1}">
+            <a th:if="${currentPage > 0}"
+               th:href="@{'/admin/user'(page=${currentPage - 1}, size=${10}, search=${search})}"
+               class="page-btn">« Trước</a>
+
+            <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                <a th:href="@{'/admin/user'(page=${i}, size=${10}, search=${search})}"
+                   th:text="${i + 1}"
+                   th:classappend="${i} == ${currentPage} ? ' active' : ''"
+                   class="page-btn"></a>
+            </span>
+
+            <a th:if="${currentPage + 1 < totalPages}"
+               th:href="@{'/admin/user'(page=${currentPage + 1}, size=${10}, search=${search})}"
+               class="page-btn">Sau »</a>
+        </div>
+    </div>
+
+    <!-- Modal thêm người dùng -->
+    <div id="addUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Thêm người dùng mới</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <form th:action="@{/admin/user/create}" method="post" th:object="${adminCreateUserRequest}" class="product-form">
+                <!-- Họ tên -->
+                <div class="form-group">
+                    <label for="fullName">Họ tên</label>
+                    <input type="text" th:field="*{fullName}" id="fullName" placeholder="Nhập họ tên">
+                    <div class="error-message" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></div>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" th:field="*{email}" id="email" placeholder="Nhập email">
+                    <div class="error-message" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                </div>
+
+                <!-- Mật khẩu -->
+                <div class="form-group">
+                    <label for="password">Mật khẩu</label>
+                    <input type="password" th:field="*{password}" id="password" placeholder="Nhập mật khẩu">
+                    <div class="error-message" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                </div>
+
+                <!-- Số điện thoại -->
+                <div class="form-group">
+                    <label for="phone">Số điện thoại</label>
+                    <input type="text" th:field="*{phone}" id="phone" placeholder="Nhập số điện thoại (nếu có)">
+                </div>
+
+                <!-- Vai trò -->
+                <div class="form-group">
+                    <label for="roleId">Vai trò</label>
+                    <select th:field="*{roleId}" id="roleId">
+                        <option value="">-- Chọn vai trò --</option>
+                        <option th:each="role : ${roles}" th:value="${role.id}" th:text="${role.name}"></option>
+                    </select>
+                    <div class="error-message" th:if="${#fields.hasErrors('roleId')}" th:errors="*{roleId}"></div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal()">Đóng</button>
+                    <button type="submit" class="btn-primary">Thêm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+
+
+
+    <div id="updateUserModal" class="modal" th:classappend="${showUpdateModal} ? ' show' : ''">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Cập nhật người dùng</h2>
+                <span class="close" onclick="closeUpdateModal()">&times;</span>
+            </div>
+            <form th:action="@{/admin/user/update}" method="post" th:object="${adminUpdateUserRequest}" class="product-form">
+                <!-- ID (ẩn) -->
+                <input type="hidden" th:field="*{id}" name="id"/>
+
+                <!-- Họ tên -->
+                <div class="form-group">
+                    <label for="updateFullName">Họ tên</label>
+                    <input type="text" th:field="*{fullName}" id="updateFullName" placeholder="Nhập họ tên">
+                    <div class="error-message" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></div>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label for="updateEmail">Email</label>
+                    <input type="email" th:field="*{email}" id="updateEmail" placeholder="Nhập email">
+                    <div class="error-message" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                </div>
+
+                <!-- Mật khẩu -->
+                <div class="form-group">
+                    <label for="updatePassword">Mật khẩu (để trống nếu không đổi)</label>
+                    <input type="password" th:field="*{password}" id="updatePassword" placeholder="Nhập mật khẩu mới">
+                    <div class="error-message" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                </div>
+
+                <!-- Số điện thoại -->
+                <div class="form-group">
+                    <label for="updatePhone">Số điện thoại</label>
+                    <input type="text" th:field="*{phone}" id="updatePhone" placeholder="Nhập số điện thoại (nếu có)">
+                </div>
+
+                <!-- Vai trò -->
+                <div class="form-group">
+                    <label for="updateRoleId">Vai trò</label>
+                    <select th:field="*{roleId}" id="updateRoleId">
+                        <option value="">-- Chọn vai trò --</option>
+                        <option th:each="role : ${roles}" th:value="${role.id}" th:text="${role.name}"></option>
+                    </select>
+                    <div class="error-message" th:if="${#fields.hasErrors('roleId')}" th:errors="*{roleId}"></div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeUpdateModal()">Hủy</button>
+                    <button type="submit" class="btn-primary">Cập nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div th:if="${param.successUpdate}" class="alert alert-success">
+        Cập nhật người dùng thành công!
+    </div>
+
+
+
+</main>
+
+
+
+
+
+
+
+<th:block th:fragment="extraScripts">
+    <script>
+        function toggleStatus(button) {
+            const userId = button.dataset.id;
+            const userName = button.dataset.name;
+            const isActive = button.dataset.status === "true";
+
+            Swal.fire({
+                title: isActive ? "Xác nhận khóa tài khoản?" : "Kích hoạt lại người dùng?",
+                text: `${isActive ? "Người dùng này sẽ bị khóa và không thể đăng nhập." : "Người dùng sẽ được kích hoạt trở lại."}`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: isActive ? "#e74c3c" : "#27ae60",
+                cancelButtonColor: "#95a5a6",
+                confirmButtonText: isActive ? "Khóa ngay" : "Kích hoạt",
+                cancelButtonText: "Hủy"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/admin/user/toggleStatus?id=${userId}`, {
+                        method: "POST"
+                    }).then(() => {
+                        Swal.fire({
+                            icon: "success",
+                            title: isActive ? "Đã khóa người dùng!" : "Đã kích hoạt người dùng!",
+                            showConfirmButton: false,
+                            timer: 1500
+                        }).then(() => {
+                            location.reload();
+                        });
+                    }).catch(() => {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Lỗi",
+                            text: "Không thể thay đổi trạng thái người dùng.",
+                        });
+                    });
+                }
+            });
+        }
+
+
+        // xóa
+        function deleteUser(userId, userName) {
+            Swal.fire({
+                title: "Xác nhận xóa?",
+                text: `Bạn có chắc muốn xóa người dùng "${userName}"?`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Xóa",
+                cancelButtonText: "Hủy",
+                confirmButtonColor: "#e74c3c",
+                cancelButtonColor: "#6c757d"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/admin/user/delete/${userId}`, {
+                        method: "POST"
+                    })
+                        .then(res => {
+                            if (res.ok) {
+                                Swal.fire({
+                                    icon: "success",
+                                    title: "Đã xóa!",
+                                    text: `Người dùng "${userName}" đã được xóa.`,
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                }).then(() => location.reload());
+                            } else {
+                                Swal.fire({
+                                    icon: "error",
+                                    title: "Lỗi!",
+                                    text: "Không thể xóa người dùng. Hãy thử lại.",
+                                });
+                            }
+                        })
+                        .catch(() => {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Lỗi hệ thống!",
+                                text: "Đã xảy ra lỗi khi gửi yêu cầu xóa.",
+                            });
+                        });
+                }
+            });
+        }
+
+
+        // Hiển thị modal thêm người dùng
+        function showAddUserModal() {
+            document.getElementById('addUserModal').style.display = 'block';
+        }
+
+        // Đóng modal thêm người dùng
+        function closeAddUserModal() {
+            document.getElementById('addUserModal').style.display = 'none';
+        }
+
+        // Đóng modal khi click ra ngoài
+        window.onclick = function (event) {
+            const modal = document.getElementById('addUserModal');
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        // Nếu muốn, submit form lọc tự động khi chọn vai trò
+        function submitSearchForm() {
+            document.querySelector('.filters form').submit();
+        }
+
+        // Hàm edit user (nếu bạn dùng cùng modal để edit)
+        function editUser(button) {
+            const userId = button.dataset.id;
+            const userName = button.dataset.name;
+            const userEmail = button.dataset.email;
+            const userPhone = button.dataset.phone;
+            const userRole = button.dataset.role;
+
+            // Ví dụ: fill dữ liệu vào modal (nếu bạn muốn dùng lại modal addUserModal)
+            showAddUserModal();
+            document.getElementById('fullName').value = userName;
+            document.getElementById('email').value = userEmail;
+            document.getElementById('phone').value = userPhone || '';
+            document.getElementById('roleName').value = userRole || '';
+            // Nếu muốn: ẩn/hiện nút submit, hoặc đổi text nút "Tạo người dùng" thành "Cập nhật"
+        }
+
+
+        // Mở modal update user và điền dữ liệu
+        function openUpdateModalFromButton(button) {
+            const userId = button.dataset.id;
+            const fullName = button.dataset.fullname;
+            const email = button.dataset.email;
+            const phone = button.dataset.phone || '';
+            const roleId = button.dataset.roleid || '';
+
+            const modal = document.getElementById('updateUserModal');
+            modal.style.display = 'block';
+
+            modal.querySelector('#updateFullName').value = fullName;
+            modal.querySelector('#updateEmail').value = email;
+            modal.querySelector('#updatePhone').value = phone;
+            modal.querySelector('#updateRoleId').value = roleId;
+            modal.querySelector('input[name="id"]').value = userId;
+        }
+
+
+        // Đóng modal update user
+        function closeUpdateModal() {
+            document.getElementById('updateUserModal').style.display = 'none';
+        }
+
+        // Đóng modal khi click ra ngoài
+        window.onclick = function(event) {
+            const addModal = document.getElementById('addUserModal');
+            const updateModal = document.getElementById('updateUserModal');
+            if (event.target === addModal) {
+                addModal.style.display = "none";
+            } else if (event.target === updateModal) {
+                updateModal.style.display = "none";
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const modal = document.getElementById('updateUserModal');
+            if(modal.classList.contains('show')) {
+                modal.style.display = 'block';
+            }
+        });
+
+
+
+
+    </script>
+</th:block>
+
+</body>
+</html>
