@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -24,4 +25,7 @@ public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> 
     Page<CategoryEntity> searchCategories(@Param("keyword") String keyword, Pageable pageable);
 
     Page<CategoryEntity> findByActive(Boolean active, Pageable pageable);
+
+    @Query("SELECT c FROM CategoryEntity c WHERE c.active = true")
+    List<CategoryEntity> getAllActivated();
 }

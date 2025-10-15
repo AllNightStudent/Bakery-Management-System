@@ -29,6 +29,14 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     // Find products by IDs
     @Query("SELECT p FROM ProductEntity p WHERE p.productId IN :ids")
     Page<ProductEntity> findProductsByIds(@Param("ids") List<Long> ids, Pageable pageable);
+
+    //find all with variant
+    @Query("SELECT DISTINCT p FROM ProductEntity p LEFT JOIN FETCH p.variants")
+    List<ProductEntity> findAllWithVariants();
+
+    @Query("SELECT DISTINCT p FROM ProductEntity p LEFT JOIN FETCH p.variants WHERE p.productId = :id")
+    ProductEntity findAllWithVariantsById(@Param("id") Long id);
+
 }
 
 

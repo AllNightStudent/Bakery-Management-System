@@ -111,4 +111,8 @@ public class CategoryService {
                 .createdAt(entity.getCreatedAt())
                 .build();
     }
+
+    public List<CategoryEntity> getAllCategoriesActivated() {
+        return categoryRepository.getAllActivated();
+    }
 }
