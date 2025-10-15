@@ -229,7 +229,7 @@
                 border: 2px dashed #ddd;
                 border-radius: 8px;
                 display: flex;products
-                flex-direction: column;
+            flex-direction: column;
                 align-items: center;
                 justify-content: center;
                 background: #f8f9fa;
@@ -621,7 +621,7 @@
         <div th:if="${successMessage}" style="margin-bottom: 16px; padding: 12px; background:#d4edda; color:#155724; border-radius:6px;">
             <span th:text="${successMessage}"></span>
         </div>
-        
+
         <div th:if="${errorMessage}" style="margin-bottom: 16px; padding: 12px; background:#f8d7da; color:#721c24; border-radius:6px;">
             <span th:text="${errorMessage}"></span>
         </div>
@@ -629,24 +629,24 @@
         <!-- Filters -->
         <div class="filters">
             <form method="get" action="/admin/products" id="searchForm">
-            <div class="filter-group">
+                <div class="filter-group">
                     <select name="category" class="filter-select" onchange="submitSearchForm()">
-                    <option value="">Tất cả danh mục</option>
-                        <option th:each="cat : ${categories}" 
+                        <option value="">Tất cả danh mục</option>
+                        <option th:each="cat : ${categories}"
                                 th:value="${cat.name}"
                                 th:text="${cat.name}"
                                 th:selected="${param.category != null && param.category[0] == cat.name}">
                         </option>
-                </select>
-                    <input type="text" 
-                           name="search" 
-                           placeholder="Tìm kiếm sản phẩm, SKU..." 
+                    </select>
+                    <input type="text"
+                           name="search"
+                           placeholder="Tìm kiếm sản phẩm, SKU..."
                            class="search-input"
                            th:value="${param.search != null ? param.search[0] : ''}"
                            onkeypress="if(event.key==='Enter') submitSearchForm()">
                     <button type="submit" class="btn-secondary">Tìm kiếm</button>
                     <button type="button" class="btn-secondary" onclick="clearSearch()" style="background: #6c757d;">Xóa bộ lọc</button>
-            </div>
+                </div>
             </form>
         </div>
 
@@ -670,13 +670,13 @@
                     <tr th:each="p : ${productPage}">
                         <td>
                             <div class="product-image-container">
-                                <img th:if="${p.imgUrl != null and !#strings.isEmpty(p.imgUrl)}" 
+                                <img th:if="${p.imgUrl != null and !#strings.isEmpty(p.imgUrl)}"
                                      th:src="${p.imgUrl}"
-                                     alt="Product" 
+                                     alt="Product"
                                      class="product-thumb"
                                      style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;"
                                      onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                <div class="product-placeholder" 
+                                <div class="product-placeholder"
                                      style="width: 60px; height: 60px; display: none; flex-direction: column; align-items: center; justify-content: center; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;"
                                      th:styleappend="${p.imgUrl == null or #strings.isEmpty(p.imgUrl)} ? ';display:flex' : ''">
                                     <span>📷</span>
@@ -696,33 +696,33 @@
                         </td>
                         <td>
                             <div class="variants-table-container">
-                                <table th:if="${variantsByProduct != null and variantsByProduct.containsKey(p.productId) and !variantsByProduct.get(p.productId).empty}" 
+                                <table th:if="${variantsByProduct != null and variantsByProduct.containsKey(p.productId) and !variantsByProduct.get(p.productId).empty}"
                                        class="variants-table">
                                     <thead>
-                                        <tr>
-                                            <th>SKU</th>
-                                            <th>Giá</th>
-                                            <th>SL</th>
-                                        </tr>
+                                    <tr>
+                                        <th>SKU</th>
+                                        <th>Giá</th>
+                                        <th>SL</th>
+                                    </tr>
                                     </thead>
                                     <tbody>
-                                        <tr th:each="variant : ${variantsByProduct.get(p.productId)}">
-                                            <td th:text="${variant.sku}">SKU</td>
-                                            <td th:text="${variant.price} + ' ₫'">Giá</td>
-                                            <td th:text="${variant.stock}">Tồn kho</td>
-                                        </tr>
+                                    <tr th:each="variant : ${variantsByProduct.get(p.productId)}">
+                                        <td th:text="${variant.sku}">SKU</td>
+                                        <td th:text="${variant.price} + ' ₫'">Giá</td>
+                                        <td th:text="${variant.stock}">Tồn kho</td>
+                                    </tr>
                                     </tbody>
                                 </table>
-                                <span th:if="${variantsByProduct == null or !variantsByProduct.containsKey(p.productId) or variantsByProduct.get(p.productId).empty}" 
+                                <span th:if="${variantsByProduct == null or !variantsByProduct.containsKey(p.productId) or variantsByProduct.get(p.productId).empty}"
                                       class="no-variants">Chưa có biến thể</span>
                             </div>
                         </td>
                         <td>
                             <span class="stock-info">
-                                <span class="stock-number" 
-                                      th:text="${variantsByProduct != null and variantsByProduct.containsKey(p.productId) and !variantsByProduct.get(p.productId).empty} ? 
+                                <span class="stock-number"
+                                      th:text="${variantsByProduct != null and variantsByProduct.containsKey(p.productId) and !variantsByProduct.get(p.productId).empty} ?
                                               ${#aggregates.sum(variantsByProduct.get(p.productId).![stock])} : 0">0</span>
-                                <span class="stock-status" 
+                                <span class="stock-status"
                                       th:classappend="${variantsByProduct != null and variantsByProduct.containsKey(p.productId) and !variantsByProduct.get(p.productId).empty and #aggregates.sum(variantsByProduct.get(p.productId).![stock]) > 0} ? 'good' : 'out'"
                                       th:text="${variantsByProduct != null and variantsByProduct.containsKey(p.productId) and !variantsByProduct.get(p.productId).empty and #aggregates.sum(variantsByProduct.get(p.productId).![stock]) > 0} ? 'Có hàng' : 'Hết hàng'">Trạng thái</span>
                             </span>
@@ -732,19 +732,19 @@
                         </td>
                         <td>
                             <div class="action-buttons">
-                                <button class="btn-view" 
-                                        th:data-product-id="${p.productId}" 
+                                <button class="btn-view"
+                                        th:data-product-id="${p.productId}"
                                         th:data-product-name="${p.name}"
                                         th:data-product-short-description="${p.shortDescription}"
                                         th:data-product-description="${p.description}"
                                         th:data-product-category-id="${p.categoryId.id}"
                                         th:data-product-img-url="${p.imgUrl}"
-                                        onclick="editProduct(this)" 
+                                        onclick="editProduct(this)"
                                         title="Chỉnh sửa">✏️</button>
-                                <button class="btn-delete" 
-                                        th:data-product-id="${p.productId}" 
+                                <button class="btn-delete"
+                                        th:data-product-id="${p.productId}"
                                         th:data-product-name="${p.name}"
-                                        onclick="deleteProduct(this.dataset.productId, this.dataset.productName)" 
+                                        onclick="deleteProduct(this.dataset.productId, this.dataset.productName)"
                                         title="Xóa">🗑️</button>
                             </div>
                         </td>
@@ -853,61 +853,61 @@
         </div>
     </div>
 
-<!-- Edit Product Modal -->
-<div id="editProductModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Chỉnh sửa sản phẩm</h2>
-            <span class="close" onclick="closeEditModal()">&times;</span>
-        </div>
-        <form class="product-form" id="editForm" method="post" enctype="multipart/form-data" action="" onsubmit="saveProduct(event)">
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Tên sản phẩm <span style="color: red;">*</span></label>
-                    <input type="text" id="editName" name="name" required>
-                    <div id="nameError" class="error-message" style="color: red; font-size: 12px; margin-top: 4px;"></div>
-                </div>
-                <div class="form-group">
-                    <label>Mô tả ngắn</label>
-                    <input type="text" id="editShortDescription" name="shortDescription">
-                </div>
+    <!-- Edit Product Modal -->
+    <div id="editProductModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Chỉnh sửa sản phẩm</h2>
+                <span class="close" onclick="closeEditModal()">&times;</span>
             </div>
-            <div class="form-group">
-                <label>Mô tả</label>
-                <textarea rows="3" id="editDescription" name="description"></textarea>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Danh mục <span style="color: red;">*</span></label>
-                    <select id="editCategoryId" name="categoryId" required>
-                        <option value="">Chọn danh mục</option>
-                        <option th:each="c : ${categories}"
-                                th:value="${c.id}"
-                                th:text="${c.name}"></option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Hình ảnh</label>
-                    <div class="image-preview">
-                        <img id="editImagePreview" src="" alt="Preview" style="max-width: 100px; max-height: 100px; display: none;">
-                        <input type="file" id="editImageFile" name="imageFile" accept="image/*">
+            <form class="product-form" id="editForm" method="post" enctype="multipart/form-data" action="" onsubmit="saveProduct(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tên sản phẩm <span style="color: red;">*</span></label>
+                        <input type="text" id="editName" name="name" required>
+                        <div id="nameError" class="error-message" style="color: red; font-size: 12px; margin-top: 4px;"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Mô tả ngắn</label>
+                        <input type="text" id="editShortDescription" name="shortDescription">
                     </div>
                 </div>
-            </div>
-            <div class="variants-section" id="editVariantsSection">
-                <h3>Biến thể sản phẩm</h3>
-                <div id="editVariantsContainer">
-                    <!-- Variants will be loaded here -->
+                <div class="form-group">
+                    <label>Mô tả</label>
+                    <textarea rows="3" id="editDescription" name="description"></textarea>
                 </div>
-                <button type="button" class="btn-success add-variant-btn" onclick="addEditVariantRow()">+ Thêm biến thể</button>
-            </div>
-            <div class="form-actions">
-                <button type="button" class="btn-secondary" onclick="closeEditModal()">Hủy</button>
-                <button type="submit" class="btn-primary">Lưu thay đổi</button>
-            </div>
-        </form>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Danh mục <span style="color: red;">*</span></label>
+                        <select id="editCategoryId" name="categoryId" required>
+                            <option value="">Chọn danh mục</option>
+                            <option th:each="c : ${categories}"
+                                    th:value="${c.id}"
+                                    th:text="${c.name}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Hình ảnh</label>
+                        <div class="image-preview">
+                            <img id="editImagePreview" src="" alt="Preview" style="max-width: 100px; max-height: 100px; display: none;">
+                            <input type="file" id="editImageFile" name="imageFile" accept="image/*">
+                        </div>
+                    </div>
+                </div>
+                <div class="variants-section" id="editVariantsSection">
+                    <h3>Biến thể sản phẩm</h3>
+                    <div id="editVariantsContainer">
+                        <!-- Variants will be loaded here -->
+                    </div>
+                    <button type="button" class="btn-success add-variant-btn" onclick="addEditVariantRow()">+ Thêm biến thể</button>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeEditModal()">Hủy</button>
+                    <button type="submit" class="btn-primary">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 
 </main>
 
@@ -1039,7 +1039,7 @@
         function validateProductName() {
             const nameInput = document.querySelector('input[name="name"]');
             const name = nameInput.value.trim();
-            
+
             if (name === '') return;
 
             // Check for duplicate product names (you can implement AJAX call here)
@@ -1049,7 +1049,7 @@
 
         function validateSKU(skuInput) {
             const sku = skuInput.value.trim();
-            
+
             if (sku === '') return;
 
             // Check for duplicate SKUs (you can implement AJAX call here)
@@ -1094,7 +1094,7 @@
             try {
                 // Clear previous errors
                 clearValidationErrors();
-                
+
                 // Get data from button's data attributes
                 const productId = button.getAttribute('data-product-id');
                 const productName = button.getAttribute('data-product-name') || '';
@@ -1102,24 +1102,24 @@
                 const description = button.getAttribute('data-product-description') || '';
                 const categoryId = button.getAttribute('data-product-category-id') || '';
                 const imgUrl = button.getAttribute('data-product-img-url') || '';
-                
+
                 // Populate form with product data
                 document.getElementById('editName').value = productName;
                 document.getElementById('editShortDescription').value = shortDescription;
                 document.getElementById('editDescription').value = description;
                 document.getElementById('editCategoryId').value = categoryId;
-                
+
                 // Handle image
                 const imagePreview = document.getElementById('editImagePreview');
                 console.log('Image URL from data attribute:', imgUrl);
-                
+
                 if (imgUrl && imgUrl.trim() !== '') {
                     // Ensure the image URL is properly formatted
                     let imageSrc = imgUrl;
                     if (!imageSrc.startsWith('/') && !imageSrc.startsWith('http')) {
                         imageSrc = '/' + imageSrc;
                     }
-                    
+
                     imagePreview.src = imageSrc;
                     imagePreview.style.display = 'block';
                     imagePreview.onerror = function() {
@@ -1131,23 +1131,23 @@
                     imagePreview.style.display = 'none';
                     console.log('No image URL provided');
                 }
-                
+
                 // Set current product ID and name
                 currentProductId = parseInt(productId);
                 currentProductName = productName;
-                
+
                 // Set form action
                 document.getElementById('editForm').action = `/admin/products/${currentProductId}/update`;
-                
+
                 // Clear variants container
                 document.getElementById('editVariantsContainer').innerHTML = '';
-                
+
                 // Load product variants via API (we still need this for variants)
                 loadProductVariants(currentProductId);
-                
+
                 // Show modal
                 document.getElementById('editProductModal').style.display = 'block';
-                
+
             } catch (error) {
                 console.error('Error loading product:', error);
                 Swal.fire({
@@ -1164,16 +1164,16 @@
                 console.log('Loading variants for product ID:', productId);
                 const response = await fetch(`/admin/products/${productId}/variants`);
                 console.log('Response status:', response.status);
-                
+
                 if (!response.ok) {
                     throw new Error('Không thể tải biến thể sản phẩm');
                 }
                 const variants = await response.json();
                 console.log('Loaded variants:', variants);
-                
+
                 const container = document.getElementById('editVariantsContainer');
                 container.innerHTML = '';
-                
+
                 if (variants && variants.length > 0) {
                     variants.forEach((variant, index) => {
                         console.log('Adding variant:', variant, 'at index:', index);
@@ -1183,7 +1183,7 @@
                 } else {
                     container.innerHTML = '<p style="color: #6c757d; font-style: italic;">Chưa có biến thể nào</p>';
                 }
-                
+
             } catch (error) {
                 console.error('Error loading variants:', error);
                 document.getElementById('editVariantsContainer').innerHTML = '<p style="color: #dc3545;">Lỗi tải biến thể: ' + error.message + '</p>';
@@ -1193,44 +1193,44 @@
         // Add variant row for edit modal (match Add modal UI)
         function addEditVariantRow(variant = null, index = null) {
             const container = document.getElementById('editVariantsContainer');
-            
+
             // If index is not provided, calculate it based on current variants
             if (index === null) {
                 const existingItems = container.querySelectorAll('.variant-item');
                 index = existingItems.length;
             }
-            
+
             const variantDiv = document.createElement('div');
             variantDiv.className = 'variant-item';
             variantDiv.setAttribute('data-index', index);
-            
+
             variantDiv.innerHTML = `
                 <div class="form-row">
                     <div class="form-group">
                         <label>SKU</label>
-                        <input type="text" name="variants[${index}].sku" placeholder="VD: LAK90" required 
+                        <input type="text" name="variants[${index}].sku" placeholder="VD: LAK90" required
                                value="${variant ? (variant.sku || '') : ''}">
                     </div>
                     <div class="form-group">
                         <label>Hạn sử dụng</label>
-                        <input type="date" name="variants[${index}].expiryDate" 
+                        <input type="date" name="variants[${index}].expiryDate"
                                value="${variant ? (variant.expiryDate || '') : ''}">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Trọng lượng (g)</label>
-                        <input type="number" min="0" name="variants[${index}].weight" required 
+                        <input type="number" min="0" name="variants[${index}].weight" required
                                value="${variant ? (variant.weight || '') : ''}">
                     </div>
                     <div class="form-group">
                         <label>Giá (₫)</label>
-                        <input type="number" step="0.01" min="0" name="variants[${index}].price" required 
+                        <input type="number" step="0.01" min="0" name="variants[${index}].price" required
                                value="${variant ? (variant.price || '') : ''}">
                     </div>
                     <div class="form-group">
                         <label>Tồn kho</label>
-                        <input type="number" min="0" name="variants[${index}].stock" required 
+                        <input type="number" min="0" name="variants[${index}].stock" required
                                value="${variant ? (variant.stock || '') : ''}">
                     </div>
                     <div class="remove-container">
@@ -1238,7 +1238,7 @@
                     </div>
                 </div>
             `;
-            
+
             container.appendChild(variantDiv);
             updateEditRemoveButtons();
         }
@@ -1248,15 +1248,15 @@
             const item = btn.closest('.variant-item');
             const container = document.getElementById('editVariantsContainer');
             const items = Array.from(container.querySelectorAll('.variant-item'));
-            
+
             if (items.length <= 1) {
                 // Always keep at least 1 row for easy binding
                 item.querySelectorAll('input').forEach(i => i.value = '');
                 return;
             }
-            
+
             item.remove();
-            
+
             // Re-index names to keep variants[0..n]
             const remaining = container.querySelectorAll('.variant-item');
             remaining.forEach((el, i) => {
@@ -1265,10 +1265,10 @@
                     input.name = input.name.replace(/variants\[\d+\]/, `variants[${i}]`);
                 });
             });
-            
+
             updateEditRemoveButtons();
         }
-        
+
         // Update remove buttons visibility (same logic as add modal)
         function updateEditRemoveButtons() {
             const container = document.getElementById('editVariantsContainer');
@@ -1300,7 +1300,7 @@
                 });
                 return false;
             }
-            
+
             // Validate category
             const category = document.getElementById('editCategoryId').value;
             if (category === '') {
@@ -1312,11 +1312,11 @@
                 });
                 return false;
             }
-            
+
             // Validate SKUs within the same product
             const skuInputs = document.querySelectorAll('#editVariantsContainer input[name*="variants"][name*="sku"]');
             const skuValues = new Set();
-            
+
             for (const input of skuInputs) {
                 const sku = input.value.trim();
                 if (sku) { // Only check non-empty SKUs
@@ -1332,20 +1332,20 @@
                     skuValues.add(sku);
                 }
             }
-            
+
             return true;
         }
 
         // Save product changes with validation
         function saveProduct(event) {
             if (!currentProductId) return;
-            
+
             const isValid = validateForm();
             if (!isValid) {
                 event.preventDefault();
                 return;
             }
-            
+
             // Show loading
             Swal.fire({
                 title: "Đang cập nhật...",
@@ -1355,7 +1355,7 @@
                     Swal.showLoading();
                 }
             });
-            
+
             // Form will submit normally, let it proceed
             return true;
         }
@@ -1377,7 +1377,7 @@
         function deleteProduct(productId, productName) {
             // Convert string to number for API call
             const productIdNum = parseInt(productId);
-            
+
             Swal.fire({
                 title: "Xác nhận xóa sản phẩm",
                 text: `Bạn có chắc chắn muốn xóa sản phẩm "${productName}"?`,
@@ -1399,37 +1399,37 @@
                             Swal.showLoading();
                         }
                     });
-                    
+
                     // Perform delete
                     const formData = new FormData();
                     fetch(`/admin/products/${productIdNum}/delete`, {
                         method: 'POST',
                         body: formData
                     })
-                    .then(response => {
-                        if (response.ok) {
-                            Swal.fire({
-                                title: "Đã xóa!",
-                                text: "Sản phẩm đã được xóa thành công",
-                                icon: "success"
-                            }).then(() => {
-                                location.reload();
-                            });
-                        } else {
+                        .then(response => {
+                            if (response.ok) {
+                                Swal.fire({
+                                    title: "Đã xóa!",
+                                    text: "Sản phẩm đã được xóa thành công",
+                                    icon: "success"
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: "Lỗi!",
+                                    text: "Có lỗi xảy ra khi xóa sản phẩm",
+                                    icon: "error"
+                                });
+                            }
+                        })
+                        .catch(error => {
                             Swal.fire({
                                 title: "Lỗi!",
-                                text: "Có lỗi xảy ra khi xóa sản phẩm",
+                                text: "Lỗi: " + error.message,
                                 icon: "error"
                             });
-                        }
-                    })
-                    .catch(error => {
-                        Swal.fire({
-                            title: "Lỗi!",
-                            text: "Lỗi: " + error.message,
-                            icon: "error"
                         });
-                    });
                 }
             });
         }
@@ -1448,7 +1448,7 @@
 
 
     </script>
-    
+
     <style>
         /* Action buttons styling */
         .action-buttons {
