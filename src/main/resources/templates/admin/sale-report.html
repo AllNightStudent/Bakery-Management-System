@@ -24,7 +24,7 @@
 
 <body>
 <main>
-    <form class="filters" th:action="@{/admin/reports/sales}" method="get">
+    <form class="filters" th:action="@{/admin/reports}" method="post">
         <div>
             <label for="start">Từ ngày</label><br>
             <input type="date" id="start" name="start" th:value="${start}"/>
@@ -53,7 +53,7 @@
 
     <section class="grid">
         <div class="card">
-            <div class="muted">Biểu đồ doanh thu theo ngày</div>
+            <div class="muted">Biểu đồ doanh thu theo tháng</div>
             <canvas id="monthlyChart" height="80"></canvas>
         </div>
         <div class="table-wrap">
@@ -75,11 +75,12 @@
     <section class="table-wrap" style="margin-top:1rem">
         <table>
             <thead>
-            <tr><th>Ngày</th><th>Doanh thu</th></tr>
+            <tr><th>Ngày</th><th>Số lượng đơn hàng</th><th>Doanh thu</th></tr>
             </thead>
             <tbody>
             <tr th:each="d : ${daily}">
                 <td th:text="${d.date}">2025-10-01</td>
+                <td th:text="${d.countOrder}">0</td>
                 <td th:text="${#numbers.formatDecimal(d.revenue, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</td>
             </tr>
             </tbody>
