@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout-admin :: layout(~{::main}, 'Sales Report - Bakery', ~{::extraHead}, ~{::extraScripts})}">
+
+<head>
+    <th:block th:fragment="extraHead">
+        <style>
+            main { padding: 15px}
+            .kpis { display:grid; grid-template-columns: repeat(3,1fr); gap:1rem; margin-bottom:1rem;}
+            .card { background:#fff; border-radius:14px; padding:1rem; box-shadow:0 4px 16px rgba(0,0,0,.06);}
+            .muted{color:#6b7280;font-size:.9rem}
+            table{width:100%; border-collapse:collapse;}
+            th,td{padding:.6rem .8rem; border-bottom:1px solid #e5e7eb; text-align:left}
+            .grid{display:grid; grid-template-columns: 1.2fr .8fr; gap:1rem;}
+            form.filters{display:flex; gap:.5rem; align-items:end; margin:1rem 0}
+            input[type="date"]{padding:.5rem .6rem; border:1px solid #cbd5e1; border-radius:8px}
+            button{padding:.6rem .9rem; border:none; border-radius:10px; background:#111827; color:#fff; cursor:pointer}
+            .table-wrap{overflow:auto; background:#fff; border-radius:14px; box-shadow:0 4px 16px rgba(0,0,0,.06); padding:.5rem}
+        </style>
+        <!-- Chart.js CDN -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </th:block>
+</head>
+
+<body>
+<main>
+    <form class="filters" th:action="@{/admin/reports/sales}" method="get">
+        <div>
+            <label for="start">Từ ngày</label><br>
+            <input type="date" id="start" name="start" th:value="${start}"/>
+        </div>
+        <div>
+            <label for="end">Đến ngày</label><br>
+            <input type="date" id="end" name="end" th:value="${end}"/>
+        </div>
+        <button type="submit">Lọc</button>
+    </form>
+
+    <section class="kpis">
+        <div class="card">
+            <div class="muted">Tổng doanh thu của tháng</div>
+            <div style="font-size:1.8rem; font-weight:700" th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</div>
+        </div>
+        <div class="card">
+            <div class="muted">Số đơn hàng trong tháng</div>
+            <div style="font-size:1.8rem; font-weight:700" th:text="${totalOrders}">0</div>
+        </div>
+        <div class="card">
+            <div class="muted">Giá trị đơn TB</div>
+            <div style="font-size:1.8rem; font-weight:700" th:text="${#numbers.formatDecimal(avgOrderValue, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</div>
+        </div>
+    </section>
+
+    <section class="grid">
+        <div class="card">
+            <div class="muted">Biểu đồ doanh thu theo ngày</div>
+            <canvas id="monthlyChart" height="80"></canvas>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr><th>Top sản phẩm</th><th>Số lượng</th><th>Doanh thu</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="tp : ${topProducts}">
+                    <td th:text="${tp.productName}">Bánh mì</td>
+                    <td th:text="${tp.quantity}">0</td>
+                    <td th:text="${#numbers.formatDecimal(tp.revenue, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="table-wrap" style="margin-top:1rem">
+        <table>
+            <thead>
+            <tr><th>Ngày</th><th>Doanh thu</th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="d : ${daily}">
+                <td th:text="${d.date}">2025-10-01</td>
+                <td th:text="${#numbers.formatDecimal(d.revenue, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+</main>
+
+<th:block th:fragment="extraScripts">
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const months = /*[[${months}]]*/ [];
+        const values = /*[[${values}]]*/ [];
+        console.log("months:", months, "values:", values);
+        const ctx = document.getElementById('monthlyChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'bar', // hoặc 'line' nếu bạn muốn đường
+          data: {
+            labels: months,
+            datasets: [{
+              label: 'Monthly Revenue (VNĐ)',
+              data: values,
+              backgroundColor: 'rgba(255, 107, 53, 0.7)',
+              borderColor: 'rgba(255, 107, 53, 1)',
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: function(value) {
+                    return new Intl.NumberFormat('vi-VN').format(value) + ' ₫';
+                  }
+                }
+              }
+            }
+          }
+        });
+        /*]]>*/
+    </script>
+</th:block>
+</body>
+</html>
