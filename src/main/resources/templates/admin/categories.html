@@ -239,6 +239,7 @@
         height: 100%;
         background: rgba(0, 0, 0, 0.5);
         backdrop-filter: blur(4px);
+        overflow-y: auto;
       }
 
       .modal-content {
@@ -250,6 +251,8 @@
         max-width: 600px;
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         animation: slideDown 0.3s ease;
+        max-height: 90vh;      /* 🧩 Giới hạn chiều cao */
+        overflow-y: auto;      /* 🧩 Cho phép nội dung trong modal cuộn */
       }
 
       @keyframes slideDown {
@@ -448,6 +451,8 @@
                         th:data-name="${category.name}"
                         th:data-description="${category.description}"
                         th:data-active="${category.active}"
+                        th:data-expireTime="${category.expireTime}"
+                        th:data-timeUnit="${category.timeUnit}"
                         onclick="editCategory(this)">
                   ✏️
                 </button>
@@ -532,6 +537,23 @@
                     placeholder="Mô tả chi tiết về danh mục..."></textarea>
         </div>
 
+        <!-- 🆕 Thêm phần nhập thời gian hết hạn -->
+        <div class="form-group">
+          <label for="expireTime">Thời gian hết hạn <span style="color: red;">*</span></label>
+          <input type="number" id="expireTime" name="expireTime" min="1" required placeholder="VD: 30">
+        </div>
+
+        <!-- 🆕 Chọn đơn vị thời gian -->
+        <div class="form-group">
+          <label for="timeUnit">Đơn vị thời gian <span style="color: red;">*</span></label>
+          <select id="timeUnit" name="timeUnit" required>
+            <option value="DAY">Ngày</option>
+            <option value="WEEK">Tuần</option>
+            <option value="MONTH">Tháng</option>
+            <option value="YEAR">Năm</option>
+          </select>
+        </div>
+
         <div class="form-group">
           <div class="checkbox-group">
             <input type="checkbox" id="active" name="active" checked>
@@ -565,6 +587,8 @@
       const name = button.getAttribute('data-name');
       const description = button.getAttribute('data-description');
       const active = button.getAttribute('data-active') === 'true';
+      const timeUnit = button.getAttribute('data-timeUnit');
+      const expireTime = button.getAttribute('data-expireTime');
 
       // Populate form
       document.getElementById('modalTitle').textContent = 'Chỉnh sửa danh mục';
@@ -572,8 +596,11 @@
       document.getElementById('categoryId').value = id;
       document.getElementById('name').value = name;
       document.getElementById('description').value = description || '';
+      document.getElementById('timeUnit').value = timeUnit || 'MONTH';
+      document.getElementById('expireTime').value = expireTime || 1;
       document.getElementById('active').checked = active;
       document.getElementById('categoryModal').style.display = 'block';
+
     }
 
     function closeModal() {

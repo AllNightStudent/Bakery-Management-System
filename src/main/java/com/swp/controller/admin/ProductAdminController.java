@@ -2,6 +2,7 @@ package com.swp.controller.admin;
 
 import com.swp.dto.request.CreateProductRequest;
 import com.swp.entity.CategoryEntity;
+import com.swp.entity.enums.TimeUnit;
 import com.swp.repository.CategoryRepository;
 import com.swp.service.ProductService;
 import jakarta.validation.Valid;
@@ -14,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -43,10 +46,23 @@ public class ProductAdminController {
                 model.addAttribute("categories", categoryRepository.findAll());
                 return "admin/products";
             }
-
             CategoryEntity category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new IllegalArgumentException("Danh mục không tồn tại"));
-
+            TimeUnit timeUnit = category.getTimeUnit();
+            Integer expireTime = category.getExpireTime();
+            request.getVariants().forEach(product -> {
+                LocalDate expiryDate = null;
+                if (expireTime != null && expireTime > 0 && timeUnit != null) {
+                    LocalDate now = LocalDate.now();
+                    switch (timeUnit) {
+                        case DAY -> expiryDate = now.plusDays(expireTime);
+                        case WEEK -> expiryDate = now.plusWeeks(expireTime);
+                        case MONTH -> expiryDate = now.plusMonths(expireTime);
+                        case YEAR -> expiryDate = now.plusYears(expireTime);
+                    }
+                }
+                product.setExpiryDate(expiryDate);
+            });
             productService.createProduct(request, category);
             redirectAttributes.addFlashAttribute("successMessage", "Tạo sản phẩm thành công");
             return "redirect:/admin/products";
@@ -101,10 +117,23 @@ public class ProductAdminController {
                 redirectAttributes.addFlashAttribute("errorMessage", "Dữ liệu không hợp lệ");
                 return "redirect:/admin/products";
             }
-
             CategoryEntity category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new IllegalArgumentException("Danh mục không tồn tại"));
-
+            TimeUnit timeUnit = category.getTimeUnit();
+            Integer expireTime = category.getExpireTime();
+            request.getVariants().forEach(product -> {
+                LocalDate expiryDate = null;
+                if (expireTime != null && expireTime > 0 && timeUnit != null) {
+                    LocalDate now = LocalDate.now();
+                    switch (timeUnit) {
+                        case DAY -> expiryDate = now.plusDays(expireTime);
+                        case WEEK -> expiryDate = now.plusWeeks(expireTime);
+                        case MONTH -> expiryDate = now.plusMonths(expireTime);
+                        case YEAR -> expiryDate = now.plusYears(expireTime);
+                    }
+                }
+                product.setExpiryDate(expiryDate);
+            });
             productService.updateProduct(id, request, category);
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật sản phẩm thành công");
             return "redirect:/admin/products";
@@ -150,16 +179,12 @@ public class ProductAdminController {
         // Determine which search method to use
         Page<ProductEntity> productPage;
         if (!category.isEmpty() && !search.isEmpty()) {
-            // Search by both category and name
             productPage = productRepository.findByCategoryAndName(category, search, pageable);
         } else if (!category.isEmpty()) {
-            // Search by category only
             productPage = productRepository.findByCategoryNameContaining(category, pageable);
         } else if (!search.isEmpty()) {
-            // Search by name or check if it's a SKU
             productPage = productRepository.findByNameOrShortDescriptionContaining(search, pageable);
 
-            // If no results found by name, try searching by SKU
             if (productPage.getContent().isEmpty()) {
                 List<ProductVariantEntity> variantsBySku = productVariantRepository.findBySkuContaining(search);
                 if (!variantsBySku.isEmpty()) {
@@ -198,5 +223,3 @@ public class ProductAdminController {
         return "admin/products";
     }
 }
-
-

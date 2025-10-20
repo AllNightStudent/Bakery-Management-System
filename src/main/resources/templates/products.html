@@ -3,7 +3,7 @@
       th:replace="~{fragments/layout :: layout(~{::main}, 'Sản Phẩm - Bakery', ~{::extraHead}, ~{::extraScripts})}">
 <head>
   <!-- Tiêu đề này sẽ không được sử dụng, vì nó được truyền trực tiếp trong th:replace -->
-  <title>Sản Phẩm -  Bakery</title>
+  <title>Sản Phẩm - Bakery</title>
   <th:block th:fragment="extraHead">
     <link rel="stylesheet" th:href="@{/css/login.css}">
     <style>
@@ -106,6 +106,12 @@
         color: #c00;
       }
 
+      .btn-variant.active {
+        background: #8B4513;
+        color: white;
+        border-color: #8B4513;
+        font-weight: bold;
+      }
 
       .variant {
         display: inline-block;
@@ -133,6 +139,7 @@
         font-weight: bold;
         transition: all 0.3s;
         flex: 1;
+        text-align: center;
       }
 
       .view-details:hover {
@@ -142,6 +149,18 @@
 
       .add-to-cart {
         flex: 1;
+        background: #8B4513;
+        border: none;
+        color: white;
+        font-weight: bold;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .add-to-cart:hover {
+        background: #a0522d;
       }
 
       @media (max-width: 768px) {
@@ -154,6 +173,7 @@
           flex-direction: column;
         }
       }
+
       .search-box {
         display: flex;
         justify-content: flex-start; /* căn trái */
@@ -167,6 +187,135 @@
         margin-right: 10px;
         min-width: 250px;
       }
+
+      .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 40px;
+      }
+
+      .pagination {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        list-style: none;
+        padding: 0;
+      }
+
+      .pagination a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 2px solid #e0e0e0;
+        background: white;
+        color: #333;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+
+      .pagination a:hover {
+        background: #8B4513;
+        color: white;
+        border-color: #8B4513;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(139, 69, 19, 0.3);
+      }
+
+      .pagination a.active {
+        background: #8B4513;
+        color: white;
+        border-color: #8B4513;
+        box-shadow: 0 4px 12px rgba(139, 69, 19, 0.4);
+      }
+
+      .pagination a.prev,
+      .pagination a.next {
+        font-size: 18px;
+        font-weight: bold;
+      }
+
+      .pagination a.disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        pointer-events: none;
+      }
+
+      @media (max-width: 600px) {
+        .pagination {
+          gap: 5px;
+        }
+
+        .pagination a {
+          width: 36px;
+          height: 36px;
+          font-size: 13px;
+        }
+
+        .pagination a.prev,
+        .pagination a.next {
+          width: 36px;
+        }
+      }
+
+
+      .btn-primary {
+        display: inline-block;
+        text-align: center;
+        padding: 10px 16px;
+        border-radius: 6px;
+        background-color: #8B4513;
+        color: white;
+        font-weight: 600;
+        font-size: 14px;
+        transition: 0.2s;
+        border: none;
+        cursor: pointer;
+        text-decoration: none; /* bỏ gạch chân cho <a> */
+      }
+
+      .btn-primary:hover {
+        background-color: #a0522d;
+      }
+
+      .product-actions a,
+      .product-actions button {
+        display: inline-flex;              /* căn giữa cả chiều ngang + dọc */
+        align-items: center;
+        justify-content: center;
+        padding: 10px 16px;
+        min-width: 140px;                  /* tuỳ, để 2 nút nhìn cân đối */
+        height: 42px;                      /* đặt chiều cao cố định */
+        border-radius: 6px;
+        background-color: #8B4513;
+        color: white;
+        font-weight: 600;
+        font-size: 14px;
+        border: none;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background-color 0.2s, transform 0.1s;
+        box-sizing: border-box;            /* đảm bảo padding không làm lệch */
+      }
+
+      .product-actions a:hover,
+      .product-actions button:hover {
+        background-color: #A0522D;
+        transform: translateY(-1px);
+      }
+
+      .product-actions button {
+        line-height: normal;               /* tránh lệch chiều cao mặc định */
+        font-family: inherit;              /* đồng bộ font với link */
+      }
+
+
 
     </style>
   </th:block>
@@ -188,7 +337,8 @@
         <form th:action="@{/products}" method="get">
           <button type="submit" name="categoryId" value=""
                   th:classappend="${selectedCategoryId == null} ? ' active'"
-                  class="filter-btn">Tất cả</button>
+                  class="filter-btn">Tất cả
+          </button>
         </form>
         <form th:each="category : ${categories}"
               th:action="@{/products}" method="get">
@@ -213,7 +363,6 @@
       </div>
 
 
-
       <!-- Products Grid -->
       <div class="products-grid">
         <!-- Mooncakes -->
@@ -223,32 +372,111 @@
             <div class="product-info">
               <h3 th:text="${product.name}"></h3>
               <p th:text="${product.shortDescription}"></p>
-              <div class="product-variants">
-                <div th:each="variant : ${product.variants}" class="variant-btn">
-                  <a th:href="@{/cart/add(variantId=${variant.variantId})}"
-                     class="btn-variant">
-                    <span th:text="${#numbers.formatDecimal(variant.price, 0, 'COMMA', 0, 'POINT')}"></span> ₫
-                  </a>
-                </div>
+              <!--                            <div class="product-variants">-->
+              <!--                                <div th:each="variant : ${product.variants}" class="variant-btn">-->
+              <!--                                    <a th:href="@{/cart/add(variantId=${variant.variantId})}"-->
+              <!--                                       class="btn-variant">-->
+              <!--                                        <span th:text="${variant.weight}"></span>-->
+              <!--                                    </a>-->
+              <!--                                </div>-->
+              <!--                            </div>-->
+              <div class="product-actions flex gap-3">
+                <form th:id="'addToCartForm_' + ${product.productId}"
+                      th:action="@{'/products/' + ${product.productId} + '/add'}"
+                      method="get">
+                  <input type="hidden" name="variantId" id="selectedVariantId"/>
+                  <input type="hidden" name="quantity" value="1"/>
+                  <button type="submit" class="btn-primary">THÊM VÀO GIỎ</button>
+                </form>
+
+                <a th:href="@{/products/{id}(id=${product.productId})}" class="btn-primary">XEM CHI TIẾT</a>
               </div>
-              <div class="product-actions">
-                <button class="add-to-cart">THÊM VÀO GIỎ</button>
-                <a th:href="@{/products/{id}(id=${product.productId})}" class="view-details">XEM CHI TIẾT</a>
-              </div>
+
+
             </div>
           </div>
         </div>
 
       </div>
+
+      <!-- Pagination - Bakery Style -->
+      <div class="pagination-container mt-16">
+        <ul class="pagination">
+          <!-- Nút Previous -->
+          <li>
+            <a th:if="${currentPage > 1}"
+               th:href="@{/products(page=${currentPage - 1}, size=9, categoryId=${selectedCategoryId}, search=${search})}"
+               class="prev">&laquo;</a>
+            <a th:if="${currentPage <= 1}" class="prev disabled">&laquo;</a>
+          </li>
+
+          <!-- Các số trang -->
+          <li th:each="i : ${#numbers.sequence(1, totalPages)}">
+            <a th:href="@{/products(page=${i}, size=9, categoryId=${selectedCategoryId}, search=${search})}"
+               th:text="${i}"
+               th:classappend="${i == currentPage} ? 'active'"></a>
+          </li>
+
+          <!-- Nút Next -->
+          <li>
+            <a th:if="${currentPage < totalPages}"
+               th:href="@{/products(page=${currentPage + 1}, size=9, categoryId=${selectedCategoryId}, search=${search})}"
+               class="next">&raquo;</a>
+            <a th:if="${currentPage >= totalPages}" class="next disabled">&raquo;</a>
+          </li>
+        </ul>
+      </div>
+
+
     </div>
+
   </section>
 </main>
 
 <th:block th:fragment="extraScripts">
   <script>
+    // Lưu variant được chọn cho từng sản phẩm
+    const selectedVariants = {};
 
+    // Khi click chọn 1 biến thể giá
+    document.querySelectorAll('.btn-variant').forEach(button => {
+      button.addEventListener('click', function (event) {
+        event.preventDefault();
+
+        // Lấy thông tin sản phẩm và variant
+        const variantId = this.getAttribute('href').split('variantId=')[1];
+        const productCard = this.closest('.product-item');
+        const productId = productCard.querySelector('.add-to-cart').closest('form').id.replace('addToCartForm_', '');
+
+        // Lưu biến thể được chọn
+        selectedVariants[productId] = variantId;
+
+        // Highlight nút đang chọn
+        productCard.querySelectorAll('.btn-variant').forEach(btn => btn.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // Xử lý khi bấm "THÊM VÀO GIỎ"
+    document.querySelectorAll('form[id^="addToCartForm_"]').forEach(form => {
+      form.addEventListener('submit', function (e) {
+        const productId = this.id.replace('addToCartForm_', '');
+        const variantId = selectedVariants[productId];
+
+        if (!variantId) {
+          e.preventDefault();
+          alert("Vui lòng chọn 1 biến thể trước khi thêm vào giỏ hàng.");
+          return;
+        }
+
+        // Gắn variantId và đổi action
+        this.querySelector('#selectedVariantId').value = variantId;
+        this.action = `/products/${productId}/add/${variantId}`;
+      });
+    });
   </script>
 </th:block>
+
 
 </body>
 </html>
