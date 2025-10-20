@@ -372,14 +372,14 @@
             <div class="product-info">
               <h3 th:text="${product.name}"></h3>
               <p th:text="${product.shortDescription}"></p>
-              <div class="product-variants">
-                <div th:each="variant : ${product.variants}" class="variant-btn">
-                  <a th:href="@{/cart/add(variantId=${variant.variantId})}"
-                     class="btn-variant">
-                    <span th:text="${variant.weight}"></span>
-                  </a>
-                </div>
-              </div>
+              <!--                            <div class="product-variants">-->
+              <!--                                <div th:each="variant : ${product.variants}" class="variant-btn">-->
+              <!--                                    <a th:href="@{/cart/add(variantId=${variant.variantId})}"-->
+              <!--                                       class="btn-variant">-->
+              <!--                                        <span th:text="${variant.weight}"></span>-->
+              <!--                                    </a>-->
+              <!--                                </div>-->
+              <!--                            </div>-->
               <div class="product-actions flex gap-3">
                 <form th:id="'addToCartForm_' + ${product.productId}"
                       th:action="@{'/products/' + ${product.productId} + '/add'}"

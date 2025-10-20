@@ -26,5 +26,12 @@ public class CartItemService {
         return cartItemRepository.findAll().stream().filter(ci -> ci.getCart().equals(cartEntity)).toList();
     }
 
+    public void updateQuantity(Long id, int quantity) {
+        CartItemEntity item = cartItemRepository.findById(id).orElseThrow();
+        item.setQuantity(quantity);
+        cartItemRepository.save(item);
+    }
+
+
 
 }

@@ -2,6 +2,7 @@ package com.swp.controller.product;
 
 import com.swp.dto.CategoryDTO;
 import com.swp.entity.*;
+import com.swp.repository.ProductVariantRepository;
 import com.swp.service.*;
 import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
+    private final ProductVariantRepository productVariantRepository;
     private final CategoryService categoryService;
     private final CartService cartService;
     private final CartItemService cartItemService;
@@ -101,10 +103,7 @@ public class ProductController {
 
         CartEntity cart = cartService.findCartByUser(currentUser);
 
-        ProductEntity productDetail = productService.getProductVariantsById(id);
-        ProductVariantEntity productVariant = productDetail.getVariants().stream().filter(v -> v.getVariantId().equals(variantId))
-                .findFirst()
-                .orElse(null);
+        ProductVariantEntity productVariant = productVariantRepository.findById(variantId).orElse(null);
 
         CartItemEntity cartItem = new CartItemEntity();
         cartItem.setProductVariantId(productVariant);
@@ -112,7 +111,7 @@ public class ProductController {
         cartItem.setCart(cart);
         cartItemService.save(cartItem);
 
-        return "redirect:/products/" + id;
+        return "redirect:/cart" ;
 
 
     }

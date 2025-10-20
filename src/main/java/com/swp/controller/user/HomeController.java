@@ -1,6 +1,8 @@
 package com.swp.controller.user;
 
 import com.swp.dto.request.ChangePasswordRequest;
+import com.swp.entity.ProductEntity;
+import com.swp.service.ProductService;
 import com.swp.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,16 +15,26 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-@Controller
+import java.util.List;
 
+@Controller
 @RequiredArgsConstructor
 public class HomeController {
 
     private final UserService userService;
+    private final ProductService productService;
 
     @GetMapping("/home")
-    public String home() {
-        return "index";
+    public String home(Model model) {
+        List<ProductEntity> allProducts = productService.getAllProducts();
+
+        List<ProductEntity> top9Products = allProducts.stream()
+                .limit(9)
+                .toList();
+
+        model.addAttribute("products", top9Products);
+
+        return "home";
     }
 
     @GetMapping("/change-password")

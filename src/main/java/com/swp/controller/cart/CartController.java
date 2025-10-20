@@ -6,9 +6,7 @@ import com.swp.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.Mapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -31,5 +29,18 @@ public class CartController {
         model.addAttribute("cartItems", items);
         return "cart";
     }
+
+    @PostMapping("/update")
+    public String updateCartItems(
+            @RequestParam("id") List<Long> ids,
+            @RequestParam("quantity") List<Integer> quantities
+    ) {
+        for (int i = 0; i < ids.size(); i++) {
+            cartItemService.updateQuantity(ids.get(i), quantities.get(i));
+        }
+        return "redirect:/cart";
+    }
+
+
 
 }
