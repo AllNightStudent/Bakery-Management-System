@@ -820,10 +820,6 @@
                                 <label>SKU</label>
                                 <input type="text" placeholder="VD: LAK90" name="variants[0].sku" required>
                             </div>
-                            <div class="form-group">
-                                <label>Hạn sử dụng</label>
-                                <input type="date" name="variants[0].expiryDate">
-                            </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
@@ -956,10 +952,6 @@
                     <div class="form-group">
                         <label>SKU</label>
                         <input type="text" name="variants[${idx}].sku" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Hạn sử dụng</label>
-                        <input type="date" name="variants[${idx}].expiryDate">
                     </div>
                 </div>
                 <div class="form-row">
@@ -1210,11 +1202,6 @@
                         <label>SKU</label>
                         <input type="text" name="variants[${index}].sku" placeholder="VD: LAK90" required
                                value="${variant ? (variant.sku || '') : ''}">
-                    </div>
-                    <div class="form-group">
-                        <label>Hạn sử dụng</label>
-                        <input type="date" name="variants[${index}].expiryDate"
-                               value="${variant ? (variant.expiryDate || '') : ''}">
                     </div>
                 </div>
                 <div class="form-row">

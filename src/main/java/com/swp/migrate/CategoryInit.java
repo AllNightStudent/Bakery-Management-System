@@ -1,11 +1,14 @@
 package com.swp.migrate;
 
 import com.swp.entity.CategoryEntity;
+import com.swp.entity.enums.TimeUnit;
 import com.swp.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -83,6 +86,14 @@ public class CategoryInit implements CommandLineRunner {
                     .active(true)
                     .build());
         }
+
+        List<CategoryEntity> categories = categoryRepository.findAll();
+        for (CategoryEntity category : categories) {
+            if (category.getTimeUnit() == null) {
+                category.setExpireTime(1);          // gán mặc định
+                category.setTimeUnit(TimeUnit.MONTH);         // hoặc TimeUnit.DAY nếu muốn có default
+                categoryRepository.save(category);
+            }
+        }
     }
 }
-
