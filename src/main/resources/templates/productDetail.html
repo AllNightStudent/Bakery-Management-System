@@ -67,10 +67,18 @@
         transition: all 0.2s ease;
       }
 
+
       .btn-variant:hover {
         background: #ffe6e6;
         border-color: #ff9999;
         color: #c00;
+      }
+
+      .btn-variant.active {
+        background: #8B4513;
+        color: white;
+        border-color: #8B4513;
+        font-weight: bold;
       }
 
 
@@ -125,26 +133,6 @@
                   class="w-full h-auto rounded-lg"
           />
         </div>
-
-        <!-- Thumbnail Gallery -->
-        <!--                <div class="flex gap-3">-->
-        <!--                    <div class="product-thumbnail active border-4 border-amber-900 rounded-lg overflow-hidden w-20 h-20">-->
-        <!--                        <img-->
-        <!--                                src="/placeholder.svg?height=80&width=80"-->
-        <!--                                alt="Thumbnail 1"-->
-        <!--                                class="w-full h-full object-cover"-->
-        <!--                                onclick="changeImage(this.src)"-->
-        <!--                        />-->
-        <!--                    </div>-->
-        <!--                    <div class="product-thumbnail border-4 border-gray-300 rounded-lg overflow-hidden w-20 h-20">-->
-        <!--                        <img-->
-        <!--                                src="/placeholder.svg?height=80&width=80"-->
-        <!--                                alt="Thumbnail 2"-->
-        <!--                                class="w-full h-full object-cover"-->
-        <!--                                onclick="changeImage(this.src)"-->
-        <!--                        />-->
-        <!--                    </div>-->
-        <!--                </div>-->
       </div>
 
       <!-- Product Info -->
@@ -152,14 +140,22 @@
         <h1 class="text-3xl font-bold text-gray-800 mb-4 uppercase" th:text="${productDetail.name}"></h1>
 
         <!-- Price -->
-        <a>Price:</a>
-        <div th:each="variant : ${productDetail.variants}" class="variant-btn">
-          <button type="button"
-                  class="btn-variant"
-                  th:text="${#numbers.formatDecimal(variant.price, 0, 'COMMA', 0, 'POINT')} + ' ₫'"
-                  th:data-variant-id="${variant.variantId}"
-                  onclick="selectVariant(this)">
-          </button>
+        <p class="mb-3 text-lg">
+          Giá:
+          <span id="displayPrice" class="font-bold text-amber-900">
+        0₫
+    </span>
+        </p>
+        <div class="product-variants">
+          <div th:each="variant : ${productDetail.variants}">
+            <button type="button"
+                    class="btn-variant"
+                    th:text="${variant.weight} + 'gram'"
+                    th:data-variant-id="${variant.variantId}"
+                    th:data-price="${variant.price}"
+                    onclick="selectVariant(this)">
+            </button>
+          </div>
         </div>
 
         <!-- Quantity Selector -->
@@ -254,20 +250,29 @@
 <th:block th:fragment="extraScripts">
   <script>
     let selectedVariantId = null;
+    let selectedPrice = 0;
+
+    function formatPrice(price) {
+      return price.toLocaleString('vi-VN') + '₫';
+    }
 
     function selectVariant(button) {
-      // Lấy variantId từ data attribute
+      // Lấy variantId và giá từ thuộc tính data
       selectedVariantId = button.getAttribute('data-variant-id');
+      selectedPrice = parseFloat(button.getAttribute('data-price'));
 
-      // Highlight nút đang chọn
+      // Bỏ active cũ, thêm active mới
       document.querySelectorAll('.btn-variant').forEach(b => b.classList.remove('active'));
       button.classList.add('active');
+
+      updateDisplayedPrice();
     }
 
     function increaseQuantity() {
       const input = document.getElementById('quantity');
       input.value = parseInt(input.value) + 1;
       updateQuantityInput(input.value);
+      updateDisplayedPrice();
     }
 
     function decreaseQuantity() {
@@ -275,11 +280,18 @@
       if (parseInt(input.value) > 1) {
         input.value = parseInt(input.value) - 1;
         updateQuantityInput(input.value);
+        updateDisplayedPrice();
       }
     }
 
     function updateQuantityInput(value) {
       document.getElementById('selectedQuantity').value = value;
+    }
+
+    function updateDisplayedPrice() {
+      const qty = parseInt(document.getElementById('quantity').value);
+      const total = selectedPrice * qty;
+      document.getElementById('displayPrice').innerText = formatPrice(total);
     }
 
     // Khi submit form, gắn variantId vào input ẩn
@@ -290,11 +302,12 @@
         return;
       }
       document.getElementById('selectedVariantId').value = selectedVariantId;
-      // Thay đổi action để gửi đúng endpoint: /products/{id}/add/{variantId}
-      const productId = /*[[${productDetail.productId}]]*/ '1'; // dùng Thymeleaf để set
+
+      const productId = /*[[${productDetail.productId}]]*/ '1';
       this.action = `/products/${productId}/add/${selectedVariantId}`;
     });
   </script>
+
 
 </th:block>
 </body>

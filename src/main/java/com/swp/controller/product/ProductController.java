@@ -29,35 +29,50 @@ public class ProductController {
     public String listProducts(
             @RequestParam(value = "categoryId", required = false) Long categoryId,
             @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "9") int size,
             Model model) {
 
         List<CategoryEntity> categories = categoryService.getAllCategoriesActivated();
         model.addAttribute("categories", categories);
 
-        List<ProductEntity> listOfProducts = productService.getAllProducts();
+        // Lấy tất cả sản phẩm
+        List<ProductEntity> allProducts = productService.getAllProducts();
 
-        // lọc theo category
+        // Lọc theo category
         if (categoryId != null) {
-            listOfProducts = listOfProducts.stream()
+            allProducts = allProducts.stream()
                     .filter(p -> p.getCategoryId().getId().equals(categoryId))
                     .toList();
         }
 
-        // lọc theo search
+        // Lọc theo search
         if (search != null && !search.trim().isEmpty()) {
             String keyword = search.trim().toLowerCase();
-            listOfProducts = listOfProducts.stream()
+            allProducts = allProducts.stream()
                     .filter(p -> p.getName().toLowerCase().contains(keyword) ||
                             (p.getShortDescription() != null && p.getShortDescription().toLowerCase().contains(keyword)))
                     .toList();
         }
 
-        model.addAttribute("products", listOfProducts);
+        // Tính tổng trang
+        int totalProducts = allProducts.size();
+        int totalPages = (int) Math.ceil((double) totalProducts / size);
+
+        // Giới hạn sản phẩm hiển thị theo trang
+        int fromIndex = Math.max(0, (page - 1) * size);
+        int toIndex = Math.min(fromIndex + size, totalProducts);
+        List<ProductEntity> paginatedProducts = allProducts.subList(fromIndex, toIndex);
+
+        model.addAttribute("products", paginatedProducts);
         model.addAttribute("selectedCategoryId", categoryId);
         model.addAttribute("search", search);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
 
         return "products";
     }
+
 
 
 

@@ -1,9 +1,12 @@
 package com.swp.service;
 
+import com.swp.entity.CartEntity;
 import com.swp.entity.CartItemEntity;
 import com.swp.repository.CartItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -18,5 +21,10 @@ public class CartItemService {
     public void save(CartItemEntity cartItem) {
         cartItemRepository.save(cartItem);
     }
+
+    public List<CartItemEntity> findAllByCart(CartEntity cartEntity) {
+        return cartItemRepository.findAll().stream().filter(ci -> ci.getCart().equals(cartEntity)).toList();
+    }
+
 
 }
