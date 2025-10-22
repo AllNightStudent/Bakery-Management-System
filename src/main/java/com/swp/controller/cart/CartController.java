@@ -41,6 +41,11 @@ public class CartController {
         return "redirect:/cart";
     }
 
+    @PostMapping("/remove")
+    public String removeCartItem(@RequestParam("id") Long cartItemId) {
+        cartItemService.deleteById(cartItemId);
+        return "redirect:/cart";
+    }
 
 
 }
