@@ -68,20 +68,18 @@
             }
 
 
+            .btn-variant:hover {
+                background: #ffe6e6;
+                border-color: #ff9999;
+                color: #c00;
+            }
 
-      .btn-variant:hover {
-        background: #ffe6e6;
-        border-color: #ff9999;
-        color: #c00;
-      }
-
-
-      .btn-variant.active {
-        background: #8B4513;
-        color: white;
-        border-color: #8B4513;
-        font-weight: bold;
-      }
+            .btn-variant.active {
+                background: #8B4513;
+                color: white;
+                border-color: #8B4513;
+                font-weight: bold;
+            }
 
 
             .variant {
@@ -135,26 +133,6 @@
                             class="w-full h-auto rounded-lg"
                     />
                 </div>
-
-                <!-- Thumbnail Gallery -->
-<!--                <div class="flex gap-3">-->
-<!--                    <div class="product-thumbnail active border-4 border-amber-900 rounded-lg overflow-hidden w-20 h-20">-->
-<!--                        <img-->
-<!--                                src="/placeholder.svg?height=80&width=80"-->
-<!--                                alt="Thumbnail 1"-->
-<!--                                class="w-full h-full object-cover"-->
-<!--                                onclick="changeImage(this.src)"-->
-<!--                        />-->
-<!--                    </div>-->
-<!--                    <div class="product-thumbnail border-4 border-gray-300 rounded-lg overflow-hidden w-20 h-20">-->
-<!--                        <img-->
-<!--                                src="/placeholder.svg?height=80&width=80"-->
-<!--                                alt="Thumbnail 2"-->
-<!--                                class="w-full h-full object-cover"-->
-<!--                                onclick="changeImage(this.src)"-->
-<!--                        />-->
-<!--                    </div>-->
-<!--                </div>-->
             </div>
 
             <!-- Product Info -->
@@ -162,14 +140,22 @@
                 <h1 class="text-3xl font-bold text-gray-800 mb-4 uppercase" th:text="${productDetail.name}"></h1>
 
                 <!-- Price -->
-                <a>Price:</a>
-                <div th:each="variant : ${productDetail.variants}" class="variant-btn">
-                    <button type="button"
-                            class="btn-variant"
-                            th:text="${#numbers.formatDecimal(variant.price, 0, 'COMMA', 0, 'POINT')} + ' ₫'"
-                            th:data-variant-id="${variant.variantId}"
-                            onclick="selectVariant(this)">
-                    </button>
+                <p class="mb-3 text-lg">
+                    Giá:
+                    <span id="displayPrice" class="font-bold text-amber-900">
+        0₫
+    </span>
+                </p>
+                <div class="product-variants">
+                    <div th:each="variant : ${productDetail.variants}">
+                        <button type="button"
+                                class="btn-variant"
+                                th:text="${variant.weight} + 'gram'"
+                                th:data-variant-id="${variant.variantId}"
+                                th:data-price="${variant.price}"
+                                onclick="selectVariant(this)">
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Quantity Selector -->
@@ -187,7 +173,11 @@
                 </div>
 
                 <div class="product-actions">
-                    <button class="view-details">MUA NGAY</button>
+                    <form id="buyNowForm" th:action="@{/products/buy-now}" method="post" style="flex: 1;">
+                        <input type="hidden" name="variantId" id="buyNowVariantId" />
+                        <input type="hidden" name="quantity" id="buyNowQuantity" value="1"/>
+                        <button type="submit" class="view-details" style="width: 100%;">MUA NGAY</button>
+                    </form>
                     <form id="addToCartForm" th:action="@{'/products/' + ${productDetail.productId} + '/add'}" method="get">
                         <input type="hidden" name="variantId" id="selectedVariantId" />
                         <input type="hidden" name="quantity" id="selectedQuantity" value="1"/>
@@ -196,36 +186,39 @@
                 </div>
 
                 <!-- Stock Status -->
-<!--                <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">-->
-<!--                    <p class="text-red-600 font-medium">Tạm hết hàng</p>-->
-<!--                </div>-->
+                <!--                <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">-->
+                <!--                    <p class="text-red-600 font-medium">Tạm hết hàng</p>-->
+                <!--                </div>-->
             </div>
         </div>
 
-      </div>
+        <!-- Tabs Section -->
+        <div class="bg-white rounded-lg shadow-lg mb-16">
+            <div class="flex border-b">
+                <button
+                        class="tab-button active px-8 py-4 font-bold text-sm uppercase tracking-wide"
+                        onclick="switchTab('description')"
+                        id="descTab"
+                >
+                    Mô tả chung
+                </button>
+                <button
+                        class="tab-button px-8 py-4 font-medium text-sm uppercase tracking-wide bg-gray-100 text-gray-700"
+                        onclick="switchTab('comments')"
+                        id="commentsTab"
+                >
+                    Bình luận
+                </button>
+            </div>
 
-      <!-- Product Info -->
-      <div class="bg-white rounded-lg shadow-lg p-8">
-        <h1 class="text-3xl font-bold text-gray-800 mb-4 uppercase" th:text="${productDetail.name}"></h1>
-
-        <!-- Price -->
-        <p class="mb-3 text-lg">
-          Giá:
-          <span id="displayPrice" class="font-bold text-amber-900">
-        0₫
-    </span>
-        </p>
-        <div class="product-variants">
-          <div th:each="variant : ${productDetail.variants}">
-            <button type="button"
-                    class="btn-variant"
-                    th:text="${variant.weight} + 'gram'"
-                    th:data-variant-id="${variant.variantId}"
-                    th:data-price="${variant.price}"
-                    onclick="selectVariant(this)">
-            </button>
-          </div>
-
+            <div class="p-8">
+                <div id="descriptionContent" class="tab-content">
+                    <p class="text-gray-600" th:utext="${productDetail.description}"></p>
+                </div>
+                <div id="commentsContent" class="tab-content hidden">
+                    <p class="text-gray-600">Chưa có bình luận nào</p>
+                </div>
+            </div>
         </div>
 
         <!-- Related Products Section -->
@@ -237,16 +230,16 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div th:each="product : ${products}" class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition">
                 <div class="p-4">
-                    <img th:alt="${product.name}"
+                    <img th:src="${product.imgUrl}"
                          class="w-full h-64 object-cover rounded-lg mb-4"/>
                 </div>
                 <div class="px-4 pb-4">
                     <h3 class="text-center font-bold text-gray-800 mb-2 uppercase text-sm" th:text="${product.name}"></h3>
                     <p class="text-center text-gray-500 text-xs mb-3" th:text="${product.shortDescription}"></p>
                     <div class="flex gap-2">
-<!--                        <button class="flex-1 bg-[#a3b18a] text-white py-2 px-4 rounded font-bold text-sm hover:bg-[#8a9a75] transition"-->
-<!--                                th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'POINT')} + '₫'">-->
-<!--                        </button>-->
+                        <!--                        <button class="flex-1 bg-[#a3b18a] text-white py-2 px-4 rounded font-bold text-sm hover:bg-[#8a9a75] transition"-->
+                        <!--                                th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'POINT')} + '₫'">-->
+                        <!--                        </button>-->
                         <button class="w-10 h-10 bg-[#78350f] text-white rounded flex items-center justify-center hover:bg-[#5a2709] transition">
                             🛒
                         </button>
@@ -256,130 +249,79 @@
         </div>
 
     </div>
-
-
-    <!-- Tabs Section -->
-    <div class="bg-white rounded-lg shadow-lg mb-16">
-      <div class="flex border-b">
-        <button
-                class="tab-button active px-8 py-4 font-bold text-sm uppercase tracking-wide"
-                onclick="switchTab('description')"
-                id="descTab"
-        >
-          Mô tả chung
-        </button>
-        <button
-                class="tab-button px-8 py-4 font-medium text-sm uppercase tracking-wide bg-gray-100 text-gray-700"
-                onclick="switchTab('comments')"
-                id="commentsTab"
-        >
-          Bình luận
-        </button>
-      </div>
-
-      <div class="p-8">
-        <div id="descriptionContent" class="tab-content">
-          <p class="text-gray-600" th:utext="${productDetail.description}"></p>
-        </div>
-        <div id="commentsContent" class="tab-content hidden">
-          <p class="text-gray-600">Chưa có bình luận nào</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Related Products Section -->
-    <div class="text-center mb-8">
-      <h2 class="text-4xl font-bold mb-2" style="color: #a3b18a;">CÓ THỂ BẠN THÍCH</h2>
-      <p class="text-gray-700 font-medium uppercase tracking-wide">Sản phẩm cùng loại</p>
-    </div>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      <div th:each="product : ${products}" class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition">
-        <div class="p-4">
-          <img th:src="${product.imgUrl}"
-               class="w-full h-64 object-cover rounded-lg mb-4"/>
-        </div>
-        <div class="px-4 pb-4">
-          <h3 class="text-center font-bold text-gray-800 mb-2 uppercase text-sm" th:text="${product.name}"></h3>
-          <p class="text-center text-gray-500 text-xs mb-3" th:text="${product.shortDescription}"></p>
-          <div class="flex gap-2">
-            <!--                        <button class="flex-1 bg-[#a3b18a] text-white py-2 px-4 rounded font-bold text-sm hover:bg-[#8a9a75] transition"-->
-            <!--                                th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'POINT')} + '₫'">-->
-            <!--                        </button>-->
-            <button class="w-10 h-10 bg-[#78350f] text-white rounded flex items-center justify-center hover:bg-[#5a2709] transition">
-              🛒
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
 </th:block>
 
 <th:block th:fragment="extraScripts">
-  <script>
-    let selectedVariantId = null;
-    let selectedPrice = 0;
+    <script>
+        let selectedVariantId = null;
+        let selectedPrice = 0;
 
-    function formatPrice(price) {
-      return price.toLocaleString('vi-VN') + '₫';
-    }
+        function formatPrice(price) {
+            return price.toLocaleString('vi-VN') + '₫';
+        }
 
-    function selectVariant(button) {
-      // Lấy variantId và giá từ thuộc tính data
-      selectedVariantId = button.getAttribute('data-variant-id');
-      selectedPrice = parseFloat(button.getAttribute('data-price'));
+        function selectVariant(button) {
+            // Lấy variantId và giá từ thuộc tính data
+            selectedVariantId = button.getAttribute('data-variant-id');
+            selectedPrice = parseFloat(button.getAttribute('data-price'));
 
-      // Bỏ active cũ, thêm active mới
-      document.querySelectorAll('.btn-variant').forEach(b => b.classList.remove('active'));
-      button.classList.add('active');
+            // Bỏ active cũ, thêm active mới
+            document.querySelectorAll('.btn-variant').forEach(b => b.classList.remove('active'));
+            button.classList.add('active');
 
-      updateDisplayedPrice();
-    }
+            updateDisplayedPrice();
+        }
 
-    function increaseQuantity() {
-      const input = document.getElementById('quantity');
-      input.value = parseInt(input.value) + 1;
-      updateQuantityInput(input.value);
-      updateDisplayedPrice();
-    }
+        function increaseQuantity() {
+            const input = document.getElementById('quantity');
+            input.value = parseInt(input.value) + 1;
+            updateQuantityInput(input.value);
+            updateDisplayedPrice();
+        }
 
-    function decreaseQuantity() {
-      const input = document.getElementById('quantity');
-      if (parseInt(input.value) > 1) {
-        input.value = parseInt(input.value) - 1;
-        updateQuantityInput(input.value);
-        updateDisplayedPrice();
-      }
-    }
-
+        function decreaseQuantity() {
+            const input = document.getElementById('quantity');
+            if (parseInt(input.value) > 1) {
+                input.value = parseInt(input.value) - 1;
+                updateQuantityInput(input.value);
+                updateDisplayedPrice();
+            }
+        }
 
         function updateQuantityInput(value) {
             document.getElementById('selectedQuantity').value = value;
+            document.getElementById('buyNowQuantity').value = value;
         }
 
+        function updateDisplayedPrice() {
+            const qty = parseInt(document.getElementById('quantity').value);
+            const total = selectedPrice * qty;
+            document.getElementById('displayPrice').innerText = formatPrice(total);
+        }
 
-    function updateDisplayedPrice() {
-      const qty = parseInt(document.getElementById('quantity').value);
-      const total = selectedPrice * qty;
-      document.getElementById('displayPrice').innerText = formatPrice(total);
-    }
+        // Khi submit form thêm vào giỏ hàng
+        document.getElementById('addToCartForm').addEventListener('submit', function(e) {
+            if (!selectedVariantId) {
+                e.preventDefault();
+                alert("Vui lòng chọn 1 biến thể trước khi thêm vào giỏ hàng.");
+                return;
+            }
+            document.getElementById('selectedVariantId').value = selectedVariantId;
 
-    // Khi submit form, gắn variantId vào input ẩn
-    document.getElementById('addToCartForm').addEventListener('submit', function(e) {
-      if (!selectedVariantId) {
-        e.preventDefault();
-        alert("Vui lòng chọn 1 biến thể trước khi thêm vào giỏ hàng.");
-        return;
-      }
-      document.getElementById('selectedVariantId').value = selectedVariantId;
+            const productId = /*[[${productDetail.productId}]]*/ '1';
+            this.action = `/products/${productId}/add/${selectedVariantId}`;
+        });
 
-      const productId = /*[[${productDetail.productId}]]*/ '1';
-      this.action = `/products/${productId}/add/${selectedVariantId}`;
-    });
-  </script>
-
+        // Khi submit form mua ngay
+        document.getElementById('buyNowForm').addEventListener('submit', function(e) {
+            if (!selectedVariantId) {
+                e.preventDefault();
+                alert("Vui lòng chọn 1 biến thể trước khi mua.");
+                return;
+            }
+            document.getElementById('buyNowVariantId').value = selectedVariantId;
+        });
+    </script>
 
 
 </th:block>

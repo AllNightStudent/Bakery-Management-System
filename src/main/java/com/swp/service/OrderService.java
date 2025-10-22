@@ -93,4 +93,43 @@ public class OrderService {
     public List<OrderEntity> findByStatus(String status) {
         return orderRepository.findByStatus(status);
     }
+
+    @Transactional
+    public OrderEntity createDirectOrder(UserEntity user, ProductVariantEntity variant, int quantity,
+                                         String customerName, String customerPhone,
+                                         String customerAddress, String note) {
+        // Tính tổng tiền
+        BigDecimal totalAmount = variant.getPrice().multiply(BigDecimal.valueOf(quantity));
+
+        // Tạo Order
+        OrderEntity order = OrderEntity.builder()
+                .user(user)
+                .orderDate(LocalDateTime.now())
+                .status("PENDING")
+                .totalAmount(totalAmount)
+                .customerName(customerName)
+                .customerPhone(customerPhone)
+                .customerAddress(customerAddress)
+                .note(note)
+                .build();
+
+        order = orderRepository.save(order);
+
+        // Tạo Order Item
+        OrderItemEntity orderItem = OrderItemEntity.builder()
+                .order(order)
+                .productVariant(variant)
+                .quantity(quantity)
+                .price(variant.getPrice())
+                .productName(variant.getProduct().getName())
+                .build();
+
+        orderItemRepository.save(orderItem);
+
+        List<OrderItemEntity> orderItems = new ArrayList<>();
+        orderItems.add(orderItem);
+        order.setOrderItems(orderItems);
+
+        return order;
+    }
 }

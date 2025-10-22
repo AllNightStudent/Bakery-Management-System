@@ -4,14 +4,12 @@ import com.swp.dto.CategoryDTO;
 import com.swp.entity.*;
 import com.swp.repository.ProductVariantRepository;
 import com.swp.service.*;
+import jakarta.servlet.http.HttpSession;
 import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -112,7 +110,22 @@ public class ProductController {
         cartItemService.save(cartItem);
 
         return "redirect:/cart" ;
+    }
 
+    @PostMapping("/buy-now")
+    public String buyNow(@RequestParam("variantId") Long variantId,
+                         @RequestParam("quantity") int quantity,
+                         HttpSession session) {
+        UserEntity currentUser = userService.getCurrentUser();
+        if(currentUser == null) {
+            return "redirect:/login";
+        }
 
+        // Lưu thông tin mua ngay vào session
+        session.setAttribute("buyNowVariantId", variantId);
+        session.setAttribute("buyNowQuantity", quantity);
+
+        // Chuyển thẳng sang trang checkout
+        return "redirect:/order/checkout";
     }
 }
