@@ -1,6 +1,7 @@
 package com.swp.repository;
 
 import com.swp.entity.OrderEntity;
+import com.swp.entity.UserEntity;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +19,11 @@ import java.util.function.Function;
 
 @Repository
 public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
+
+    List<OrderEntity> findByUserOrderByOrderDateDesc(UserEntity user);
+
+    List<OrderEntity> findByStatus(String status);
+
     @Query("SELECT o FROM OrderEntity o WHERE o.orderDate > :start AND o.orderDate < :end")
     List<OrderEntity> findOrdersBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 

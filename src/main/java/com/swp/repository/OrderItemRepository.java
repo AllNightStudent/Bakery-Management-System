@@ -1,6 +1,7 @@
 package com.swp.repository;
 
 import com.swp.dto.ProductRevenueDTO;
+import com.swp.entity.OrderEntity;
 import com.swp.entity.OrderItemEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,6 +14,9 @@ import java.util.List;
 
 @Repository
 public interface OrderItemRepository extends JpaRepository<OrderItemEntity, Long> {
+
+    List<OrderItemEntity> findByOrder(OrderEntity order);
+
     @Query(value = """
         SELECT 
             oi.product_id                                AS productId,

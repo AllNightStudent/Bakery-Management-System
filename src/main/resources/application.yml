@@ -16,3 +16,11 @@ spring:
 
 server:
   port: 8080
+
+# VNPay Configuration
+vnpay:
+  payUrl: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+  returnUrl: http://localhost:8080/vnpay/return
+  tmnCode: ILYI8NLG
+  secretKey: U4901LRDT468HJR30O6OKP8LCQHFBTX8
+  apiUrl: https://sandbox.vnpayment.vn/merchant_webapi/api/transaction

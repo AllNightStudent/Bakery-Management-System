@@ -228,7 +228,7 @@
                 height: 60px;
                 border: 2px dashed #ddd;
                 border-radius: 8px;
-                display: flex;products
+                display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
@@ -708,7 +708,7 @@
                                     <tbody>
                                     <tr th:each="variant : ${variantsByProduct.get(p.productId)}">
                                         <td th:text="${variant.sku}">SKU</td>
-                                        <td th:text="${variant.price} + ' ₫'">Giá</td>
+                                        <td th:text="${#numbers.formatDecimal(variant.price, 0, 'COMMA', 0, 'POINT')} + ' ₫'">Giá</td>
                                         <td th:text="${variant.stock}">Tồn kho</td>
                                     </tr>
                                     </tbody>

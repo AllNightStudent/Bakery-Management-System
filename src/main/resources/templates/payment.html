@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::main}, 'Thanh toán - Bakery', ~{::extraHead}, ~{::extraScripts})}">
+<head>
+  <title>Thanh toán - Bakery</title>
+  <th:block th:fragment="extraHead">
+    <link rel="stylesheet" th:href="@{/css/login.css}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+      body {
+        background-color: #f5f0e8;
+        font-family: 'Arial', sans-serif;
+      }
+    </style>
+  </th:block>
+</head>
+
+<body class="min-h-screen">
+<main>
+  <div class="w-full h-2 bg-gradient-to-r from-green-600 via-red-600 to-gray-800"></div>
+
+  <div class="max-w-4xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-center mb-12 tracking-wider">THANH TOÁN</h1>
+
+    <!-- Thông tin đơn hàng -->
+    <div class="bg-white p-6 rounded-lg shadow-sm mb-6">
+      <h2 class="text-xl font-semibold mb-4">Thông tin đơn hàng</h2>
+      <div class="space-y-2 text-gray-700">
+        <div class="flex justify-between">
+          <span>Mã đơn hàng:</span>
+          <span class="font-semibold" th:text="'ORD-' + ${order.orderId}"></span>
+        </div>
+        <div class="flex justify-between">
+          <span>Người nhận:</span>
+          <span th:text="${order.customerName}"></span>
+        </div>
+        <div class="flex justify-between">
+          <span>Số điện thoại:</span>
+          <span th:text="${order.customerPhone}"></span>
+        </div>
+        <div class="flex justify-between">
+          <span>Địa chỉ:</span>
+          <span th:text="${order.customerAddress}"></span>
+        </div>
+        <div class="flex justify-between text-xl font-bold text-gray-800 pt-4 border-t">
+          <span>Tổng tiền:</span>
+          <span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phương thức thanh toán -->
+    <div class="bg-white p-6 rounded-lg shadow-sm">
+      <h2 class="text-xl font-semibold mb-4">Chọn phương thức thanh toán</h2>
+
+      <form id="paymentForm">
+        <input type="hidden" id="orderId" th:value="${order.orderId}">
+
+        <div class="space-y-3 mb-6">
+          <div>
+            <h3 class="font-medium mb-3">Cách 1: Chuyển hướng sang Cổng VNPAY chọn phương thức thanh toán</h3>
+            <label class="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+              <input type="radio" name="bankCode" value="" checked class="w-4 h-4 text-blue-600">
+              <span class="ml-3">Cổng thanh toán VNPAYQR</span>
+            </label>
+          </div>
+
+          <div>
+            <h3 class="font-medium mb-3">Cách 2: Tách phương thức tại site của đơn vị kết nối</h3>
+            <div class="space-y-2">
+              <label class="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                <input type="radio" name="bankCode" value="VNPAYQR" class="w-4 h-4 text-blue-600">
+                <span class="ml-3">Thanh toán bằng ứng dụng hỗ trợ VNPAYQR</span>
+              </label>
+
+              <label class="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                <input type="radio" name="bankCode" value="VNBANK" class="w-4 h-4 text-blue-600">
+                <span class="ml-3">Thanh toán qua thẻ ATM/Tài khoản nội địa</span>
+              </label>
+
+              <label class="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                <input type="radio" name="bankCode" value="INTCARD" class="w-4 h-4 text-blue-600">
+                <span class="ml-3">Thanh toán qua thẻ quốc tế</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-4">
+          <a th:href="@{/cart}" class="px-8 py-3 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition">
+            Hủy
+          </a>
+          <button type="submit" class="px-8 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+            Thanh toán ngay
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>
+
+<th:block th:fragment="extraScripts">
+  <link href="https://pay.vnpay.vn/lib/vnpay/vnpay.css" rel="stylesheet" />
+  <script src="https://pay.vnpay.vn/lib/vnpay/vnpay.min.js"></script>
+  <script>
+    $("#paymentForm").submit(function(e) {
+      e.preventDefault();
+
+      var orderId = $("#orderId").val();
+      var bankCode = $("input[name='bankCode']:checked").val();
+
+      $.ajax({
+        type: "POST",
+        url: "/vnpay/create-payment",
+        data: {
+          orderId: orderId,
+          bankCode: bankCode
+        },
+        dataType: 'JSON',
+        success: function(response) {
+          if (response.code === '00') {
+            if (window.vnpay) {
+              vnpay.open({width: 768, height: 600, url: response.data});
+            } else {
+              window.location.href = response.data;
+            }
+          } else {
+            alert(response.message);
+          }
+        },
+        error: function() {
+          alert("Có lỗi xảy ra, vui lòng thử lại!");
+        }
+      });
+
+      return false;
+    });
+  </script>
+</th:block>
+
+</body>
+</html>
