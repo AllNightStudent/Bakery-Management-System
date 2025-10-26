@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout-admin :: layout(~{::main}, 'Quản lý đơn hàng - Bakery', ~{::extraHead}, ~{::extraScripts})}">
+<head>
+    <title>Quản lý đơn hàng - Bakery</title>
+    <th:block th:fragment="extraHead">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <style>
+            /* Admin Base Styles */
+            .admin-header {
+                background: #2c3e50;
+                color: white;
+                padding: 15px 0;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 1000;
+            }
+
+            .admin-container {
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 0 20px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .admin-layout {
+                display: flex;
+                margin-top: 70px;
+                min-height: calc(100vh - 70px);
+            }
+
+            .admin-sidebar {
+                width: 250px;
+                background: #34495e;
+                color: white;
+                position: fixed;
+                height: calc(100vh - 70px);
+                overflow-y: auto;
+            }
+
+            .admin-main {
+                flex: 1;
+                margin-left: 250px;
+                padding: 30px;
+                background: #ecf0f1;
+            }
+
+            /* Order Page Styles */
+            .page-header {
+                margin-bottom: 30px;
+            }
+
+            .page-header h1 {
+                font-size: 28px;
+                color: #2c3e50;
+                margin-bottom: 10px;
+            }
+
+            .breadcrumb {
+                color: #7f8c8d;
+                font-size: 14px;
+            }
+
+            /* Statistics Cards */
+            .stats-container {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 20px;
+                margin-bottom: 30px;
+            }
+
+            .stat-card {
+                background: white;
+                border-radius: 8px;
+                padding: 20px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .stat-info h3 {
+                font-size: 14px;
+                color: #7f8c8d;
+                margin-bottom: 8px;
+            }
+
+            .stat-info .number {
+                font-size: 28px;
+                font-weight: bold;
+                color: #2c3e50;
+            }
+
+            .stat-icon {
+                font-size: 40px;
+            }
+
+            .stat-card.total { border-left: 4px solid #3498db; }
+            .stat-card.pending { border-left: 4px solid #f39c12; }
+            .stat-card.confirmed { border-left: 4px solid #9b59b6; }
+            .stat-card.delivered { border-left: 4px solid #27ae60; }
+            .stat-card.cancelled { border-left: 4px solid #e74c3c; }
+
+            /* Filter Section */
+            .filter-section {
+                background: white;
+                border-radius: 8px;
+                padding: 20px;
+                margin-bottom: 20px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+
+            .filter-title {
+                font-size: 18px;
+                font-weight: bold;
+                color: #2c3e50;
+                margin-bottom: 15px;
+            }
+
+            .filter-form {
+                display: grid;
+                grid-template-columns: 2fr 1fr 1fr auto;
+                gap: 15px;
+                align-items: end;
+            }
+
+            .form-group {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .form-group label {
+                font-size: 14px;
+                color: #2c3e50;
+                margin-bottom: 5px;
+                font-weight: 500;
+            }
+
+            .form-group input,
+            .form-group select {
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                font-size: 14px;
+            }
+
+            .filter-buttons {
+                display: flex;
+                gap: 10px;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 500;
+                transition: all 0.3s;
+            }
+
+            .btn-primary {
+                background: #3498db;
+                color: white;
+            }
+
+            .btn-primary:hover {
+                background: #2980b9;
+            }
+
+            .btn-secondary {
+                background: #95a5a6;
+                color: white;
+            }
+
+            .btn-secondary:hover {
+                background: #7f8c8d;
+            }
+
+            .btn-success {
+                background: #27ae60;
+                color: white;
+                padding: 5px 10px;
+                font-size: 12px;
+            }
+
+            .btn-success:hover {
+                background: #229954;
+            }
+
+            .btn-danger {
+                background: #e74c3c;
+                color: white;
+                padding: 5px 10px;
+                font-size: 12px;
+            }
+
+            .btn-danger:hover {
+                background: #c0392b;
+            }
+
+            .btn-warning {
+                background: #f39c12;
+                color: white;
+                padding: 5px 10px;
+                font-size: 12px;
+            }
+
+            .btn-warning:hover {
+                background: #e67e22;
+            }
+
+            /* Table Styles */
+            .table-container {
+                background: white;
+                border-radius: 8px;
+                padding: 20px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+
+            .table-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 15px;
+            }
+
+            .table-header h2 {
+                font-size: 18px;
+                color: #2c3e50;
+            }
+
+            .table-info {
+                font-size: 14px;
+                color: #7f8c8d;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            thead {
+                background: #ecf0f1;
+            }
+
+            th {
+                padding: 12px;
+                text-align: left;
+                font-weight: 600;
+                color: #2c3e50;
+                font-size: 14px;
+            }
+
+            td {
+                padding: 12px;
+                border-bottom: 1px solid #ecf0f1;
+                font-size: 14px;
+            }
+
+            tbody tr:hover {
+                background: #f8f9fa;
+            }
+
+            /* Status Badges */
+            .status-badge {
+                display: inline-block;
+                padding: 5px 12px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 600;
+            }
+
+            .status-pending {
+                background: #fff3cd;
+                color: #856404;
+            }
+
+            .status-confirmed {
+                background: #e3d3f5;
+                color: #6a1b9a;
+            }
+
+            .status-delivered {
+                background: #d4edda;
+                color: #155724;
+            }
+
+            .status-cancelled {
+                background: #f8d7da;
+                color: #721c24;
+            }
+
+            /* Status Select Dropdown */
+            .status-select-pending {
+                background: #fff3cd;
+                color: #856404;
+                border: 1px solid #ffeaa7;
+            }
+
+            .status-select-confirmed {
+                background: #e3d3f5;
+                color: #6a1b9a;
+                border: 1px solid #d3b4f0;
+            }
+
+            .status-select {
+                padding: 5px 12px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 600;
+                cursor: pointer;
+                appearance: none;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                background-repeat: no-repeat;
+                background-position: right 8px center;
+                background-size: 12px;
+                padding-right: 28px;
+            }
+
+            .status-select-pending {
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23856404' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            }
+
+            .status-select-confirmed {
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236a1b9a' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            }
+
+            /* Pagination */
+            .pagination {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 10px;
+                margin-top: 20px;
+                padding-top: 20px;
+                border-top: 1px solid #ecf0f1;
+            }
+
+            .pagination a,
+            .pagination span {
+                padding: 8px 12px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                text-decoration: none;
+                color: #2c3e50;
+                font-size: 14px;
+            }
+
+            .pagination a:hover {
+                background: #3498db;
+                color: white;
+                border-color: #3498db;
+            }
+
+            .pagination .current {
+                background: #3498db;
+                color: white;
+                border-color: #3498db;
+            }
+
+            .pagination .disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+                pointer-events: none;
+            }
+
+            /* Empty State */
+            .empty-state {
+                text-align: center;
+                padding: 60px 20px;
+                color: #7f8c8d;
+            }
+
+            .empty-state .icon {
+                font-size: 64px;
+                margin-bottom: 20px;
+            }
+
+            .empty-state h3 {
+                font-size: 20px;
+                margin-bottom: 10px;
+            }
+
+            .empty-state p {
+                font-size: 14px;
+            }
+
+            /* Customer Info */
+            .customer-info {
+                font-size: 13px;
+            }
+
+            .customer-info .label {
+                font-weight: 600;
+                color: #2c3e50;
+            }
+
+            .customer-info .value {
+                color: #7f8c8d;
+            }
+
+            /* Responsive */
+            @media (max-width: 1200px) {
+                .filter-form {
+                    grid-template-columns: 1fr 1fr;
+                }
+
+                .filter-buttons {
+                    grid-column: 1 / -1;
+                }
+
+                .stats-container {
+                    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                }
+            }
+
+            @media (max-width: 768px) {
+                .filter-form {
+                    grid-template-columns: 1fr;
+                }
+
+                .stats-container {
+                    grid-template-columns: 1fr;
+                }
+
+                .table-container {
+                    overflow-x: auto;
+                }
+
+                table {
+                    min-width: 1000px;
+                }
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+<main th:fragment="main">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>🛒 Quản lý đơn hàng</h1>
+        <div class="breadcrumb">Dashboard / Quản lý đơn hàng</div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-container">
+        <div class="stat-card total">
+            <div class="stat-info">
+                <h3>Tổng đơn hàng</h3>
+                <div class="number" th:text="${totalOrders}">0</div>
+            </div>
+            <div class="stat-icon">🛒</div>
+        </div>
+
+        <div class="stat-card pending">
+            <div class="stat-info">
+                <h3>Đang chờ</h3>
+                <div class="number" th:text="${pendingCount}">0</div>
+            </div>
+            <div class="stat-icon">⏳</div>
+        </div>
+
+        <div class="stat-card confirmed">
+            <div class="stat-info">
+                <h3>Đã xác nhận</h3>
+                <div class="number" th:text="${confirmedCount}">0</div>
+            </div>
+            <div class="stat-icon">✔️</div>
+        </div>
+
+        <div class="stat-card delivered">
+            <div class="stat-info">
+                <h3>Đã giao</h3>
+                <div class="number" th:text="${deliveredCount}">0</div>
+            </div>
+            <div class="stat-icon">✅</div>
+        </div>
+
+        <div class="stat-card cancelled">
+            <div class="stat-info">
+                <h3>Đã hủy</h3>
+                <div class="number" th:text="${cancelledCount}">0</div>
+            </div>
+            <div class="stat-icon">❌</div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <div class="filter-title">🔍 Tìm kiếm và lọc</div>
+        <form th:action="@{/admin/orders}" method="get" class="filter-form">
+            <div class="form-group">
+                <label for="search">Tìm kiếm</label>
+                <input type="text" id="search" name="search" 
+                       th:value="${search}"
+                       placeholder="Tìm theo tên, SĐT, địa chỉ khách hàng...">
+            </div>
+
+            <div class="form-group">
+                <label for="status">Trạng thái</label>
+                <select id="status" name="status">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="PENDING" th:selected="${status == 'PENDING'}">Đang chờ</option>
+                    <option value="CONFIRMED" th:selected="${status == 'CONFIRMED'}">Đã xác nhận</option>
+                    <option value="COMPLETED" th:selected="${status == 'COMPLETED'}">Đã giao</option>
+                    <option value="CANCELLED" th:selected="${status == 'CANCELLED'}">Đã hủy</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="size">Số bản ghi/trang</label>
+                <select id="size" name="size">
+                    <option value="10" th:selected="${size == 10}">10</option>
+                    <option value="20" th:selected="${size == 20}">20</option>
+                    <option value="50" th:selected="${size == 50}">50</option>
+                    <option value="100" th:selected="${size == 100}">100</option>
+                </select>
+            </div>
+
+            <div class="filter-buttons">
+                <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                <a th:href="@{/admin/orders}" class="btn btn-secondary">Xóa bộ lọc</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Order Table -->
+    <div class="table-container">
+        <div class="table-header">
+            <h2>📋 Danh sách đơn hàng</h2>
+            <div class="table-info">
+                Hiển thị <strong th:text="${orders.size()}">0</strong> / 
+                <strong th:text="${totalElements}">0</strong> đơn hàng
+            </div>
+        </div>
+
+        <!-- Table with data -->
+        <div th:if="${orders != null && !orders.isEmpty()}">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mã đơn</th>
+                        <th>Khách hàng</th>
+                        <th>Liên hệ</th>
+                        <th>Địa chỉ</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày đặt</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="order : ${orders}">
+                        <td>
+                            <strong th:text="'#' + ${order.orderId}">ORD001</strong>
+                        </td>
+                        <td>
+                            <div class="customer-info">
+                                <div th:text="${order.customerName}">Nguyễn Văn A</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="customer-info">
+                                <div th:text="${order.customerPhone}">0123456789</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="customer-info" style="max-width: 200px;">
+                                <div th:text="${order.customerAddress}">123 Đường ABC</div>
+                            </div>
+                        </td>
+                        <td>
+                            <strong th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">
+                                500,000 ₫
+                            </strong>
+                        </td>
+                        <td>
+                            <!-- Hiển thị badge nếu đã giao hoặc đã hủy (không thể thay đổi) -->
+                            <span th:if="${order.status == 'COMPLETED' || order.status == 'CANCELLED'}"
+                                  class="status-badge"
+                                  th:classappend="${order.status == 'COMPLETED'} ? 'status-delivered' : 'status-cancelled'"
+                                  th:text="${order.status == 'COMPLETED'} ? 'Đã giao' : 'Đã hủy'">
+                                Đã giao
+                            </span>
+                            
+                            <!-- Hiển thị dropdown nếu chưa giao và chưa hủy (có thể thay đổi) -->
+                            <select th:if="${order.status != 'COMPLETED' && order.status != 'CANCELLED'}"
+                                    th:data-order-id="${order.orderId}" 
+                                    class="status-change-select status-select"
+                                    th:classappend="${order.status == 'PENDING'} ? 'status-select-pending' : 'status-select-confirmed'">
+                                <option value="PENDING" th:selected="${order.status == 'PENDING'}">Đang chờ</option>
+                                <option value="CONFIRMED" th:selected="${order.status == 'CONFIRMED'}">Đã xác nhận</option>
+                                <option value="COMPLETED">Đã giao</option>
+                                <option value="CANCELLED">Đã hủy</option>
+                            </select>
+                        </td>
+                        <td th:text="${order.orderDate != null ? #temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm') : '-'}">
+                            01/01/2024 10:30
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            <div class="pagination" th:if="${totalPages > 1}">
+                <!-- Previous Button -->
+                <a th:href="@{/admin/orders(page=${currentPage - 1}, size=${size}, search=${search}, status=${status})}"
+                   th:classappend="${currentPage == 0} ? 'disabled' : ''">
+                    ← Trước
+                </a>
+
+                <!-- Page Numbers -->
+                <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                    <a th:if="${i == currentPage}"
+                       class="current"
+                       th:text="${i + 1}">1</a>
+                    
+                    <a th:if="${i != currentPage}"
+                       th:href="@{/admin/orders(page=${i}, size=${size}, search=${search}, status=${status})}"
+                       th:text="${i + 1}">1</a>
+                </th:block>
+
+                <!-- Next Button -->
+                <a th:href="@{/admin/orders(page=${currentPage + 1}, size=${size}, search=${search}, status=${status})}"
+                   th:classappend="${currentPage >= totalPages - 1} ? 'disabled' : ''">
+                    Tiếp →
+                </a>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${orders == null || orders.isEmpty()}" class="empty-state">
+            <div class="icon">📭</div>
+            <h3>Không tìm thấy đơn hàng</h3>
+            <p>Không có đơn hàng nào phù hợp với tiêu chí tìm kiếm của bạn.</p>
+        </div>
+    </div>
+</main>
+
+<th:block th:fragment="extraScripts">
+    <script>
+        // Auto-focus on search input
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('search');
+            if (searchInput && searchInput.value === '') {
+                searchInput.focus();
+            }
+        });
+
+        // Handle status change
+        document.querySelectorAll('.status-change-select').forEach(function(select) {
+            // Store original value
+            const originalValue = select.value;
+            
+            select.addEventListener('change', function() {
+                const orderId = this.getAttribute('data-order-id');
+                const newStatus = this.value;
+                const oldValue = originalValue;
+                
+                // If same as original, do nothing
+                if (newStatus === oldValue) return;
+                
+                // Confirm with SweetAlert
+                let statusText = '';
+                if (newStatus === 'PENDING') statusText = 'đang chờ';
+                else if (newStatus === 'CONFIRMED') statusText = 'đã xác nhận';
+                else if (newStatus === 'DELIVERED') statusText = 'đã giao';
+                else if (newStatus === 'CANCELLED') statusText = 'đã hủy';
+                
+                Swal.fire({
+                    title: 'Xác nhận thay đổi?',
+                    text: `Bạn muốn chuyển đơn hàng sang trạng thái "${statusText}"?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3498db',
+                    cancelButtonColor: '#95a5a6',
+                    confirmButtonText: 'Xác nhận',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Send AJAX request
+                        fetch(`/admin/orders/${orderId}/status?status=${newStatus}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        })
+                        .then(response => response.text())
+                        .then(data => {
+                            if (data === 'success') {
+                                Swal.fire({
+                                    title: 'Thành công!',
+                                    text: 'Đã cập nhật trạng thái đơn hàng',
+                                    icon: 'success',
+                                    confirmButtonColor: '#3498db'
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Lỗi!',
+                                    text: 'Không thể cập nhật trạng thái',
+                                    icon: 'error',
+                                    confirmButtonColor: '#e74c3c'
+                                });
+                                // Reset to original value
+                                select.value = oldValue;
+                            }
+                        })
+                        .catch(error => {
+                            Swal.fire({
+                                title: 'Lỗi!',
+                                text: 'Có lỗi xảy ra khi cập nhật',
+                                icon: 'error',
+                                confirmButtonColor: '#e74c3c'
+                            });
+                            // Reset to original value
+                            select.value = oldValue;
+                        });
+                    } else {
+                        // Reset to original value if cancelled
+                        select.value = oldValue;
+                    }
+                });
+            });
+        });
+
+        // Highlight current page in pagination
+        document.querySelectorAll('.pagination a.current').forEach(function(el) {
+            el.style.pointerEvents = 'none';
+        });
+    </script>
+</th:block>
+</body>
+</html>
+
