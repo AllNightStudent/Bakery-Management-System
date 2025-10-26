@@ -1,7 +1,9 @@
 package com.swp.service;
 
 import com.swp.dto.request.ChangePasswordRequest;
+import com.swp.entity.RoleEntity;
 import com.swp.entity.UserEntity;
+import com.swp.repository.RoleRepository;
 import com.swp.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -10,12 +12,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
 
     private final UserRepository userRepository;
+
+    private final RoleRepository roleRepository;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -46,5 +52,31 @@ public class UserService {
 
         String email = auth.getName();
         return userRepository.findByEmail(email).orElse(null);
+    }
+
+    public List<UserEntity> findAll() {
+        return userRepository.findAll();
+    }
+
+    public List<UserEntity> findByRole(Long roleId) {
+        return this.findAll().stream().filter(user -> user.getRole().getId().equals(roleId)).toList();
+    }
+
+    public List<RoleEntity> getAllRoles() {
+        return roleRepository.findAll();
+    }
+
+    public void toggleStatus(Long id) {
+        UserEntity user = userRepository.findById(id).orElse(null);
+        if (user != null) {
+            user.setStatus(!user.getStatus());
+            userRepository.save(user);
+        }
+    }
+
+    public boolean deleteById(Long id) {
+        if (!userRepository.existsById(id)) return false;
+        userRepository.deleteById(id);
+        return true;
     }
 }

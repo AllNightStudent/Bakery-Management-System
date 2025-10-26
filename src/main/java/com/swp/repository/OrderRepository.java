@@ -22,9 +22,20 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
 
     List<OrderEntity> findByUserOrderByOrderDateDesc(UserEntity user);
 
+
     List<OrderEntity> findByStatus(String status);
 
     @Query("SELECT o FROM OrderEntity o WHERE o.orderDate > :start AND o.orderDate < :end")
     List<OrderEntity> findOrdersBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+    @Query("SELECT o FROM OrderEntity o WHERE " +
+            "(:status IS NULL OR o.status = :status) AND " +
+            "(:search IS NULL OR " +
+            "LOWER(o.customerName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(o.customerPhone) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(o.customerAddress) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<OrderEntity> searchAndFilterOrders(
+            @Param("status") String status,
+            @Param("search") String search,
+            Pageable pageable);
 
 }

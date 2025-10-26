@@ -5,6 +5,10 @@ import com.swp.repository.OrderItemRepository;
 import com.swp.repository.OrderRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -20,6 +24,25 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final CartItemService cartItemService;
+
+    public long countAll() {
+        return orderRepository.count();
+    }
+
+    public long countByStatus(String status) {
+        return orderRepository.findByStatus(status).size();
+    }
+
+    public Page<OrderEntity> searchAndFilterOrders(String search, String status, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "orderDate"));
+
+        // Handle empty strings as null
+        String searchTerm = (search != null && !search.trim().isEmpty())
+                ? search.trim() : null;
+        String filterStatus = (status != null && !status.trim().isEmpty()) ? status : null;
+
+        return orderRepository.searchAndFilterOrders(filterStatus, searchTerm, pageable);
+    }
 
     @Transactional
     public OrderEntity createOrderFromCart(CartEntity cart, String customerName, String customerPhone,
