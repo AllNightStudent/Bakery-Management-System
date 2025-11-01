@@ -25,8 +25,15 @@ public class OrderController {
     private final ProductVariantRepository productVariantRepository;
 
     @GetMapping("/checkout")
-    public String checkout(HttpSession session, Model model) {
+    public String checkout(@RequestParam(value = "fromCart", required = false) Boolean fromCart,
+                           HttpSession session, Model model) {
         UserEntity currentUser = userService.getCurrentUser();
+
+        // Nếu đi từ giỏ hàng, xóa trạng thái "mua ngay" trong session
+        if (Boolean.TRUE.equals(fromCart)) {
+            session.removeAttribute("buyNowVariantId");
+            session.removeAttribute("buyNowQuantity");
+        }
 
         // Kiểm tra xem có phải "mua ngay" không
         Long buyNowVariantId = (Long) session.getAttribute("buyNowVariantId");

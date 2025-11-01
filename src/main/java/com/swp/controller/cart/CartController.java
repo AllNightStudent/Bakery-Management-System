@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.HttpSession;
 
 import java.util.List;
 
@@ -21,7 +22,10 @@ public class CartController {
     private final UserService userService;
 
     @GetMapping
-    public String viewCartItem(Model model) {
+    public String viewCartItem(Model model, HttpSession session) {
+        // Khi vào trang giỏ hàng, xóa trạng thái mua ngay nếu có
+        session.removeAttribute("buyNowVariantId");
+        session.removeAttribute("buyNowQuantity");
         CartEntity cart = cartService.findCartByUser(userService.getCurrentUser());
         List<CartItemEntity> items = cartItemService.findAllByCart(cart);
 
