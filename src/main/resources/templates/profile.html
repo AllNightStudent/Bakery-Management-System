@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::main}, 'Profile - Bakery', ~{::extraHead}, ~{::extraScripts})}">
+<head>
+  <title>Profile - Bakery</title>
+  <th:block th:fragment="extraHead">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+  </th:block>
+</head>
+<body>
+<th:block th:fragment="main">
+  <div class="container mx-auto px-4 py-8 max-w-3xl">
+    <!-- Header -->
+    <div class="bg-amber-900 rounded-lg shadow-lg p-8 text-center text-white mb-8">
+      <div class="avatar mx-auto mb-4 w-24 h-24 rounded-full bg-white flex items-center justify-center text-4xl text-amber-900">👤</div>
+      <h1 class="text-2xl font-bold" th:text="${currentUser.name}">Tên Người Dùng</h1>
+      <p class="text-sm opacity-90" th:text="${currentUser.role != null ? currentUser.role.name : 'Khách hàng'}">Vai trò</p>
+    </div>
+
+    <!-- Profile Form -->
+    <div class="bg-white rounded-lg shadow-lg p-8">
+      <!-- Thông báo thành công -->
+      <div th:if="${successMessage}" class="mb-4 p-3 bg-green-100 text-green-700 rounded" th:text="${successMessage}"></div>
+
+      <form th:action="@{/profile/update}" method="post" id="profileForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block mb-2 font-semibold">Họ và Tên</label>
+          <input type="text" name="name" class="w-full border-2 border-gray-300 rounded px-3 py-2"
+                 th:value="${currentUser.name}" disabled id="name">
+        </div>
+        <div>
+          <label class="block mb-2 font-semibold">Email</label>
+          <input type="email" name="email" class="w-full border-2 border-gray-300 rounded px-3 py-2"
+                 th:value="${currentUser.email}" disabled id="email">
+        </div>
+        <div>
+          <label class="block mb-2 font-semibold">Số điện thoại</label>
+          <input type="tel" name="phone" class="w-full border-2 border-gray-300 rounded px-3 py-2"
+                 th:value="${currentUser.phone}" disabled id="phone">
+        </div>
+
+        <div class="flex gap-4 md:col-span-2 mt-6">
+          <button type="button" class="bg-amber-900 text-white px-6 py-2 rounded font-bold"
+                  id="updateBtn" onclick="toggleEditMode()">Cập nhật thông tin</button>
+          <div class="flex gap-2 hidden" id="actionButtons">
+            <button type="submit" class="bg-amber-900 text-white px-6 py-2 rounded font-bold">Lưu thay đổi</button>
+            <button type="button" class="bg-gray-300 text-gray-700 px-6 py-2 rounded" onclick="cancelEdit()">Hủy</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</th:block>
+
+<th:block th:fragment="extraScripts">
+  <script>
+    function toggleEditMode() {
+      document.querySelectorAll('#profileForm input').forEach(input => input.disabled = false);
+      document.getElementById('updateBtn').classList.add('hidden');
+      document.getElementById('actionButtons').classList.remove('hidden');
+    }
+
+    function cancelEdit() {
+      document.querySelectorAll('#profileForm input').forEach(input => input.disabled = true);
+      document.getElementById('updateBtn').classList.remove('hidden');
+      document.getElementById('actionButtons').classList.add('hidden');
+    }
+  </script>
+</th:block>
+</body>
+</html>

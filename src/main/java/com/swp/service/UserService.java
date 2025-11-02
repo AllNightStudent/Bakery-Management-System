@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,9 +21,7 @@ public class UserService {
 
 
     private final UserRepository userRepository;
-
     private final RoleRepository roleRepository;
-
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
@@ -79,4 +78,10 @@ public class UserService {
         userRepository.deleteById(id);
         return true;
     }
+
+    public void update(UserEntity user) {
+        userRepository.save(user);
+    }
+
+
 }

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::main}, 'Đơn Hàng - Bakery', ~{::extraHead}, ~{::extraScripts})}">
+<head>
+  <th:block th:fragment="extraHead">
+    <script src="https://cdn.tailwindcss.com"></script>
+  </th:block>
+</head>
+
+<body class="min-h-screen">
+<main>
+  <th:block th:fragment="main">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+      <h1 class="text-3xl font-bold text-center mb-8">ĐƠN HÀNG CỦA TÔI</h1>
+
+      <div th:if="${orders.isEmpty()}" class="text-center text-gray-500">
+        Bạn chưa có đơn hàng nào.
+      </div>
+
+      <div th:if="${!orders.isEmpty()}">
+        <!-- Table Header -->
+        <div class="grid grid-cols-12 gap-4 font-bold border-b pb-2 mb-2 text-center">
+          <div class="col-span-2">Mã đơn</div>
+          <div class="col-span-3">Ngày đặt</div>
+          <div class="col-span-2">Tổng tiền</div>
+          <div class="col-span-2">Trạng thái</div>
+          <div class="col-span-3">Hành động</div>
+        </div>
+
+        <!-- Order Rows -->
+        <div th:each="order : ${orders}" class="grid grid-cols-12 gap-4 items-center border-b py-4 text-center">
+          <div class="col-span-2" th:text="${order.orderId}">1</div>
+          <div class="col-span-3" th:text="${order.orderDate.format(T(java.time.format.DateTimeFormatter).ofPattern('dd/MM/yyyy HH:mm'))}"></div>
+
+          <div class="col-span-2 font-semibold text-gray-800"
+               th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</div>
+          <div class="col-span-2">
+                    <span th:text="${order.status}"
+                          th:classappend="${order.status == 'PENDING' ? 'text-yellow-600' : (order.status == 'CONFIRMED' ? 'text-blue-600' : (order.status == 'DELIVERED' ? 'text-green-600' : 'text-red-600'))}"></span>
+          </div>
+          <div class="col-span-3 flex justify-center gap-2">
+            <a th:href="@{'/orders/' + ${order.orderId} + '/details'}"
+               class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">Chi tiết</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </th:block>
+</main>
+
+<th:block th:fragment="extraScripts">
+</th:block>
+</body>
+
+</html>

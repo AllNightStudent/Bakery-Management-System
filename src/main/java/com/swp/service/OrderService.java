@@ -25,25 +25,6 @@ public class OrderService {
     private final OrderItemRepository orderItemRepository;
     private final CartItemService cartItemService;
 
-    public long countAll() {
-        return orderRepository.count();
-    }
-
-    public long countByStatus(String status) {
-        return orderRepository.findByStatus(status).size();
-    }
-
-    public Page<OrderEntity> searchAndFilterOrders(String search, String status, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "orderDate"));
-
-        // Handle empty strings as null
-        String searchTerm = (search != null && !search.trim().isEmpty())
-                ? search.trim() : null;
-        String filterStatus = (status != null && !status.trim().isEmpty()) ? status : null;
-
-        return orderRepository.searchAndFilterOrders(filterStatus, searchTerm, pageable);
-    }
-
     @Transactional
     public OrderEntity createOrderFromCart(CartEntity cart, String customerName, String customerPhone,
                                            String customerAddress, String note) {
@@ -109,6 +90,10 @@ public class OrderService {
         return orderRepository.findById(orderId);
     }
 
+    public OrderEntity findOrderById(Long orderId) {
+        return orderRepository.findById(orderId).get();
+    }
+
     public List<OrderEntity> findByUser(UserEntity user) {
         return orderRepository.findByUserOrderByOrderDateDesc(user);
     }
@@ -154,5 +139,35 @@ public class OrderService {
         order.setOrderItems(orderItems);
 
         return order;
+    }
+
+    // Admin order management methods
+    public Page<OrderEntity> getAllOrders(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "orderDate"));
+        return orderRepository.findAll(pageable);
+    }
+
+    public Page<OrderEntity> searchAndFilterOrders(String search, String status, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "orderDate"));
+
+        // Handle empty strings as null
+        String searchTerm = (search != null && !search.trim().isEmpty())
+                ? search.trim() : null;
+        String filterStatus = (status != null && !status.trim().isEmpty()) ? status : null;
+
+        return orderRepository.searchAndFilterOrders(filterStatus, searchTerm, pageable);
+    }
+
+    public List<OrderEntity> getAllOrders() {
+        return orderRepository.findAll();
+    }
+
+    // Get statistics for dashboard
+    public long countByStatus(String status) {
+        return orderRepository.findByStatus(status).size();
+    }
+
+    public long countAll() {
+        return orderRepository.count();
     }
 }

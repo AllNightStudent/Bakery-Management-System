@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::main}, 'Chi Tiết Đơn Hàng - Bakery', ~{::extraHead}, ~{::extraScripts})}">
+<head>
+  <th:block th:fragment="extraHead">
+    <link rel="stylesheet" th:href="@{/css/login.css}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        background-color: #f5f0e8;
+        font-family: 'Arial', sans-serif;
+      }
+    </style>
+  </th:block>
+</head>
+
+<body class="min-h-screen">
+<main>
+  <!-- Header Image -->
+  <div class="w-full h-2 bg-gradient-to-r from-green-600 via-red-600 to-gray-800"></div>
+
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-center mb-12 tracking-wider">CHI TIẾT ĐƠN HÀNG</h1>
+
+    <!-- Thông tin đơn hàng -->
+    <div class="mb-6 text-gray-700">
+      <p>Mã đơn hàng: <span th:text="${order.orderId}"></span></p>
+      <p>Ngày đặt: <span
+              th:text="${order.orderDate.format(T(java.time.format.DateTimeFormatter).ofPattern('dd/MM/yyyy HH:mm'))}"></span>
+      </p>
+      <p>Trạng thái: <span th:text="${order.status}"></span></p>
+    </div>
+
+    <!-- Table Header -->
+    <div class="grid grid-cols-12 gap-4 mb-6 text-sm text-gray-700 font-semibold">
+      <div class="col-span-6 text-center">Thông tin sản phẩm</div>
+      <div class="col-span-2 text-center">Đơn giá</div>
+      <div class="col-span-2 text-center">Số lượng</div>
+      <div class="col-span-2 text-center">Tổng giá</div>
+    </div>
+
+    <!-- Order Items -->
+    <div th:each="item : ${items}"
+         class="grid grid-cols-12 gap-4 items-center mb-8 bg-white p-4 rounded-lg shadow-sm">
+      <!-- Sản phẩm -->
+      <div class="col-span-6 flex items-center gap-4">
+        <img th:src="${item.productVariant.product.imgUrl}" class="w-32 h-32 object-cover rounded">
+        <div>
+          <h3 class="font-semibold text-gray-800 mb-2" th:text="${item.productName}"></h3>
+        </div>
+      </div>
+
+      <!-- Giá -->
+      <div class="col-span-2 text-center">
+                <span class="text-gray-800"
+                      th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+
+      </div>
+
+      <!-- Số lượng -->
+      <div class="col-span-2 text-center">
+        <span class="text-gray-800" th:text="${item.quantity}"></span>
+      </div>
+
+      <!-- Tổng giá -->
+      <!-- Tổng giá từng sản phẩm -->
+      <div class="col-span-2 text-center">
+    <span class="font-semibold text-gray-800"
+          th:text="${#numbers.formatDecimal(item.price.multiply(T(java.math.BigDecimal).valueOf(item.quantity.longValue())), 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+      </div>
+
+    </div>
+
+    <!-- Tổng cộng -->
+    <div class="flex justify-end items-center gap-8 mt-6">
+      <div class="text-right">
+        <p class="text-sm text-gray-600 mb-2">Tổng tiền</p>
+        <p th:text="${#numbers.formatDecimal(totalAmount, 0, 'COMMA', 0, 'POINT')} + '₫'"></p>
+      </div>
+    </div>
+
+    <!-- Quay lại danh sách đơn hàng -->
+    <div class="mt-6">
+      <a th:href="@{/orders}" class="px-6 py-3 bg-gray-500 text-white rounded hover:bg-gray-600 transition">
+        Quay lại đơn hàng
+      </a>
+    </div>
+  </div>
+</main>
+
+<th:block th:fragment="extraScripts">
+  <!-- Không cần JS thay đổi số lượng ở trang chi tiết -->
+</th:block>
+</body>
+</html>
