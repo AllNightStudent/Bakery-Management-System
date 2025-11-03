@@ -187,7 +187,7 @@
                 <p class="mb-3 text-lg">
                     Giá:
                     <span id="displayPrice" class="font-bold text-amber-900">
-        0₫
+        0
     </span>
                 </p>
                 <div class="product-variants">
@@ -316,7 +316,6 @@
         }
 
         function selectVariant(button) {
-            // <CHANGE> Lấy variantId, giá và stock từ thuộc tính data
             selectedVariantId = button.getAttribute('data-variant-id');
             selectedPrice = parseFloat(button.getAttribute('data-price'));
             selectedStock = parseInt(button.getAttribute('data-stock'));
@@ -325,14 +324,17 @@
             document.querySelectorAll('.btn-variant').forEach(b => b.classList.remove('active'));
             button.classList.add('active');
 
-            // <CHANGE> hiển thị stock info
+            // Hiển thị stock info
             document.getElementById('stockInfo').style.display = 'block';
             document.getElementById('stockAmount').innerText = selectedStock;
 
             // Reset quantity về 1 khi chọn variant mới
             document.getElementById('quantity').value = 1;
             updateQuantityInput(1);
-            // updateDisplayedPrice();
+
+            // ✅ Cập nhật hiển thị giá ngay khi chọn variant
+            document.getElementById('displayPrice').innerText = formatPrice(selectedPrice);
+
             checkStockValidity();
         }
 

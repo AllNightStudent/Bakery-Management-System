@@ -59,7 +59,7 @@ public class ProductVariantEntity {
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
-    @JsonIgnore
+    //@JsonIgnore
     private LocalDateTime createdAt;
 }
 
