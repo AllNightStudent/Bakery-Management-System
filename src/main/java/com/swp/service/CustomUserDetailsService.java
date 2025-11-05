@@ -19,13 +19,12 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy user"));
-        boolean enabled = Boolean.TRUE.equals(user.getStatus()); // status=false => suspended
-        boolean accountNonLocked = true;     // nếu có field locked thì map vào đây
-        boolean accountNonExpired = true;    // nếu có field expired thì map vào đây
+        boolean enabled = Boolean.TRUE.equals(user.getStatus());
+        boolean accountNonLocked = true;
+        boolean accountNonExpired = true;
         boolean credentialsNonExpired = true;
 
-        // 3) Map role: nếu user.getRole().getName() đã là "ROLE_ADMIN" thì dùng authorities(),
-        // nếu chỉ là "ADMIN" thì dùng roles("ADMIN")
+
         String roleName = user.getRole().getName();
         boolean hasRolePrefix = roleName != null && roleName.startsWith("ROLE_");
 
@@ -39,7 +38,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         if (hasRolePrefix) {
             builder.authorities(roleName);
         } else {
-            builder.roles(roleName); // tự thêm "ROLE_"
+            builder.roles(roleName);
         }
 
         return builder.build();
