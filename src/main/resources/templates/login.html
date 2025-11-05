@@ -152,9 +152,14 @@
         <!-- Login Form -->
         <div id="login-form" class="auth-form">
           <h2>Đăng Nhập Tài Khoản</h2>
-          <div th:if="${param.error}">
-            <p style="color:red;">Sai tài khoản hoặc mật khẩu!</p>
-          </div>
+            <div th:if="${param.error}">
+                <p th:switch="${param.error[0]}">
+                    <span th:case="'bad'">Sai email hoặc mật khẩu.</span>
+                    <span th:case="'disabled'">Tài khoản chưa kích hoạt.</span>
+                    <span th:case="'locked'">Tài khoản đã bị khóa.</span>
+                    <span th:case="*">Lỗi không xác định, vui lòng thử lại.</span>
+                </p>
+            </div>
 
           <div th:if="${param.logout}">
             <p style="color:green;">Bạn đã đăng xuất thành công!</p>
