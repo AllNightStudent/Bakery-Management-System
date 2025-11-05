@@ -2,6 +2,7 @@ package com.swp.controller.product;
 
 import com.swp.dto.CategoryDTO;
 import com.swp.entity.*;
+import com.swp.repository.CartItemRepository;
 import com.swp.repository.ProductVariantRepository;
 import com.swp.service.*;
 import jakarta.servlet.http.HttpSession;
@@ -24,6 +25,7 @@ public class ProductController {
     private final CartService cartService;
     private final CartItemService cartItemService;
     private final UserService userService;
+    private final CartItemRepository cartItemRepository;
 
     @GetMapping
     public String listProducts(
@@ -100,15 +102,20 @@ public class ProductController {
         }
 
         CartEntity cart = cartService.findCartByUser(currentUser);
+        ProductVariantEntity productVariant = productVariantRepository.findById(variantId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
 
-        ProductVariantEntity productVariant = productVariantRepository.findById(variantId).orElse(null);
-
-        CartItemEntity cartItem = new CartItemEntity();
-        cartItem.setProductVariantId(productVariant);
-        cartItem.setQuantity(quantity);
-        cartItem.setCart(cart);
-        cartItemService.save(cartItem);
-
+        CartItemEntity existingItem = cartItemRepository.findByCartAndProductVariantId(cart, productVariant);
+        if (existingItem != null) {
+            existingItem.setQuantity(existingItem.getQuantity() + quantity);
+            cartItemService.save(existingItem);
+        } else {
+            CartItemEntity cartItem = new CartItemEntity();
+            cartItem.setProductVariantId(productVariant);
+            cartItem.setQuantity(quantity);
+            cartItem.setCart(cart);
+            cartItemService.save(cartItem);
+        }
         return "redirect:/cart" ;
     }
 

@@ -33,8 +33,21 @@
                 color: white;
             }
 
+            .view-details:disabled {
+                background: #ccc;
+                border-color: #ccc;
+                color: #666;
+                cursor: not-allowed;
+            }
+
             .add-to-cart {
                 flex: 1;
+            }
+
+            .add-to-cart:disabled {
+                background: #ccc;
+                color: #666;
+                cursor: not-allowed;
             }
 
             @media (max-width: 768px) {
@@ -48,13 +61,13 @@
                 }
             }
 
-
             .product-variants {
                 margin-top: 10px;
                 display: flex;
                 flex-wrap: wrap;
                 gap: 8px;
             }
+
             .btn-variant {
                 display: inline-block;
                 padding: 8px 12px;
@@ -66,7 +79,6 @@
                 text-decoration: none;
                 transition: all 0.2s ease;
             }
-
 
             .btn-variant:hover {
                 background: #ffe6e6;
@@ -81,7 +93,6 @@
                 font-weight: bold;
             }
 
-
             .variant {
                 display: inline-block;
                 background: #f0f0f0;
@@ -92,25 +103,58 @@
                 color: #8B4513;
                 font-weight: bold;
             }
+
             body {
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             }
+
             .product-thumbnail {
                 cursor: pointer;
                 transition: all 0.3s ease;
             }
+
             .product-thumbnail:hover {
                 transform: scale(1.05);
             }
+
             .product-thumbnail.active {
                 border-color: #78350f;
             }
+
             .tab-button {
                 transition: all 0.3s ease;
             }
+
             .tab-button.active {
                 background-color: #78350f;
                 color: white;
+            }
+
+            /* <CHANGE> thêm style cho stock info */
+            .stock-info {
+                font-size: 14px;
+                color: #666;
+                margin-top: 5px;
+                font-weight: 500;
+            }
+
+            .stock-info.low-stock {
+                color: #d97706;
+            }
+
+            .warning-message {
+                background-color: #fee2e2;
+                border: 1px solid #fca5a5;
+                color: #dc2626;
+                padding: 12px;
+                border-radius: 6px;
+                margin-bottom: 16px;
+                display: none;
+                font-weight: 500;
+            }
+
+            .warning-message.show {
+                display: block;
             }
         </style>
     </th:block>
@@ -143,7 +187,7 @@
                 <p class="mb-3 text-lg">
                     Giá:
                     <span id="displayPrice" class="font-bold text-amber-900">
-        0₫
+        0
     </span>
                 </p>
                 <div class="product-variants">
@@ -153,9 +197,19 @@
                                 th:text="${variant.weight} + 'gram'"
                                 th:data-variant-id="${variant.variantId}"
                                 th:data-price="${variant.price}"
+                                th:data-stock="${variant.stock}"
                                 onclick="selectVariant(this)">
                         </button>
                     </div>
+                </div>
+                <!-- <CHANGE> hiển thị stock của variant được chọn -->
+                <div class="stock-info" id="stockInfo" style="display: none;">
+                    Có sẵn: <span id="stockAmount">0</span> sản phẩm
+                </div>
+
+                <!-- <CHANGE> thêm warning message khi vượt quá stock -->
+                <div class="warning-message" id="warningMessage">
+                    ⚠️ Số lượng vượt quá hàng có sẵn. Vui lòng giảm số lượng.
                 </div>
 
                 <!-- Quantity Selector -->
@@ -176,12 +230,12 @@
                     <form id="buyNowForm" th:action="@{/products/buy-now}" method="post" style="flex: 1;">
                         <input type="hidden" name="variantId" id="buyNowVariantId" />
                         <input type="hidden" name="quantity" id="buyNowQuantity" value="1"/>
-                        <button type="submit" class="view-details" style="width: 100%;">MUA NGAY</button>
+                        <button type="submit" id="buyNowBtn" class="view-details" style="width: 100%;">MUA NGAY</button>
                     </form>
                     <form id="addToCartForm" th:action="@{'/products/' + ${productDetail.productId} + '/add'}" method="get">
                         <input type="hidden" name="variantId" id="selectedVariantId" />
                         <input type="hidden" name="quantity" id="selectedQuantity" value="1"/>
-                        <button type="submit" class="add-to-cart">THÊM VÀO GIỎ</button>
+                        <button type="submit" id="addToCartBtn" class="add-to-cart">THÊM VÀO GIỎ</button>
                     </form>
                 </div>
 
@@ -255,28 +309,70 @@
     <script>
         let selectedVariantId = null;
         let selectedPrice = 0;
+        let selectedStock = 0;
 
         function formatPrice(price) {
             return price.toLocaleString('vi-VN') + '₫';
         }
 
         function selectVariant(button) {
-            // Lấy variantId và giá từ thuộc tính data
             selectedVariantId = button.getAttribute('data-variant-id');
             selectedPrice = parseFloat(button.getAttribute('data-price'));
+            selectedStock = parseInt(button.getAttribute('data-stock'));
 
             // Bỏ active cũ, thêm active mới
             document.querySelectorAll('.btn-variant').forEach(b => b.classList.remove('active'));
             button.classList.add('active');
 
-            updateDisplayedPrice();
+            // Hiển thị stock info
+            document.getElementById('stockInfo').style.display = 'block';
+            document.getElementById('stockAmount').innerText = selectedStock;
+
+            // Reset quantity về 1 khi chọn variant mới
+            document.getElementById('quantity').value = 1;
+            updateQuantityInput(1);
+
+            // ✅ Cập nhật hiển thị giá ngay khi chọn variant
+            document.getElementById('displayPrice').innerText = formatPrice(selectedPrice);
+
+            checkStockValidity();
+        }
+
+        // <CHANGE> hàm kiểm tra xem số lượng có vượt quá stock hay không
+        function checkStockValidity() {
+            const quantity = parseInt(document.getElementById('quantity').value);
+            const warningMsg = document.getElementById('warningMessage');
+            const addToCartBtn = document.getElementById('addToCartBtn');
+            const buyNowBtn = document.getElementById('buyNowBtn');
+
+            if (quantity > selectedStock) {
+                // Vượt quá stock - disable buttons và hiển thị warning
+                warningMsg.classList.add('show');
+                addToCartBtn.disabled = true;
+                buyNowBtn.disabled = true;
+            } else {
+                // Hợp lệ - enable buttons và ẩn warning
+                warningMsg.classList.remove('show');
+                addToCartBtn.disabled = false;
+                buyNowBtn.disabled = false;
+            }
         }
 
         function increaseQuantity() {
             const input = document.getElementById('quantity');
-            input.value = parseInt(input.value) + 1;
+            const newValue = parseInt(input.value) + 1;
+
+            // <CHANGE> kiểm tra trước khi tăng
+            if (newValue > selectedStock) {
+                // Không cho tăng vượt quá stock
+                document.getElementById('warningMessage').classList.add('show');
+                return;
+            }
+
+            input.value = newValue;
             updateQuantityInput(input.value);
-            updateDisplayedPrice();
+            checkStockValidity();
+            // updateDisplayedPrice();
         }
 
         function decreaseQuantity() {
@@ -284,7 +380,8 @@
             if (parseInt(input.value) > 1) {
                 input.value = parseInt(input.value) - 1;
                 updateQuantityInput(input.value);
-                updateDisplayedPrice();
+                checkStockValidity();
+                // updateDisplayedPrice();
             }
         }
 
