@@ -19,11 +19,30 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy user"));
-        return org.springframework.security.core.userdetails.User
-                .withUsername(user.getEmail())
+        boolean enabled = Boolean.TRUE.equals(user.getStatus());
+        boolean accountNonLocked = true;
+        boolean accountNonExpired = true;
+        boolean credentialsNonExpired = true;
+
+
+        String roleName = user.getRole().getName();
+        boolean hasRolePrefix = roleName != null && roleName.startsWith("ROLE_");
+
+        var builder = org.springframework.security.core.userdetails.User.withUsername(user.getEmail())
                 .password(user.getPassword())
-                .roles(user.getRole().getName())
-                .build();
+                .accountExpired(!accountNonExpired)
+                .accountLocked(!accountNonLocked)
+                .credentialsExpired(!credentialsNonExpired)
+                .disabled(!enabled);
+
+        if (hasRolePrefix) {
+            builder.authorities(roleName);
+        } else {
+            builder.roles(roleName);
+        }
+
+        return builder.build();
     }
+
 }
 
