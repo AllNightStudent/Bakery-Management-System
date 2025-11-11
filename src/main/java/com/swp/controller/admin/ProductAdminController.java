@@ -43,8 +43,9 @@ public class ProductAdminController {
                          org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
         try {
             if (bindingResult.hasErrors()) {
-                model.addAttribute("categories", categoryRepository.findAll());
-                return "admin/products";
+                redirectAttributes.addFlashAttribute("errorMessage", "Dữ liệu không hợp lệ: " +
+                        bindingResult.getFieldError().getDefaultMessage());
+                return "redirect:/admin/products";
             }
             CategoryEntity category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new IllegalArgumentException("Danh mục không tồn tại"));
