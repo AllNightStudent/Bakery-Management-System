@@ -50,4 +50,20 @@ public interface OrderItemRepository extends JpaRepository<OrderItemEntity, Long
             @Param("to") LocalDateTime to
     );
 
+    @Query("""
+    SELECT oi
+    FROM OrderItemEntity oi
+    JOIN oi.order o
+    JOIN o.user u
+    JOIN oi.productVariant pv
+    JOIN pv.product p
+    WHERE u.id = :userId
+      AND p.productId = :productId
+      AND UPPER(o.status) IN ('DELIVERED','COMPLETED')
+    ORDER BY o.orderDate DESC
+""")
+    List<OrderItemEntity> findDeliveredByUserAndProduct(@Param("userId") Long userId,
+                                                        @Param("productId") Long productId);
+
+
 }

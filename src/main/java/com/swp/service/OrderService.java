@@ -3,6 +3,7 @@ package com.swp.service;
 import com.swp.entity.*;
 import com.swp.repository.OrderItemRepository;
 import com.swp.repository.OrderRepository;
+import com.swp.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,7 +25,6 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final CartItemService cartItemService;
-
     @Transactional
     public OrderEntity createOrderFromCart(CartEntity cart, String customerName, String customerPhone,
                                            String customerAddress, String note) {
