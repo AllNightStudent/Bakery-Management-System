@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout-admin :: layout(~{::main}, 'Chi tiết review - Bakery', ~{::extraHead}, ~{::extraScripts})}">
+<head>
+    <th:block th:fragment="extraHead">
+        <script src="https://cdn.tailwindcss.com"></script>
+    </th:block>
+</head>
+<body>
+<main>
+    <div class="max-w-4xl mx-auto p-6 bg-white shadow rounded">
+        <a th:href="@{/admin/reviews}" class="text-sm text-blue-700 hover:underline">← Quay lại danh sách</a>
+
+        <h1 class="text-2xl font-bold mt-2 mb-4">Chi tiết review #<span th:text="${r.reviewId}"></span></h1>
+
+        <!-- Thông tin chung -->
+        <div class="grid grid-cols-2 gap-4 text-sm">
+            <div><span class="text-gray-500">Sản phẩm:</span>
+                <span class="font-medium" th:text="${r.product != null ? r.product.name : 'N/A'}"></span>
+                <span class="ml-2 text-xs" th:if="${r.orderItem != null}">Verified ✓</span>
+            </div>
+            <div><span class="text-gray-500">Người dùng:</span>
+                <span class="font-medium" th:text="${r.user != null ? r.user.email : 'N/A'}"></span>
+            </div>
+            <div><span class="text-gray-500">Số sao:</span>
+                <span class="font-medium" th:text="${r.rating}"></span> ★
+            </div>
+            <div><span class="text-gray-500">Trạng thái:</span>
+                <span class="font-medium" th:text="${r.status}"></span>
+            </div>
+            <div><span class="text-gray-500">Tạo lúc:</span>
+                <span class="font-medium" th:text="${#temporals.format(r.createdAt,'dd/MM/yyyy HH:mm')}"></span>
+            </div>
+        </div>
+
+        <!-- Nội dung -->
+        <div class="mt-6">
+            <label class="text-lg font-semibold">Tiêu đề: </label>
+            <div class="text-lg font-semibold" th:text="${r.title ?: '(Không tiêu đề)'}"></div>
+            <label class="mt-2 whitespace-pre-line">Nội dung: </label>
+            <div class="mt-2 whitespace-pre-line" th:text="${r.content ?: ''}"></div>
+        </div>
+
+        <!-- Ảnh đính kèm (nếu có) -->
+        <div class="mt-6" th:if="${media != null and !media.isEmpty()}">
+            <div class="text-sm text-gray-600 mb-2">Ảnh đính kèm:</div>
+            <div class="grid grid-cols-3 gap-3">
+                <img th:each="m : ${media}" th:src="${m.url}" class="w-full h-32 object-cover rounded border" />
+            </div>
+        </div>
+
+        <!-- Hành động duyệt -->
+        <div class="mt-6 flex gap-3">
+            <form th:action="@{'/admin/reviews/' + ${r.reviewId} + '/approve'}" method="post">
+                <button class="px-3 py-2 rounded bg-emerald-600 text-white" th:if="${r.status.name() != 'APPROVED'}">Approve</button>
+            </form>
+            <form th:action="@{'/admin/reviews/' + ${r.reviewId} + '/reject'}" method="post">
+                <button class="px-3 py-2 rounded bg-rose-600 text-white" th:if="${r.status.name() != 'REJECTED'}">Reject</button>
+            </form>
+        </div>
+
+        <!-- Replies -->
+        <div class="mt-8">
+            <h2 class="text-lg font-semibold mb-2">Phản hồi của quản trị</h2>
+            <div th:if="${replies == null or replies.isEmpty()}" class="text-sm text-gray-500">Chưa có phản hồi.</div>
+            <div th:each="rep : ${replies}" class="p-3 mb-2 rounded border">
+                <div class="text-sm" th:text="${rep.content}"></div>
+                <div class="text-xs text-gray-500 mt-1">
+                    <span th:text="${rep.adminEmail}"></span> •
+                    <span th:text="${#temporals.format(rep.createdAt,'dd/MM/yyyy HH:mm')}"></span> •
+                    <span th:text="${rep.isPublic ? 'Public' : 'Hidden'}"></span>
+                </div>
+            </div>
+
+            <!-- Form reply -->
+            <form th:action="@{'/admin/reviews/' + ${r.reviewId} + '/reply'}" method="post" class="mt-3">
+                <textarea name="content" rows="3" class="w-full border rounded px-2 py-1" placeholder="Nhập phản hồi..."></textarea>
+                <label class="text-sm mt-2 inline-flex items-center gap-1">
+                    <input type="checkbox" name="isPublic" checked> Hiển thị công khai
+                </label>
+                <div class="mt-2">
+                    <button class="px-3 py-2 rounded bg-blue-600 text-white">Gửi phản hồi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<th:block th:fragment="extraScripts"></th:block>
+</body>
+</html>

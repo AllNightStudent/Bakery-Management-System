@@ -1,8 +1,12 @@
 package com.swp.controller;
 
 import com.swp.dto.ReviewCreateRequest;
+import com.swp.entity.OrderItemEntity;
+import com.swp.entity.Review;
 import com.swp.entity.UserEntity;
 import com.swp.repository.OrderItemRepository;
+import com.swp.repository.ReviewMediaRepository;
+import com.swp.repository.ReviewReplyRepository;
 import com.swp.repository.ReviewRepository;
 import com.swp.repository.UserRepository;
 import com.swp.service.ReviewService;
@@ -29,18 +33,19 @@ public class ReviewController {
     private final ReviewRepository reviewRepository;
     private final OrderItemRepository orderItemRepo;
     private final UserRepository userRepository;
+    private final ReviewMediaRepository mediaRepo;
+    private final ReviewReplyRepository replyRepo;
 
-    /** Trang form riêng: GET /products/{productId}/reviews/new */
-    // ReviewController.java
+    /** ========================= NEW FORM ========================= **/
     @GetMapping("/new")
     public String newForm(@PathVariable Long productId,
                           @RequestParam(required = false) Long orderItemId,
                           Authentication auth,
                           Model model,
-                          RedirectAttributes ra) { // <-- thêm RedirectAttributes
+                          RedirectAttributes ra) {
 
         if (auth == null || !auth.isAuthenticated()
-                || auth instanceof org.springframework.security.authentication.AnonymousAuthenticationToken) {
+                || auth instanceof AnonymousAuthenticationToken) {
             return "redirect:/login";
         }
 
@@ -48,36 +53,29 @@ public class ReviewController {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalStateException("Không tìm thấy user"));
 
-        // Nếu có orderItemId thì kiểm tra đã review chưa
+        OrderItemEntity oi = null;
         if (orderItemId != null) {
-            var oi = orderItemRepo.findById(orderItemId)
+            oi = orderItemRepo.findById(orderItemId)
                     .orElseThrow(() -> new IllegalArgumentException("Order item not found"));
 
-            // bảo vệ: item phải thuộc user
             if (!oi.getOrder().getUser().getId().equals(user.getId())) {
                 ra.addFlashAttribute("error", "Sản phẩm này không thuộc đơn hàng của bạn.");
                 return "redirect:/orders/" + oi.getOrder().getOrderId() + "/details";
             }
 
-            // 👉 THÔNG BÁO SỚM nếu đã review
+            // Nếu đã review rồi -> quay về chi tiết review luôn
             if (reviewRepository.existsByOrderItemAndUser(oi, user)) {
-                ra.addFlashAttribute("info", "Bạn đã đánh giá sản phẩm này rồi.");
-                return "redirect:/orders/" + oi.getOrder().getOrderId() + "/details";
+                return "redirect:/products/" + productId + "/reviews/view?orderItemId=" + orderItemId;
             }
         }
 
-        // chưa review -> hiển thị form như bình thường
-        model.addAttribute("eligibleOrderItems",
-                orderItemRepo.findDeliveredByUserAndProduct(user.getId(), productId));
         model.addAttribute("productId", productId);
         model.addAttribute("orderItemId", orderItemId);
         model.addAttribute("req", new ReviewCreateRequest(0, "", "", orderItemId, false));
-
-        return "write-reviews"; // view của bạn
+        return "write-reviews";
     }
 
-
-    /** Submit form: POST /products/{productId}/reviews */
+    /** ========================= CREATE REVIEW ========================= **/
     @PostMapping
     public String create(@PathVariable Long productId,
                          @Valid @ModelAttribute("req") ReviewCreateRequest req,
@@ -87,16 +85,16 @@ public class ReviewController {
                          RedirectAttributes ra) throws IOException {
 
         System.out.println("[REVIEW POST] principal="
-                + (auth==null?null:auth.getName())
-                + ", isAuth=" + (auth!=null && auth.isAuthenticated())
-                + ", anon=" + (auth instanceof org.springframework.security.authentication.AnonymousAuthenticationToken));
+                + (auth == null ? null : auth.getName())
+                + ", isAuth=" + (auth != null && auth.isAuthenticated())
+                + ", anon=" + (auth instanceof AnonymousAuthenticationToken));
 
-        // 1) Bảo vệ đăng nhập
         if (auth == null || !auth.isAuthenticated()
-                || auth instanceof org.springframework.security.authentication.AnonymousAuthenticationToken) {
+                || auth instanceof AnonymousAuthenticationToken) {
             ra.addFlashAttribute("error", "Vui lòng đăng nhập để viết đánh giá.");
             return "redirect:/login";
         }
+
         String email = auth.getName();
         UserEntity user = userRepository.findByEmail(email).orElse(null);
         if (user == null) {
@@ -104,7 +102,6 @@ public class ReviewController {
             return "redirect:/login";
         }
 
-        // 2) Nếu form lỗi → quay lại trang Product (giữ như cũ)
         if (br.hasErrors()) {
             br.getFieldErrors().forEach(e ->
                     System.out.printf("[REVIEW ERR] field=%s, rejected=%s, msg=%s%n",
@@ -113,26 +110,73 @@ public class ReviewController {
             ra.addFlashAttribute("org.springframework.validation.BindingResult.req", br);
             ra.addFlashAttribute("req", req);
             ra.addFlashAttribute("error", "Vui lòng kiểm tra lại các trường nhập.");
-            return "redirect:/products/" + productId + "?writeReview=1"
-                    + (req.orderItemId()!=null ? "&orderItemId="+req.orderItemId() : "");
+            return "redirect:/products/" + productId + "/reviews/new?orderItemId=" + req.orderItemId();
         }
 
-        // 3) Lấy orderId trước khi tạo review để biết chỗ quay về
         Long orderId = null;
         if (req.orderItemId() != null) {
-            var oi = orderItemRepo.findById(req.orderItemId())
-                    .orElse(null);
+            var oi = orderItemRepo.findById(req.orderItemId()).orElse(null);
             if (oi != null) {
-                orderId = oi.getOrder().getOrderId(); // đổi getter theo entity của bạn
+                orderId = oi.getOrder().getOrderId();
             }
         }
 
-        // 4) Tạo review
         reviewService.createReview(productId, user, req, photos);
-
         ra.addFlashAttribute("success", "Đã gửi đánh giá! Sẽ hiển thị sau khi được duyệt.");
-            System.out.println("Order ID không lỗi");
-            return "redirect:/orders/" + orderId+"/details";   // <--- chỉnh đúng route chi tiết đơn của bạn
+
+        if (orderId != null) {
+            return "redirect:/orders/" + orderId + "/details";
+        }
+        return "redirect:/products/" + productId;
     }
 
+    /** ========================= VIEW MY REVIEW ========================= **/
+    @GetMapping("/view")
+    public String viewMyReview(@PathVariable Long productId,
+                               @RequestParam Long orderItemId,
+                               Authentication auth,
+                               RedirectAttributes ra,
+                               Model model) {
+
+        System.out.println("[REVIEW VIEW] productId=" + productId + ", orderItemId=" + orderItemId);
+
+        if (auth == null || !auth.isAuthenticated()
+                || auth instanceof AnonymousAuthenticationToken) {
+            return "redirect:/login";
+        }
+
+        String email = auth.getName();
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalStateException("Không tìm thấy user"));
+
+        OrderItemEntity oi = orderItemRepo.findById(orderItemId)
+                .orElseThrow(() -> new IllegalArgumentException("Order item not found"));
+
+        if (!oi.getOrder().getUser().getId().equals(user.getId())) {
+            ra.addFlashAttribute("error", "Mục đơn hàng không thuộc về bạn.");
+            return "redirect:/orders/" + oi.getOrder().getOrderId() + "/details";
+        }
+
+        var optReview = reviewRepository.findByOrderItemAndUser(oi, user);
+        if (optReview.isEmpty()) {
+            // chưa có review -> đẩy sang màn new
+            ra.addFlashAttribute("info", "Bạn chưa đánh giá sản phẩm này. Hãy viết đánh giá mới.");
+            return "redirect:/products/" + productId + "/reviews/new?orderItemId=" + orderItemId;
+        }
+
+        Review review = optReview.get();
+        System.out.println("[REVIEW VIEW] found reviewId=" + review.getReviewId());
+
+        var media   = mediaRepo.findByReviewOrderByMediaIdAsc(review);
+        var replies = replyRepo.findByReviewOrderByCreatedAtAsc(review);
+
+        model.addAttribute("r", review);
+        model.addAttribute("media", media);
+        model.addAttribute("replies", replies);
+        model.addAttribute("productId", productId);
+        model.addAttribute("orderItemId", orderItemId);
+        model.addAttribute("orderId", oi.getOrder().getOrderId());
+
+        return "my-review";  // <-- template xem chi tiết review
+    }
 }

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><title>Xem đánh giá</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+<div class="max-w-3xl mx-auto p-6 bg-white shadow rounded">
+    <a th:href="@{'/products/' + ${productId}}" class="text-blue-700 hover:underline">← Về sản phẩm</a>
+
+    <h1 class="text-2xl font-bold mt-2 mb-4">Đánh giá của bạn</h1>
+
+    <div class="grid grid-cols-2 gap-4 text-sm">
+        <div><span class="text-gray-500">Sản phẩm:</span>
+            <span class="font-medium" th:text="${r.product != null ? r.product.name : 'N/A'}"></span>
+        </div>
+        <div><span class="text-gray-500">Số sao:</span>
+            <span class="font-medium" th:text="${r.rating}"></span> ★
+        </div>
+        <div><span class="text-gray-500">Trạng thái:</span>
+            <span class="font-medium" th:text="${r.status}"></span>
+        </div>
+        <div><span class="text-gray-500">Ngày tạo:</span>
+            <span class="font-medium" th:text="${#temporals.format(r.createdAt,'dd/MM/yyyy HH:mm')}"></span>
+        </div>
+    </div>
+
+    <div class="mt-6">
+        <div class="text-lg font-semibold" th:text="${r.title ?: '(Không tiêu đề)'}"></div>
+        <div class="mt-2 whitespace-pre-line" th:text="${r.content ?: ''}"></div>
+    </div>
+
+    <div class="mt-6" th:if="${media != null and !media.isEmpty()}">
+        <div class="text-sm text-gray-600 mb-2">Ảnh đính kèm:</div>
+        <div class="grid grid-cols-3 gap-3">
+            <img th:each="m : ${media}" th:src="${m.url}"
+                 class="w-full h-32 object-cover rounded border"/>
+        </div>
+    </div>
+
+
+    <div class="mt-8">
+        <h2 class="text-lg font-semibold mb-2">Phản hồi của quán</h2>
+        <div th:if="${replies == null or replies.isEmpty()}">
+            Chưa có phản hồi.
+        </div>
+
+        <div th:each="rep : ${replies}" class="border rounded p-3 mb-2 bg-gray-50" th:if="${rep.isPublic}">
+            <div th:text="${rep.content}"></div>
+            <div class="text-xs text-gray-500 mt-1">
+                <span th:text="${rep.adminEmail}"></span> •
+                <span th:text="${#temporals.format(rep.createdAt,'dd/MM/yyyy HH:mm')}"></span>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

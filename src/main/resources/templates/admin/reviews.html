@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout-admin :: layout(~{::main}, 'Quản lý feedback - Bakery', ~{::extraHead}, ~{::extraScripts})}">
+<head>
+    <!-- head bổ sung sẽ truyền vào layout -->
+    <th:block th:fragment="extraHead">
+        <link rel="stylesheet" th:href="@{/css/admin.css}">
+        <script src="https://cdn.tailwindcss.com"></script>
+    </th:block>
+</head>
+
+<body>
+<main>
+    <div class="max-w-7xl mx-auto p-6 bg-white shadow rounded">
+
+        <h1 class="text-2xl font-bold mb-4">Feedback / Reviews</h1>
+
+        <!-- Alerts -->
+        <div th:if="${success}" class="mb-3 p-3 rounded bg-emerald-50 text-emerald-800" th:text="${success}"></div>
+        <div th:if="${error}" class="mb-3 p-3 rounded bg-rose-50 text-rose-800" th:text="${error}"></div>
+
+        <!-- (1)(2)(3)(4)(5): Filter bar -->
+        <form method="get" class="flex flex-wrap gap-3 items-end mb-4">
+            <!-- (1) Stars -->
+            <div>
+                <label class="text-sm text-gray-600">Stars</label>
+                <select name="stars" class="border rounded px-2 py-1">
+                    <option value="" th:selected="${stars == null}">All</option>
+                    <option th:each="s : ${#numbers.sequence(1,5)}"
+                            th:value="${s}" th:selected="${stars == s}"
+                            th:text="${s + ' ★'}"></option>
+                </select>
+            </div>
+
+            <!-- (2) Status -->
+            <div>
+                <label class="text-sm text-gray-600">Status</label>
+                <select name="status" class="border rounded px-2 py-1">
+                    <option value="" th:selected="${status == null}">All</option>
+                    <option th:each="st : ${statuses}"
+                            th:value="${st}" th:selected="${status == st}"
+                            th:text="${st}"></option>
+                </select>
+            </div>
+
+            <!-- (3) Product Id -->
+            <div>
+                <label class="text-sm text-gray-600">Product Id</label>
+                <input type="number" min="1" name="productId" class="border rounded px-2 py-1"
+                       th:value="${productId}">
+            </div>
+
+            <!-- (4) Keyword -->
+            <div class="flex-1 min-w-[240px]">
+                <label class="text-sm text-gray-600">Keywords</label>
+                <input type="text" name="q" placeholder="title/content/user email/product..."
+                       class="w-full border rounded px-2 py-1" th:value="${q}">
+            </div>
+
+            <!-- (5) Search -->
+            <div>
+                <button class="bg-gray-800 text-white rounded px-4 py-2">Search</button>
+            </div>
+            <div>
+                <a th:href="@{/admin/reviews}"
+                   class="bg-gray-500 hover:bg-gray-600 text-white rounded px-4 py-2 inline-block">
+                    Clear filter
+                </a>
+            </div>
+        </form>
+
+        <!-- (6) Table -->
+        <div class="overflow-x-auto">
+            <table class="min-w-full border border-gray-200">
+                <thead class="bg-gray-100 text-sm">
+                <tr>
+                    <th class="px-3 py-2 border">Id</th>
+                    <th class="px-3 py-2 border">Product</th>
+                    <th class="px-3 py-2 border">User</th>
+                    <th class="px-3 py-2 border">Stars</th>
+                    <th class="px-3 py-2 border">Title</th>
+                    <th class="px-3 py-2 border">Created</th>
+                    <th class="px-3 py-2 border">Status</th>
+                    <th class="px-3 py-2 border">Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="r : ${data.content}" class="text-sm">
+                    <td class="px-3 py-2 border" th:text="${r.reviewId}"></td>
+                    <td class="px-3 py-2 border">
+                        <a th:href="@{'/admin/reviews/' + ${r.reviewId}}"
+                           class="text-blue-700 hover:underline"
+                           th:text="${r.product != null ? r.product.name : 'N/A'}"></a>
+                        <div class="text-xs text-gray-500" th:if="${r.orderItem != null}">Verified ✓</div>
+                    </td>
+
+                    <td class="px-3 py-2 border" th:text="${r.user != null ? r.user.email : 'N/A'}"></td>
+                    <td class="px-3 py-2 border" th:text="${r.rating + ' ★'}"></td>
+                    <td class="px-3 py-2 border">
+                        <div class="font-medium" th:text="${#strings.abbreviate(r.title ?: '', 36)}"></div>
+                        <div class="text-xs text-gray-500" th:text="${#strings.abbreviate((r.content ?: ''), 60)}"></div>
+                    </td>
+                    <td class="px-3 py-2 border" th:text="${#temporals.format(r.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
+                    <td class="px-3 py-2 border" th:text="${r.status}"></td>
+                    <td class="px-3 py-2 border">
+                        <!-- (7) Approve -->
+                        <form th:action="@{'/admin/reviews/' + ${r.reviewId} + '/approve'}" method="post" class="inline">
+                            <button class="text-emerald-700 hover:underline" th:if="${r.status.name() != 'APPROVED'}">Approve</button>
+                        </form>
+                        <!-- (8) Reject -->
+                        <form th:action="@{'/admin/reviews/' + ${r.reviewId} + '/reject'}" method="post" class="inline ml-2">
+                            <button class="text-rose-700 hover:underline" th:if="${r.status.name() != 'REJECTED'}">Reject</button>
+                        </form>
+
+                    </td>
+                </tr>
+                <tr th:if="${data.totalElements == 0}">
+                    <td colspan="8" class="px-3 py-6 text-center text-gray-500">Không có review nào phù hợp</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Phân trang -->
+        <div class="flex items-center gap-2 mt-4">
+            <a th:href="@{|/admin/reviews?page=${page-1}&size=${size}&status=${status}&productId=${productId}&stars=${stars}&q=${q}|}"
+               th:classappend="${page<=1} ? ' pointer-events-none opacity-40' : ''"
+               class="px-3 py-1 border rounded">Prev</a>
+
+            <span class="text-sm text-gray-600">
+        Page <span th:text="${data.number + 1}"></span> / <span th:text="${data.totalPages}"></span>
+        – <span th:text="${data.totalElements}"></span> items
+      </span>
+
+            <a th:href="@{|/admin/reviews?page=${page+1}&size=${size}&status=${status}&productId=${productId}&stars=${stars}&q=${q}|}"
+               th:classappend="${data.number + 1 >= data.totalPages} ? ' pointer-events-none opacity-40' : ''"
+               class="px-3 py-1 border rounded">Next</a>
+        </div>
+
+    </div>
+</main>
+
+<!-- scripts bổ sung sẽ truyền vào layout -->
+<th:block th:fragment="extraScripts">
+    <!-- nếu cần JS riêng cho trang này, đặt ở đây -->
+</th:block>
+</body>
+</html>
