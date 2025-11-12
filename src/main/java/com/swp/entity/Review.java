@@ -32,7 +32,7 @@ public class Review {
 
     @Column(nullable = false) private Integer rating; // 1..5
     @Column(length = 150) private String title;
-    @Lob @Column(nullable = false) private String content;
+    @Column(nullable = false) private String content;
 
     @Enumerated(EnumType.STRING) @Column(nullable = false)
     private ReviewStatus status = ReviewStatus.PENDING;
