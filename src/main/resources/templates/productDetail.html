@@ -172,9 +172,10 @@
                 <div class="bg-white rounded-lg shadow-lg p-4">
                     <img
                             id="mainImage"
-                            src="/placeholder.svg?height=400&width=400"
+                            th:src="${productDetail.variants[0].product.imgUrl}"
                             alt="Cupcake Trung Thu"
                             class="w-full h-auto rounded-lg"
+                            style="max-height: 450px"
                     />
                 </div>
             </div>
