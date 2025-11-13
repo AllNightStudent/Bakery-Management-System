@@ -2,8 +2,9 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{fragments/layout-admin :: layout(~{::main}, 'Quản lý voucher - Bakery', ~{::extraHead}, ~{::extraScripts})}">
 <head>
-    <title>Quản lý voucher - Bakery</title>
+    <title>Quản lý voucher</title>
 
+    <!-- Extra CSS/JS nếu cần -->
     <th:block th:fragment="extraHead">
         <script src="https://cdn.tailwindcss.com"></script>
     </th:block>
@@ -48,8 +49,7 @@
                     <a th:href="@{'/admin/vouchers/edit/' + ${v.id}}"
                        class="text-blue-600 hover:underline mr-2">Sửa</a>
 
-                    <form th:action="@{'/admin/vouchers/delete/' + ${v.id}}"
-                          method="post" class="inline">
+                    <form th:action="@{'/admin/vouchers/delete/' + ${v.id}}" method="post" class="inline">
                         <button type="submit"
                                 class="text-red-600 hover:underline"
                                 onclick="return confirm('Bạn có chắc muốn xoá voucher này?');">

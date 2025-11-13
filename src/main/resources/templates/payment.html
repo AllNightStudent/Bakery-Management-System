@@ -43,10 +43,26 @@
           <span>Địa chỉ:</span>
           <span th:text="${order.customerAddress}"></span>
         </div>
-        <div class="flex justify-between text-xl font-bold text-gray-800 pt-4 border-t">
-          <span>Tổng tiền:</span>
-          <span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
-        </div>
+          <!-- Tạm tính -->
+          <div class="flex justify-between pt-3 border-t border-dashed">
+              <span>Tạm tính:</span>
+              <span th:text="${#numbers.formatDecimal(subtotal, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+          </div>
+
+          <!-- Giảm từ voucher (nếu có) -->
+          <div class="flex justify-between text-green-700"
+               th:if="${discount != null and discount > 0}">
+              <span>Giảm từ voucher:</span>
+              <span>
+            -<span th:text="${#numbers.formatDecimal(discount, 0, 'COMMA', 0, 'POINT')}"></span>₫
+          </span>
+          </div>
+
+          <!-- Tổng tiền sau giảm -->
+          <div class="flex justify-between text-xl font-bold text-gray-800 pt-4 border-t">
+              <span>Tổng tiền:</span>
+              <span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+          </div>
       </div>
     </div>
 
