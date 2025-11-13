@@ -63,9 +63,9 @@ public class ReviewController {
                 return "redirect:/orders/" + oi.getOrder().getOrderId() + "/details";
             }
 
-            // Nếu đã review rồi -> quay về chi tiết review luôn
             if (reviewRepository.existsByOrderItemAndUser(oi, user)) {
-                return "redirect:/products/" + productId + "/reviews/view?orderItemId=" + orderItemId;
+                ra.addFlashAttribute("info", "Bạn đã đánh giá sản phẩm này rồi.");
+                return "redirect:/orders/" + oi.getOrder().getOrderId() + "/details";
             }
         }
 
@@ -144,16 +144,13 @@ public class ReviewController {
         OrderItemEntity oi = orderItemRepo.findById(orderItemId)
                 .orElseThrow(() -> new IllegalArgumentException("Order item not found"));
 
-        if (!oi.getOrder().getUser().getId().equals(user.getId())) {
-            ra.addFlashAttribute("error", "Mục đơn hàng không thuộc về bạn.");
-            return "redirect:/orders/" + oi.getOrder().getOrderId() + "/details";
-        }
+
 
         var optReview = reviewRepository.findByOrderItemAndUser(oi, user);
         if (optReview.isEmpty()) {
             // chưa có review -> đẩy sang màn new
             ra.addFlashAttribute("info", "Bạn chưa đánh giá sản phẩm này. Hãy viết đánh giá mới.");
-            return "redirect:/products/" + productId + "/reviews/new?orderItemId=" + orderItemId;
+            return "redirect:/orders/" + oi.getOrder().getOrderId() + "/details";
         }
 
         Review review = optReview.get();
