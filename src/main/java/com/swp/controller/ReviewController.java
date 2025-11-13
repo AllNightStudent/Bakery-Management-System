@@ -89,18 +89,10 @@ public class ReviewController {
                 + ", isAuth=" + (auth != null && auth.isAuthenticated())
                 + ", anon=" + (auth instanceof AnonymousAuthenticationToken));
 
-        if (auth == null || !auth.isAuthenticated()
-                || auth instanceof AnonymousAuthenticationToken) {
-            ra.addFlashAttribute("error", "Vui lòng đăng nhập để viết đánh giá.");
-            return "redirect:/login";
-        }
 
         String email = auth.getName();
         UserEntity user = userRepository.findByEmail(email).orElse(null);
-        if (user == null) {
-            ra.addFlashAttribute("error", "Tài khoản không hợp lệ.");
-            return "redirect:/login";
-        }
+
 
         if (br.hasErrors()) {
             br.getFieldErrors().forEach(e ->

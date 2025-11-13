@@ -17,7 +17,7 @@ public class ReviewMedia {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String url; // đường dẫn public của file
 
-    @Column(nullable = false, length = 10)
+    @Column(nullable = false)
     private String mediaType; // "image"
 }
 
