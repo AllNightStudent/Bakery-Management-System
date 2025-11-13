@@ -1,7 +1,9 @@
 package com.swp.controller;
 
 import com.swp.entity.*;
+import com.swp.repository.OrderRepository;
 import com.swp.repository.ProductVariantRepository;
+import com.swp.repository.PromotionRepository;
 import com.swp.service.*;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,11 @@ public class OrderController {
     private final OrderService orderService;
     private final ProductVariantRepository productVariantRepository;
 
+    //Hùng thêm
+    private final PromotionService promotionService;
+    private final PromotionRepository promotionRepository;
+    private final OrderRepository orderRepository;
+
     @GetMapping("/checkout")
     public String checkout(@RequestParam(value = "fromCart", required = false) Boolean fromCart,
                            HttpSession session, Model model) {
@@ -39,23 +46,22 @@ public class OrderController {
         Long buyNowVariantId = (Long) session.getAttribute("buyNowVariantId");
         Integer buyNowQuantity = (Integer) session.getAttribute("buyNowQuantity");
 
-        List<CartItemEntity> items;
-        BigDecimal totalAmount = BigDecimal.ZERO;
+        List<CartItemEntity> items = new ArrayList<>();
+        BigDecimal subtotal = BigDecimal.ZERO;   // tổng tiền hàng, chưa trừ voucher
 
         if (buyNowVariantId != null && buyNowQuantity != null) {
             // Trường hợp "Mua ngay"
             ProductVariantEntity variant = productVariantRepository.findById(buyNowVariantId)
                     .orElseThrow(() -> new RuntimeException("Product variant not found"));
 
-            // Tạo CartItemEntity tạm để hiển thị
+            // Tạo CartItemEntity tạm để hiển thị + tính tiền
             CartItemEntity tempItem = new CartItemEntity();
             tempItem.setProductVariantId(variant);
             tempItem.setQuantity(buyNowQuantity);
 
-            items = new ArrayList<>();
             items.add(tempItem);
 
-            totalAmount = variant.getPrice().multiply(BigDecimal.valueOf(buyNowQuantity));
+            subtotal = variant.getPrice().multiply(BigDecimal.valueOf(buyNowQuantity));
 
             model.addAttribute("isBuyNow", true);
         } else {
@@ -67,21 +73,53 @@ public class OrderController {
                 return "redirect:/cart";
             }
 
-            // Tính tổng tiền
+            // Tính tổng tiền hàng (subtotal)
             for (CartItemEntity item : items) {
                 BigDecimal itemPrice = item.getProductVariantId().getPrice()
                         .multiply(BigDecimal.valueOf(item.getQuantity()));
-                totalAmount = totalAmount.add(itemPrice);
+                subtotal = subtotal.add(itemPrice);
             }
 
             model.addAttribute("isBuyNow", false);
         }
 
+        // ================== ÁP DỤNG VOUCHER Ở ĐÂY ==================
+        BigDecimal voucherDiscount = BigDecimal.ZERO;
+        BigDecimal finalTotal = subtotal;
+
+        // Lấy voucher đã chọn từ session (id)
+        Long selectedVoucherId = (Long) session.getAttribute("selectedVoucherId");
+        String voucherCode = (String) session.getAttribute("selectedVoucherCode");
+
+        if (selectedVoucherId != null) {
+            Promotion voucher = promotionRepository.findById(selectedVoucherId)
+                    .orElse(null);
+            if (voucher != null) {
+                // Dùng PromotionService để tính số tiền giảm, nếu đủ điều kiện
+                voucherDiscount = promotionService.calculateDiscountForItems(voucher, items);
+
+                if (voucherDiscount.compareTo(BigDecimal.ZERO) > 0) {
+                    finalTotal = subtotal.subtract(voucherDiscount);
+                    if (finalTotal.compareTo(BigDecimal.ZERO) < 0) {
+                        finalTotal = BigDecimal.ZERO;
+                    }
+                }
+            }
+        }
+
+        // ================== ĐẨY DỮ LIỆU SANG VIEW ==================
         model.addAttribute("cartItems", items);
-        model.addAttribute("totalAmount", totalAmount);
+        model.addAttribute("subtotal", subtotal);               // tổng trước khi giảm
+        model.addAttribute("voucherDiscount", voucherDiscount); // tiền giảm
+        model.addAttribute("totalAmount", finalTotal);          // tổng sau khi giảm
         model.addAttribute("user", currentUser);
+
+        // Để fill vào ô input mã voucher
+        model.addAttribute("voucherCode", voucherCode);
+
         return "checkout";
     }
+
 
     @PostMapping("/create")
     public String createOrder(
@@ -100,6 +138,7 @@ public class OrderController {
             Long buyNowVariantId = (Long) session.getAttribute("buyNowVariantId");
             Integer buyNowQuantity = (Integer) session.getAttribute("buyNowQuantity");
 
+            // ==== 1. TẠO ORDER NHƯ CŨ ====
             if (buyNowVariantId != null && buyNowQuantity != null) {
                 // Trường hợp "Mua ngay" - tạo order trực tiếp
                 ProductVariantEntity variant = productVariantRepository.findById(buyNowVariantId)
@@ -119,7 +158,56 @@ public class OrderController {
                         cart, customerName, customerPhone, customerAddress, note);
             }
 
-            // Redirect đến trang thanh toán
+            // ==== 2. ÁP DỤNG VOUCHER VÀ CẬP NHẬT LẠI TOTAL TRONG ORDER ====
+
+            // Lấy voucher đã chọn từ session
+            Long selectedVoucherId = (Long) session.getAttribute("selectedVoucherId");
+            if (selectedVoucherId != null) {
+                Promotion voucher = promotionRepository.findById(selectedVoucherId)
+                        .orElse(null);
+
+                if (voucher != null && order.getOrderItems() != null && !order.getOrderItems().isEmpty()) {
+
+                    // Tính subtotal lại từ orderItems
+                    BigDecimal subtotal = BigDecimal.ZERO;
+                    List<CartItemEntity> fakeCartItems = new ArrayList<>();
+
+                    for (OrderItemEntity oi : order.getOrderItems()) {
+                        ProductVariantEntity variant = oi.getProductVariant();
+                        int quantity = oi.getQuantity();
+
+                        // subtotal = sum(variant.price * quantity)
+                        BigDecimal lineTotal = variant.getPrice()
+                                .multiply(BigDecimal.valueOf(quantity));
+                        subtotal = subtotal.add(lineTotal);
+
+                        // Tạo CartItemEntity giả để tái sử dụng hàm calculateDiscountForItems(...)
+                        CartItemEntity ci = new CartItemEntity();
+                        ci.setProductVariantId(variant);
+                        ci.setQuantity(quantity);
+                        fakeCartItems.add(ci);
+                    }
+
+                    // Tính tiền giảm bằng service hiện tại của bạn
+                    BigDecimal voucherDiscount = promotionService.calculateDiscountForItems(voucher, fakeCartItems);
+                    if (voucherDiscount.compareTo(BigDecimal.ZERO) < 0) {
+                        voucherDiscount = BigDecimal.ZERO;
+                    }
+
+                    BigDecimal finalTotal = subtotal.subtract(voucherDiscount);
+                    if (finalTotal.compareTo(BigDecimal.ZERO) < 0) {
+                        finalTotal = BigDecimal.ZERO;
+                    }
+
+                    // Ghi lại totalAmount đã trừ voucher vào order
+                    order.setTotalAmount(finalTotal);
+
+
+                    orderRepository.save(order); // cần có hàm này trong OrderService
+                }
+            }
+
+
             return "redirect:/order/payment?orderId=" + order.getOrderId();
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
@@ -127,12 +215,34 @@ public class OrderController {
         }
     }
 
+
     @GetMapping("/payment")
     public String payment(@RequestParam("orderId") Long orderId, Model model) {
         OrderEntity order = orderService.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
         model.addAttribute("order", order);
+        //Của Hùng
+        BigDecimal subtotal = BigDecimal.ZERO;
+        if (order.getOrderItems() != null) {
+            for (OrderItemEntity item : order.getOrderItems()) {
+                BigDecimal price = item.getProductVariant().getPrice();
+                BigDecimal lineTotal = price.multiply(BigDecimal.valueOf(item.getQuantity()));
+                subtotal = subtotal.add(lineTotal);
+            }
+        }
+
+        // totalAmount là số tiền cuối cùng đã lưu trong order (đã trừ voucher nếu có)
+        BigDecimal totalAmount = order.getTotalAmount();
+
+        // Tiền giảm (nếu >0 thì coi là giảm từ voucher)
+        BigDecimal discount = subtotal.subtract(totalAmount);
+        if (discount.compareTo(BigDecimal.ZERO) < 0) {
+            discount = BigDecimal.ZERO; // phòng trường hợp dữ liệu lệch
+        }
+
+        model.addAttribute("subtotal", subtotal);
+        model.addAttribute("discount", discount);
         return "payment";
     }
 

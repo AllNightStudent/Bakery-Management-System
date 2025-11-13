@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::main}, 'Chọn voucher - Bakery', ~{::extraHead}, ~{::extraScripts})}">
+<head>
+    <th:block th:fragment="extraHead">
+        <script src="https://cdn.tailwindcss.com"></script>
+    </th:block>
+</head>
+<body>
+<main class="max-w-5xl mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-6">Chọn voucher</h1>
+
+    <p class="text-sm text-gray-600 mb-4">
+        Những voucher đủ điều kiện sẽ được <span class="font-semibold text-green-600">làm nổi bật</span>,
+        voucher không đủ điều kiện sẽ <span class="italic">bị làm mờ</span>.
+    </p>
+
+    <div class="grid md:grid-cols-2 gap-4">
+        <div th:each="v : ${voucherViews}"
+             th:class="'border rounded-lg p-4 shadow-sm relative ' +
+                       (${v.eligible} ? 'bg-white border-green-500' : 'bg-gray-100 border-gray-300 opacity-60')">
+
+            <div class="flex justify-between items-start mb-2">
+                <div>
+                    <h2 class="font-semibold text-lg"
+                        th:text="${v.promotion.name}">Tên voucher</h2>
+                    <p class="text-sm text-gray-600"
+                       th:text="${v.promotion.description}">Mô tả...</p>
+                </div>
+
+                <div th:if="${v.eligible}"
+                     class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full">
+                    Áp dụng được
+                </div>
+                <div th:if="${!v.eligible}"
+                     class="text-xs px-2 py-1 bg-gray-200 text-gray-600 rounded-full">
+                    Không đủ điều kiện
+                </div>
+            </div>
+
+            <div class="text-sm text-gray-700 space-y-1 mb-3">
+                <p th:if="${v.promotion.minOrderValue != null}">
+                    • Đơn tối thiểu:
+                    <span class="font-medium"
+                          th:text="${#numbers.formatDecimal(v.promotion.minOrderValue, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+                </p>
+                <p th:if="${v.promotion.minTotalQuantity != null}">
+                    • Số lượng tối thiểu:
+                    <span class="font-medium" th:text="${v.promotion.minTotalQuantity}"></span> sản phẩm
+                </p>
+                <p th:if="${v.discountAmount != null and v.eligible}">
+                    • Số tiền sẽ giảm:
+                    <span class="font-semibold text-green-700"
+                          th:text="${#numbers.formatDecimal(v.discountAmount, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+                </p>
+            </div>
+
+            <!-- Nút chọn -->
+            <div class="flex justify-between items-center mt-2">
+                <div>
+                    <span class="text-xs text-gray-500">Mã:</span>
+                    <span class="text-xs font-mono"
+                          th:text="${v.promotion.code}">CODE123</span>
+                </div>
+
+                <form th:action="@{/vouchers/apply}" method="post">
+                    <input type="hidden" name="promotionId"
+                           th:value="${v.promotion.id}"/>
+                    <!-- Đổi lại đúng URL trang thanh toán của bạn -->
+                    <input type="hidden" name="returnUrl" value="/order/checkout"/>
+
+                    <button type="submit"
+                            th:disabled="${!v.eligible}"
+                            th:class="'px-3 py-2 rounded text-sm font-medium ' +
+                                      (${v.eligible} ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-gray-400 text-gray-100 cursor-not-allowed')">
+                        Chọn voucher này
+                    </button>
+                </form>
+            </div>
+
+            <!-- Đánh dấu nếu là voucher hiện đang chọn -->
+            <div th:if="${selectedVoucherId != null and selectedVoucherId == v.promotion.id}"
+                 class="absolute -top-2 -right-2 bg-orange-500 text-white text-xs px-2 py-1 rounded-full shadow">
+                Đang chọn
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-6">
+        <form th:action="@{/vouchers/clear}" method="post" class="inline-block mr-3">
+            <input type="hidden" name="returnUrl" value="/order/checkout"/>
+            <button type="submit"
+                    class="px-4 py-2 text-sm border border-gray-400 rounded hover:bg-gray-100">
+                Bỏ chọn voucher
+            </button>
+        </form>
+
+        <a href="/order/checkout"
+           class="px-4 py-2 text-sm bg-gray-800 text-white rounded hover:bg-gray-700">
+            Quay lại trang thanh toán
+        </a>
+    </div>
+</main>
+
+<th:block th:fragment="extraScripts"></th:block>
+</body>
+</html>
