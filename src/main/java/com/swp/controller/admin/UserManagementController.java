@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,7 +93,8 @@ public class UserManagementController {
     public String createUserByAdmin(
             @Valid @ModelAttribute("adminCreateUserRequest") AdminCreateUserRequest request,
             BindingResult bindingResult,
-            ModelMap model) {
+            ModelMap model,
+            RedirectAttributes redirectAttributes) {
 
         if (bindingResult.hasErrors()) {
             model.put("roles", userService.getAllRoles());
@@ -106,9 +108,9 @@ public class UserManagementController {
 
         try {
             authService.createUserByAdmin(request);
-            model.put("successMessage", "Tạo người dùng thành công!");
+            redirectAttributes.addFlashAttribute("successMessage", "Tạo người dùng thành công!");
         } catch (Exception e) {
-            model.put("errorMessage", e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
 
         return "redirect:/admin/user";

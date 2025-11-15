@@ -80,8 +80,6 @@
                     <th class="px-3 py-2 border">Stars</th>
                     <th class="px-3 py-2 border">Title</th>
                     <th class="px-3 py-2 border">Created</th>
-                    <th class="px-3 py-2 border">Status</th>
-                    <th class="px-3 py-2 border">Action</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -101,18 +99,6 @@
                         <div class="text-xs text-gray-500" th:text="${#strings.abbreviate((r.content ?: ''), 60)}"></div>
                     </td>
                     <td class="px-3 py-2 border" th:text="${#temporals.format(r.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
-                    <td class="px-3 py-2 border" th:text="${r.status}"></td>
-                    <td class="px-3 py-2 border">
-                        <!-- (7) Approve -->
-                        <form th:action="@{'/admin/reviews/' + ${r.reviewId} + '/approve'}" method="post" class="inline">
-                            <button class="text-emerald-700 hover:underline" th:if="${r.status.name() != 'APPROVED'}">Approve</button>
-                        </form>
-                        <!-- (8) Reject -->
-                        <form th:action="@{'/admin/reviews/' + ${r.reviewId} + '/reject'}" method="post" class="inline ml-2">
-                            <button class="text-rose-700 hover:underline" th:if="${r.status.name() != 'REJECTED'}">Reject</button>
-                        </form>
-
-                    </td>
                 </tr>
                 <tr th:if="${data.totalElements == 0}">
                     <td colspan="8" class="px-3 py-6 text-center text-gray-500">Không có review nào phù hợp</td>

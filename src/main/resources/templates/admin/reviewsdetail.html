@@ -25,9 +25,7 @@
             <div><span class="text-gray-500">Số sao:</span>
                 <span class="font-medium" th:text="${r.rating}"></span> ★
             </div>
-            <div><span class="text-gray-500">Trạng thái:</span>
-                <span class="font-medium" th:text="${r.status}"></span>
-            </div>
+
             <div><span class="text-gray-500">Tạo lúc:</span>
                 <span class="font-medium" th:text="${#temporals.format(r.createdAt,'dd/MM/yyyy HH:mm')}"></span>
             </div>
@@ -49,15 +47,7 @@
             </div>
         </div>
 
-        <!-- Hành động duyệt -->
-        <div class="mt-6 flex gap-3">
-            <form th:action="@{'/admin/reviews/' + ${r.reviewId} + '/approve'}" method="post">
-                <button class="px-3 py-2 rounded bg-emerald-600 text-white" th:if="${r.status.name() != 'APPROVED'}">Approve</button>
-            </form>
-            <form th:action="@{'/admin/reviews/' + ${r.reviewId} + '/reject'}" method="post">
-                <button class="px-3 py-2 rounded bg-rose-600 text-white" th:if="${r.status.name() != 'REJECTED'}">Reject</button>
-            </form>
-        </div>
+
 
         <!-- Replies -->
         <div class="mt-8">
