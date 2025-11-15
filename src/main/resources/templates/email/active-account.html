@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Mã xác minh</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f2f3f3; margin: 0; padding: 0;">
+<table align="center" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; margin-top: 40px; border-collapse: collapse;">
+    <tr>
+        <td align="center" style="padding: 40px 30px 20px;">
+            <h2 style="margin: 0;">Mã xác minh</h2>
+            <p style="font-size: 36px; font-weight: bold; margin: 10px 0;" th:text="${code}"></p>
+            <p style="color: #555; font-size: 13px;">(Mã này sẽ hết hạn sau 10 phút kể từ khi được gửi.)</p>
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 20px 30px; font-size: 14px; color: #333;">
+            Cake sẽ không bao giờ gửi email yêu cầu bạn cung cấp hoặc xác minh mật khẩu, thẻ tín dụng hoặc thông tin tài khoản ngân hàng. Nếu bạn nhận được một email đáng ngờ với liên kết để cập nhật thông tin tài khoản, vui lòng không nhấp vào liên kết. Thay vào đó, hãy báo cáo email đó cho Cake để điều tra.
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 20px 30px; font-size: 12px; color: #999;">
+            Cake Inc. Thư này được tạo và gửi bởi Cake.
+    </tr>
+</table>
+</body>
+</html>
