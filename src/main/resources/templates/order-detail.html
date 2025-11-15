@@ -101,7 +101,7 @@
     <div class="flex justify-end items-center gap-8 mt-6">
       <div class="text-right">
         <p class="text-sm text-gray-600 mb-2">Tổng tiền</p>
-        <p th:text="${#numbers.formatDecimal(totalAmount, 0, 'COMMA', 0, 'POINT')} + '₫'"></p>
+        <p th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + '₫'"></p>
       </div>
     </div>
 
