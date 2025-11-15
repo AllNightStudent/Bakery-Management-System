@@ -64,11 +64,19 @@ public class UserManagementController {
         model.put("totalPages", totalPages);
         model.put("search", search);
         model.put("roleId", roleId);
-        model.addAttribute("adminCreateUserRequest", new AdminCreateUserRequest());
-        model.addAttribute("adminUpdateUserRequest", new AdminUpdateUserRequest());
 
         return "admin/users";
     }
+    @ModelAttribute("adminCreateUserRequest")
+    public AdminCreateUserRequest adminCreateUserRequest() {
+        return new AdminCreateUserRequest();
+    }
+
+    @ModelAttribute("adminUpdateUserRequest")
+    public AdminUpdateUserRequest adminUpdateUserRequest() {
+        return new AdminUpdateUserRequest();
+    }
+
 
     @PostMapping("/toggleStatus")
     public String toggleUserStatus(@RequestParam Long id) {

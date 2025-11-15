@@ -757,34 +757,34 @@
                 <!-- Họ tên -->
                 <div class="form-group">
                     <label for="fullName">Họ tên</label>
-                    <input type="text" th:field="*{fullName}" id="fullName" placeholder="Nhập họ tên">
+                    <input type="text" th:field="*{fullName}" id="fullName" placeholder="Nhập họ tên" required>
                     <div class="error-message" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></div>
                 </div>
 
                 <!-- Email -->
                 <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="email" th:field="*{email}" id="email" placeholder="Nhập email">
+                    <input type="email" th:field="*{email}" id="email" placeholder="Nhập email" required>
                     <div class="error-message" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
                 </div>
 
                 <!-- Mật khẩu -->
                 <div class="form-group">
                     <label for="password">Mật khẩu</label>
-                    <input type="password" th:field="*{password}" id="password" placeholder="Nhập mật khẩu">
+                    <input type="password" th:field="*{password}" id="password" placeholder="Nhập mật khẩu" required>
                     <div class="error-message" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
                 </div>
 
                 <!-- Số điện thoại -->
                 <div class="form-group">
                     <label for="phone">Số điện thoại</label>
-                    <input type="tel" th:field="*{phone}" id="phone" placeholder="Nhập số điện thoại (nếu có)">
+                    <input type="tel" th:field="*{phone}" id="phone" placeholder="Nhập số điện thoại (nếu có)" required>
                 </div>
 
                 <!-- Vai trò -->
                 <div class="form-group">
                     <label for="roleId">Vai trò</label>
-                    <select th:field="*{roleId}" id="roleId">
+                    <select th:field="*{roleId}" id="roleId" required>
                         <option value="">-- Chọn vai trò --</option>
                         <option th:each="role : ${roles}" th:value="${role.id}" th:text="${role.name}"></option>
                     </select>
