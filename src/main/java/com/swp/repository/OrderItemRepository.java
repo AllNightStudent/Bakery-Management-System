@@ -41,7 +41,8 @@ public interface OrderItemRepository extends JpaRepository<OrderItemEntity, Long
             COALESCE(SUM(oi.quantity * oi.price), 0) AS rev
         FROM orders o
         LEFT JOIN order_items oi ON oi.order_id = o.order_id
-        WHERE o.order_date >= :from AND o.order_date < :to
+        WHERE o.order_date >= :from AND o.order_date < :to 
+        AND o.status = 'COMPLETED'
         GROUP BY DATE(o.order_date)
         ORDER BY DATE(o.order_date)
         """, nativeQuery = true)
