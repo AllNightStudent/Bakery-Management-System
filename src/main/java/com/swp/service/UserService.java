@@ -73,11 +73,7 @@ public class UserService {
         }
     }
 
-    public boolean deleteById(Long id) {
-        if (!userRepository.existsById(id)) return false;
-        userRepository.deleteById(id);
-        return true;
-    }
+
 
     public void update(UserEntity user) {
         userRepository.save(user);

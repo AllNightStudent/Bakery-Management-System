@@ -84,19 +84,6 @@ public class UserManagementController {
         return "redirect:/admin/user";
     }
 
-    @PostMapping("/delete/{id}")
-    @ResponseBody
-    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
-        try {
-            boolean deleted = userService.deleteById(id);
-            return deleted
-                    ? ResponseEntity.ok("deleted")
-                    : ResponseEntity.badRequest().body("not_found");
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("error");
-        }
-    }
-
     @PostMapping("/create")
     public String createUserByAdmin(
             @Valid @ModelAttribute("adminCreateUserRequest") AdminCreateUserRequest request,
