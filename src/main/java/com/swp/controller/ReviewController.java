@@ -84,21 +84,13 @@ public class ReviewController {
                          Authentication auth,
                          RedirectAttributes ra) throws IOException {
 
-        System.out.println("[REVIEW POST] principal="
-                + (auth == null ? null : auth.getName())
-                + ", isAuth=" + (auth != null && auth.isAuthenticated())
-                + ", anon=" + (auth instanceof AnonymousAuthenticationToken));
-
 
         String email = auth.getName();
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
 
         if (br.hasErrors()) {
-            br.getFieldErrors().forEach(e ->
-                    System.out.printf("[REVIEW ERR] field=%s, rejected=%s, msg=%s%n",
-                            e.getField(), e.getRejectedValue(), e.getDefaultMessage())
-            );
+
             ra.addFlashAttribute("org.springframework.validation.BindingResult.req", br);
             ra.addFlashAttribute("req", req);
             ra.addFlashAttribute("error", "Vui lòng kiểm tra lại các trường nhập.");
@@ -130,13 +122,6 @@ public class ReviewController {
                                RedirectAttributes ra,
                                Model model) {
 
-        System.out.println("[REVIEW VIEW] productId=" + productId + ", orderItemId=" + orderItemId);
-
-        if (auth == null || !auth.isAuthenticated()
-                || auth instanceof AnonymousAuthenticationToken) {
-            return "redirect:/login";
-        }
-
         String email = auth.getName();
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalStateException("Không tìm thấy user"));
@@ -154,7 +139,6 @@ public class ReviewController {
         }
 
         Review review = optReview.get();
-        System.out.println("[REVIEW VIEW] found reviewId=" + review.getReviewId());
 
         var media   = mediaRepo.findByReviewOrderByMediaIdAsc(review);
         var replies = replyRepo.findByReviewOrderByCreatedAtAsc(review);

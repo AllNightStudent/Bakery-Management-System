@@ -40,13 +40,7 @@ public class ReviewService {
             orderItem = orderItemRepo.findById(req.orderItemId())
                     .orElseThrow(() -> new IllegalArgumentException("Order item not found"));
 
-            // Kiểm tra orderItem thuộc về user và trạng thái đơn đã giao/hoàn tất
-            if (!orderItem.getOrder().getUser().getId().equals(user.getId()))
-                throw new SecurityException("Order item does not belong to current user");
 
-            String st = orderItem.getOrder().getStatus();
-            if (!"DELIVERED".equalsIgnoreCase(st) && !"COMPLETED".equalsIgnoreCase(st))
-                throw new IllegalStateException("Order not delivered/completed yet");
 
             // Chống trùng: đã từng review orderItem này chưa?
             reviewRepo.findByOrderItemAndUser(orderItem, user)

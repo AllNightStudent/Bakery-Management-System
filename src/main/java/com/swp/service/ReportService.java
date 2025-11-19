@@ -98,7 +98,9 @@ public class ReportService {
         List<OrderEntity> orderList = orderRepository.findOrdersBetween(start, end);
         BigDecimal total = BigDecimal.ZERO;
         for(OrderEntity order: orderList){
-            total = total.add(order.getTotalAmount());
+            if(order.getStatus().equalsIgnoreCase("COMPLETED")){
+                total = total.add(order.getTotalAmount());
+            }
         }
         return total;
     }
