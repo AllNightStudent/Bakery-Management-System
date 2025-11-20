@@ -1,5 +1,6 @@
 package com.swp.repository;
 
+import com.swp.entity.CategoryEntity;
 import com.swp.entity.ProductEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,12 +32,13 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     Page<ProductEntity> findProductsByIds(@Param("ids") List<Long> ids, Pageable pageable);
 
     //find all with variant
-    @Query("SELECT DISTINCT p FROM ProductEntity p LEFT JOIN FETCH p.variants")
-    List<ProductEntity> findAllWithVariants();
+    @Query("SELECT DISTINCT p FROM ProductEntity p LEFT JOIN FETCH p.variants WHERE p.active = TRUE")
+    List<ProductEntity> findAllActiveWithVariants();
 
     @Query("SELECT DISTINCT p FROM ProductEntity p LEFT JOIN FETCH p.variants WHERE p.productId = :id")
     ProductEntity findAllWithVariantsById(@Param("id") Long id);
 
+    List<ProductEntity> findByActiveIsNull();
+
+    boolean existsByCategoryId(CategoryEntity categoryId);
 }
-
-

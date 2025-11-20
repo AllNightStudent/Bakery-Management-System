@@ -2,7 +2,6 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{fragments/layout :: layout(~{::main}, 'Sản Phẩm - Bakery', ~{::extraHead}, ~{::extraScripts})}">
 <head>
-    <!-- Tiêu đề này sẽ không được sử dụng, vì nó được truyền trực tiếp trong th:replace -->
     <title>Giỏ hàng - Bakery</title>
     <th:block th:fragment="extraHead">
         <link rel="stylesheet" th:href="@{/css/login.css}">
@@ -12,30 +11,38 @@
                 background-color: #f5f0e8;
                 font-family: 'Arial', sans-serif;
             }
-
+            .warning-message {
+                background-color: #fef3c7;
+                border: 1px solid #fbbf24;
+                color: #92400e;
+                padding: 12px 16px;
+                border-radius: 6px;
+                display: none;
+                margin-top: 8px;
+                font-size: 14px;
+            }
+            .warning-message.show {
+                display: block;
+            }
         </style>
     </th:block>
-
 </head>
-
 <body class="min-h-screen">
 <main>
     <!--    Header Image-->
     <div class="w-full h-2 bg-gradient-to-r from-green-600 via-red-600 to-gray-800"></div>
-
     <!--    Main Container-->
     <div class="max-w-6xl mx-auto px-4 py-8">
-<!--        Title-->
+        Title
         <h1 class="text-3xl font-bold text-center mb-12 tracking-wider">GIỎ HÀNG</h1>
 
-<!--        Table Header-->
+        Table Header
         <div class="grid grid-cols-12 gap-4 mb-6 text-sm text-gray-700">
             <div class="col-span-6 text-center">Thông tin chi tiết sản phẩm</div>
             <div class="col-span-2 text-center">Đơn giá</div>
             <div class="col-span-2 text-center">Số lượng</div>
             <div class="col-span-2 text-center">Tổng giá</div>
         </div>
-
         <!--      Product 1-->
         <div>
             <div th:each="item, iterStat : ${cartItems}">
@@ -52,28 +59,31 @@
                             <span th:text="${item.productVariantId.weight + ' g'}"></span>
                         </p>
                     </div>
-
                     <!-- Giá -->
                     <div class="col-span-2 text-center">
                 <span class="unit-price text-gray-800"
                       th:text="${#numbers.formatDecimal(item.productVariantId.price, 0, 'COMMA', 0, 'POINT')}"></span>
                     </div>
-
                     <!-- Số lượng -->
-                    <div class="col-span-2 flex justify-center items-center gap-2">
-                        <input type="hidden" name="id" th:value="${item.id}"> <!-- gửi ID về server -->
-                        <button type="button" class="btn-minus w-8 h-8 border border-gray-300 rounded">−</button>
-                        <input type="number" name="quantity" th:value="${item.quantity}" min="1"
-                               class="quantity-input w-12 text-center border border-gray-300 rounded">
-                        <button type="button" class="btn-plus w-8 h-8 border border-gray-300 rounded">+</button>
+                    <div class="col-span-2">
+                        <div class="flex justify-center items-center gap-2">
+                            <input type="hidden" name="id" th:value="${item.id}"> <!-- gửi ID về server -->
+                            <input type="hidden" name="max-stock" th:value="${item.productVariantId.stock}" class="max-stock">
+                            <button type="button" class="btn-minus w-8 h-8 border border-gray-300 rounded">−</button>
+                            <input type="number" name="quantity" th:value="${item.quantity}" min="1"
+                                   class="quantity-input w-12 text-center border border-gray-300 rounded">
+                            <button type="button" class="btn-plus w-8 h-8 border border-gray-300 rounded">+</button>
+                        </div>
+                        <!-- thêm warning message khi vượt quá stock -->
+                        <div class="warning-message">
+                            ⚠️ Số lượng vượt quá hàng có sẵn. Vui lòng giảm số lượng.
+                        </div>
                     </div>
-
                     <!-- Tổng -->
                     <div class="col-span-1 text-center">
                 <span class="item-total font-semibold text-gray-800"
                       th:text="${#numbers.formatDecimal(item.productVariantId.price * item.quantity, 0, 'COMMA', 0, 'POINT')}"></span>
                     </div>
-
                     <!-- Nút Xóa -->
                     <div class="col-span-1 text-center">
                         <form th:action="@{/cart/remove}" method="post" class="inline">
@@ -87,7 +97,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- Tổng cộng + nút cập nhật -->
             <div class="flex justify-end items-center gap-8">
                 <div class="text-right">
@@ -103,11 +112,7 @@
                 </div>
             </div>
             </form>
-
-
         </div>
-
-        <!--    Phone Button-->
         <a href="tel:+84123456789"
            class="fixed bottom-8 left-8 w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700 transition">
             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -116,7 +121,7 @@
             </svg>
         </a>
 
-<!--        Scroll to Top Button-->
+        Scroll to Top Button
         <button class="fixed bottom-8 right-8 w-10 h-10 bg-gray-700 rounded flex items-center justify-center shadow-lg hover:bg-gray-600 transition">
             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
@@ -136,8 +141,11 @@
                 const quantityInput = item.querySelector(".quantity-input");
                 const priceElement = item.querySelector(".unit-price");
                 const totalElement = item.querySelector(".item-total");
+                const maxStockElement = item.querySelector(".max-stock");
+                const warningMessage = item.querySelector(".warning-message");
 
                 const unitPrice = parseInt(priceElement.textContent.replace(/\D/g, ""));
+                const maxStock = parseInt(maxStockElement.value);
 
                 function updateTotal() {
                     const quantity = parseInt(quantityInput.value);
@@ -146,10 +154,22 @@
                     updateCartTotal();
                 }
 
+                function checkStock() {
+                    const quantity = parseInt(quantityInput.value);
+                    if (quantity > maxStock) {
+                        warningMessage.classList.add("show");
+                        return false;
+                    } else {
+                        warningMessage.classList.remove("show");
+                        return true;
+                    }
+                }
+
                 minusBtn.addEventListener("click", (e) => {
                     e.preventDefault();
                     if (quantityInput.value > 1) {
                         quantityInput.value--;
+                        warningMessage.classList.remove("show");
                         updateTotal();
                     }
                 });
@@ -157,10 +177,17 @@
                 plusBtn.addEventListener("click", (e) => {
                     e.preventDefault();
                     quantityInput.value++;
-                    updateTotal();
+                    if (checkStock()) {
+                        updateTotal();
+                    } else {
+                        quantityInput.value--;
+                    }
                 });
 
-                quantityInput.addEventListener("input", updateTotal);
+                quantityInput.addEventListener("input", () => {
+                    checkStock();
+                    updateTotal();
+                });
             });
 
             function updateCartTotal() {

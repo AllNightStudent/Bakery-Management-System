@@ -7,6 +7,19 @@
     <th:block th:fragment="extraHead">
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <style>
+            .btn-restore {
+                background-color: #17a2b8; /* xanh cyan */
+                color: white;
+                padding: 6px 12px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+
+            .btn-restore:hover {
+                background-color: #138496;
+            }
+
             /* Include admin styles from dashboard.html */
             .admin-header {
                 background: #2c3e50;
@@ -574,6 +587,27 @@
                 border-top: 1px solid #eee;
             }
 
+            .status {
+                display: inline-block;
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                margin-right: 6px;
+            }
+
+            .status.active {
+                background-color: #28a745; /* xanh */
+            }
+
+            .status.inactive {
+                background-color: #dc3545; /* đỏ */
+            }
+
+            .status-text {
+                font-weight: 500;
+            }
+
+
             /* remove button row spans all columns and right-align */
             .variant-item .remove-container {
                 grid-column: 1 / -1;
@@ -726,12 +760,19 @@
                                       th:classappend="${variantsByProduct != null and variantsByProduct.containsKey(p.productId) and !variantsByProduct.get(p.productId).empty and #aggregates.sum(variantsByProduct.get(p.productId).![stock]) > 0} ? 'good' : 'out'"
                                       th:text="${variantsByProduct != null and variantsByProduct.containsKey(p.productId) and !variantsByProduct.get(p.productId).empty and #aggregates.sum(variantsByProduct.get(p.productId).![stock]) > 0} ? 'Có hàng' : 'Hết hàng'">Trạng thái</span>
                             </span>
-                        </td>
                         <td>
-                            <span class="status active">Đang bán</span>
+                            <span class="status"
+                                  th:classappend="${p.active == null || p.active ? 'active' : 'inactive'}">
+                            </span>
+
+                            <span class="status-text"
+                                  th:text="${p.active == null || p.active ? 'Hoạt động' : 'Ngừng hoạt động'}">
+                            </span>
                         </td>
+
                         <td>
-                            <div class="action-buttons">
+                            <!-- Nếu active = true hoặc null (xem như true) -->
+                            <div th:if="${p.active == null || p.active}" style="display: flex; gap: 20px">
                                 <button class="btn-view"
                                         th:data-product-id="${p.productId}"
                                         th:data-product-name="${p.name}"
@@ -739,14 +780,26 @@
                                         th:data-product-description="${p.description}"
                                         th:data-product-category-id="${p.categoryId.id}"
                                         th:data-product-img-url="${p.imgUrl}"
+                                        th:data-product-active="${p.active}"
                                         onclick="editProduct(this)"
                                         title="Chỉnh sửa">✏️</button>
+
                                 <button class="btn-delete"
                                         th:data-product-id="${p.productId}"
                                         th:data-product-name="${p.name}"
                                         onclick="deleteProduct(this.dataset.productId, this.dataset.productName)"
                                         title="Xóa">🗑️</button>
                             </div>
+                            <!-- Nếu active = false thì hiện nút Kích hoạt lại -->
+                            <div th:if="${p.active == false}">
+                                <button class="btn-restore"
+                                        th:data-product-id="${p.productId}"
+                                        th:data-product-name="${p.name}"
+                                        onclick="reactiveProduct(this.dataset.productId, this.dataset.productName)">
+                                    🔄 Kích hoạt lại
+                                </button>
+                            </div>
+
                         </td>
                     </tr>
                     </tbody>
@@ -867,6 +920,16 @@
                         <label>Mô tả ngắn</label>
                         <input type="text" id="editShortDescription" name="shortDescription">
                     </div>
+                    <!--                <div class="form-row">-->
+                    <!--                    <div class="form-group">-->
+                    <!--                        <label>Trạng thái</label>-->
+                    <!--                        <div style="display: flex; align-items: center; gap: 6px;">-->
+                    <!--                            <input type="checkbox" id="editActive" name="active">-->
+                    <!--                            <label for="editActive" style="margin: 0;">Hoạt động</label>-->
+                    <!--                        </div>-->
+                    <!--                    </div>-->
+                    <!--                </div>-->
+
                 </div>
                 <div class="form-group">
                     <label>Mô tả</label>
@@ -1094,12 +1157,14 @@
                 const description = button.getAttribute('data-product-description') || '';
                 const categoryId = button.getAttribute('data-product-category-id') || '';
                 const imgUrl = button.getAttribute('data-product-img-url') || '';
+                const active = button.getAttribute('data-product-active') || true;
 
                 // Populate form with product data
                 document.getElementById('editName').value = productName;
                 document.getElementById('editShortDescription').value = shortDescription;
                 document.getElementById('editDescription').value = description;
                 document.getElementById('editCategoryId').value = categoryId;
+                document.getElementById("editActive").value = active
 
                 // Handle image
                 const imagePreview = document.getElementById('editImagePreview');
@@ -1196,15 +1261,6 @@
             variantDiv.className = 'variant-item';
             variantDiv.setAttribute('data-index', index);
 
-            const formatDate = (dateTimeStr) => {
-                if (!dateTimeStr) return '';
-                const date = new Date(dateTimeStr);
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                return `${year}-${month}-${day}`;
-            };
-
             variantDiv.innerHTML = `
                 <div class="form-row">
                     <div class="form-group">
@@ -1213,16 +1269,6 @@
                                value="${variant ? (variant.sku || '') : ''}">
                     </div>
                 </div>
-                <div class="form-row">
-        <label>Ngày sản xuất</label>
-        <input type="date" name="variants[${index}].createdAt"
-               value="${variant ? formatDate(variant.createdAt) : ''}" readonly>
-    </div>
-                <div class="form-row">
-                        <label>Hạn sử dụng</label>
-                        <input type="date" name="variants[${index}].expiryDate"
-                               value="${variant ? (variant.expiryDate || '') : ''}">
-                    </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Trọng lượng (g)</label>
@@ -1439,6 +1485,65 @@
                 }
             });
         }
+
+        function reactiveProduct(productId, productName) {
+            const productIdNum = parseInt(productId);
+
+            Swal.fire({
+                title: "Kích hoạt lại sản phẩm",
+                html: `Bạn có muốn kích hoạt lại sản phẩm <strong>"${productName}"</strong>?`,
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonColor: "#28a745",
+                cancelButtonColor: "#6c757d",
+                confirmButtonText: "Kích hoạt",
+                cancelButtonText: "Hủy"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Show loading
+                    Swal.fire({
+                        title: "Đang kích hoạt...",
+                        text: "Vui lòng chờ",
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    // Gửi request
+                    const formData = new FormData();
+                    fetch(`/admin/products/${productIdNum}/reactive`, {
+                        method: 'POST',
+                        body: formData
+                    })
+                        .then(response => {
+                            if (response.ok) {
+                                Swal.fire({
+                                    title: "Thành công!",
+                                    text: "Sản phẩm đã được kích hoạt lại",
+                                    icon: "success"
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: "Lỗi!",
+                                    text: "Không thể kích hoạt lại sản phẩm",
+                                    icon: "error"
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            Swal.fire({
+                                title: "Lỗi!",
+                                text: "Lỗi: " + error.message,
+                                icon: "error"
+                            });
+                        });
+                }
+            });
+        }
+
+
 
         // Close modals
         function closeEditModal() {

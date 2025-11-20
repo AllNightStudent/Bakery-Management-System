@@ -4,6 +4,7 @@ package com.swp.service;
 import com.swp.dto.CategoryDTO;
 import com.swp.entity.CategoryEntity;
 import com.swp.repository.CategoryRepository;
+import com.swp.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
 
     public Page<CategoryDTO> getAllCategories(int page, int size, String sortBy, String sortDir) {
         Sort sort = sortDir.equalsIgnoreCase("asc")
@@ -92,11 +94,19 @@ public class CategoryService {
 
     @Transactional
     public void deleteCategory(Long id) {
-        if (!categoryRepository.existsById(id)) {
-            throw new RuntimeException("Không tìm thấy danh mục với ID: " + id);
+        CategoryEntity category = categoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục với ID: " + id));
+
+        // Kiểm tra xem có Product nào thuộc category này không
+        boolean hasProducts = productRepository.existsByCategoryId(category);
+        if (hasProducts) {
+            throw new RuntimeException("Không thể xóa danh mục vì còn sản phẩm thuộc danh mục này!");
         }
-        categoryRepository.deleteById(id);
+
+        // Nếu không có product nào, mới xóa
+        categoryRepository.delete(category);
     }
+
 
     @Transactional
     public void toggleCategoryStatus(Long id) {

@@ -128,7 +128,7 @@ public class CategoryController {
             categoryService.toggleCategoryStatus(id);
             redirectAttributes.addFlashAttribute("success", "Cập nhật trạng thái thành công!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
 
         return "redirect:/admin/categories";

@@ -31,6 +31,8 @@ public class CreateProductRequest {
     @NotNull
     private java.util.List<VariantRequest> variants;
 
+    private Boolean active = true;
+
     @Data
     public static class VariantRequest {
         @NotBlank

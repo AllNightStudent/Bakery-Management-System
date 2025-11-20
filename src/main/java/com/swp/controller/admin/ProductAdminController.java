@@ -150,6 +150,14 @@ public class ProductAdminController {
         }
     }
 
+    @PostMapping("/{id}/reactive")
+    public String reactiveProduct(@PathVariable Long id) {
+        ProductEntity product = productRepository.findById(id).orElseThrow();
+        product.setActive(true);
+        productRepository.save(product);
+        return "redirect:/admin/products";
+    }
+
     @PostMapping("/{id}/delete")
     public String deleteProduct(@PathVariable Long id,
                                 org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {

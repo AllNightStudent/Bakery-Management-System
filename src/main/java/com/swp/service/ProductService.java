@@ -56,6 +56,7 @@ public class ProductService {
                 .imgUrl(storedImagePath)
                 .description(request.getDescription())
                 .categoryId(category)
+                .active(true)
                 .build();
         product = productRepository.save(product);
 
@@ -102,6 +103,7 @@ public class ProductService {
         product.setShortDescription(request.getShortDescription());
         product.setDescription(request.getDescription());
         product.setCategoryId(category);
+        product.setActive(request.getActive());
 
         // Handle image update
         if (request.getImageFile() != null && !request.getImageFile().isEmpty()) {
@@ -150,13 +152,14 @@ public class ProductService {
     @Transactional
     public void deleteProduct(Long productId) {
         ProductEntity product = getProductById(productId);
-
-        // Delete all variants first (cascade delete)
-        List<ProductVariantEntity> variants = productVariantRepository.findByProductProductId(productId);
-        productVariantRepository.deleteAll(variants);
+        product.setActive(false);
+//
+//        // Delete all variants first (cascade delete)
+//        List<ProductVariantEntity> variants = productVariantRepository.findByProductProductId(productId);
+//        productVariantRepository.deleteAll(variants);
 
         // Delete the product
-        productRepository.delete(product);
+//        productRepository.delete(product);
     }
 
     private String storeImage(MultipartFile file) {
@@ -179,7 +182,7 @@ public class ProductService {
     }
 
     public List<ProductEntity> getAllProducts() {
-        return productRepository.findAllWithVariants();
+        return productRepository.findAllActiveWithVariants();
     }
 
     public ProductEntity getProductVariantsById(Long productId) {

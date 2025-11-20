@@ -47,4 +47,5 @@ public class ProductEntity {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private java.util.List<ProductVariantEntity> variants;
 
+    private Boolean active = Boolean.TRUE;
 }

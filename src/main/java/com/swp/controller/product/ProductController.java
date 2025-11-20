@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -95,6 +96,7 @@ public class ProductController {
     public String addProductToCart(@PathVariable("id") Long id,
                                    @PathParam("variantId") Long variantId,
                                    @RequestParam(value = "quantity", defaultValue = "1") int quantity,
+                                   RedirectAttributes redirectAttributes,
                                    Model model) {
         UserEntity currentUser = userService.getCurrentUser();
         if(currentUser == null) {
@@ -105,8 +107,23 @@ public class ProductController {
         ProductVariantEntity productVariant = productVariantRepository.findById(variantId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
 
+        Integer stock = productVariant.getStock();
+
+        if(quantity > stock) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Số lượng trong kho không đủ, vui lòng chọn số lượng dưới " + stock);
+            return "redirect:/products/" + id;
+        }
+
         CartItemEntity existingItem = cartItemRepository.findByCartAndProductVariantId(cart, productVariant);
         if (existingItem != null) {
+            Integer totalQuantity = existingItem.getQuantity() + quantity;
+            if(totalQuantity > stock) {
+                redirectAttributes.addFlashAttribute("errorMessage",
+                        "Bạn đã có " + existingItem.getQuantity() +
+                                " sản phẩm trong giỏ. Tồn kho chỉ còn " + stock + ".");
+                return "redirect:/products/" + id;
+            }
             existingItem.setQuantity(existingItem.getQuantity() + quantity);
             cartItemService.save(existingItem);
         } else {

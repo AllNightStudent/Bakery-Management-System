@@ -162,6 +162,14 @@
 
 <body>
 <th:block th:fragment="main">
+
+    <div th:if="${errorMessage}" th:utext="${errorMessage}" id="errorMessage" style="display:none"></div>
+    <script th:if="${errorMessage}">
+        alert(document.getElementById('errorMessage').innerText);
+    </script>
+
+
+
     <!-- Nội dung trang chính -->
     <div class="container mx-auto px-4 py-8 max-w-7xl">
         <!-- Product Detail Section -->
@@ -178,6 +186,7 @@
                             style="max-height: 450px"
                     />
                 </div>
+
             </div>
 
             <!-- Product Info -->
@@ -188,7 +197,7 @@
                 <p class="mb-3 text-lg">
                     Giá:
                     <span id="displayPrice" class="font-bold text-amber-900">
-        0
+        0₫
     </span>
                 </p>
                 <div class="product-variants">
@@ -317,6 +326,7 @@
         }
 
         function selectVariant(button) {
+            // <CHANGE> Lấy variantId, giá và stock từ thuộc tính data
             selectedVariantId = button.getAttribute('data-variant-id');
             selectedPrice = parseFloat(button.getAttribute('data-price'));
             selectedStock = parseInt(button.getAttribute('data-stock'));
@@ -325,17 +335,14 @@
             document.querySelectorAll('.btn-variant').forEach(b => b.classList.remove('active'));
             button.classList.add('active');
 
-            // Hiển thị stock info
+            // <CHANGE> hiển thị stock info
             document.getElementById('stockInfo').style.display = 'block';
             document.getElementById('stockAmount').innerText = selectedStock;
 
             // Reset quantity về 1 khi chọn variant mới
             document.getElementById('quantity').value = 1;
             updateQuantityInput(1);
-
-            // ✅ Cập nhật hiển thị giá ngay khi chọn variant
-            document.getElementById('displayPrice').innerText = formatPrice(selectedPrice);
-
+            // updateDisplayedPrice();
             checkStockValidity();
         }
 
@@ -418,6 +425,35 @@
                 return;
             }
             document.getElementById('buyNowVariantId').value = selectedVariantId;
+        });
+
+        const qtyInput = document.getElementById('quantity');
+
+        qtyInput.addEventListener('input', function () {
+            let value = parseInt(qtyInput.value);
+
+            // Nếu nhập ký tự không phải số → chuyển về 1
+            if (isNaN(value) || value < 1) {
+                value = 1;
+            }
+
+            // Không cho vượt quá stock
+            if (selectedStock && value > selectedStock) {
+                value = selectedStock;
+            }
+
+            qtyInput.value = value;
+
+            updateQuantityInput(value);
+            checkStockValidity();
+            updateDisplayedPrice();
+        });
+
+        qtyInput.addEventListener('blur', function () {
+            if (qtyInput.value === "" || qtyInput.value === "0") {
+                qtyInput.value = 1;
+                updateQuantityInput(1);
+            }
         });
     </script>
 
