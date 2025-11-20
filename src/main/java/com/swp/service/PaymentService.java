@@ -63,7 +63,7 @@ public class PaymentService {
             if ("00".equals(responseCode)) {
                 payment.setStatus("SUCCESS");
                 payment.setTransactionDate(LocalDateTime.now());
-                orderService.updateOrderStatus(payment.getOrder().getOrderId(), "CONFIRMED");
+                orderService.updateOrderStatus(payment.getOrder().getOrderId(), "PENDING");
                 OrderEntity order = payment.getOrder();
                 for (OrderItemEntity item : order.getOrderItems()) {
                     ProductVariantEntity variant = item.getProductVariant();
