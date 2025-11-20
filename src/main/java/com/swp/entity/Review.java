@@ -1,7 +1,6 @@
 package com.swp.entity;
 
 
-import com.swp.entity.enums.ReviewStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -11,11 +10,13 @@ import java.time.LocalDateTime;
 
 @Getter @Setter @Builder
 @NoArgsConstructor @AllArgsConstructor
-@Entity @Table(name = "reviews",
+@Entity
+@Table(name = "reviews",
         indexes = {
-                @Index(name="idx_reviews_product_status_created", columnList = "product_id,status,created_at"),
+                @Index(name="idx_reviews_product_created", columnList = "product_id,created_at"),
                 @Index(name="idx_reviews_user", columnList = "user_id")
         })
+
 public class Review {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long reviewId;
@@ -34,8 +35,7 @@ public class Review {
     @Column(length = 150) private String title;
     @Column(nullable = false) private String content;
 
-    @Enumerated(EnumType.STRING) @Column(nullable = false)
-    private ReviewStatus status = ReviewStatus.PENDING;
+
 
 
     @CreationTimestamp @Column(name="created_at", updatable = false)

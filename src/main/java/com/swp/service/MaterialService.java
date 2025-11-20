@@ -53,9 +53,7 @@ public class MaterialService {
 	public MaterialDTO update(Long id, MaterialDTO dto) {
 		MaterialEntity entity = materialRepository.findById(id)
 				.orElseThrow(() -> new RuntimeException("Không tìm thấy nguyên liệu với ID: " + id));
-		if((dto.getName() != entity.getName()) && (materialRepository.existsByName(dto.getName()))) {
-			throw new RuntimeException("Tên nguyên liệu đã tồn tại: " + dto.getName());
-		}
+
 		entity.setName(dto.getName());
 		entity.setStock(dto.getStock());
 		entity.setUnit(dto.getUnit());

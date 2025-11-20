@@ -2,7 +2,6 @@ package com.swp.service;
 
 import com.swp.dto.ReviewCreateRequest;
 import com.swp.entity.*;
-import com.swp.entity.enums.ReviewStatus;
 import com.swp.repository.OrderItemRepository;
 import com.swp.repository.ProductRepository;
 import com.swp.repository.ReviewMediaRepository;
@@ -56,7 +55,6 @@ public class ReviewService {
                 .rating(req.rating())
                 .title(req.title())
                 .content(req.content())
-                .status(ReviewStatus.PENDING) // có thể auto-approve theo chính sách
                 .build();
 
         review = reviewRepo.save(review);

@@ -32,29 +32,13 @@
                 </select>
             </div>
 
-            <!-- (2) Status -->
-            <div>
-                <label class="text-sm text-gray-600">Status</label>
-                <select name="status" class="border rounded px-2 py-1">
-                    <option value="" th:selected="${status == null}">All</option>
-                    <option th:each="st : ${statuses}"
-                            th:value="${st}" th:selected="${status == st}"
-                            th:text="${st}"></option>
-                </select>
-            </div>
 
-            <!-- (3) Product Id -->
-            <div>
-                <label class="text-sm text-gray-600">Product Id</label>
-                <input type="number" min="1" name="productId" class="border rounded px-2 py-1"
-                       th:value="${productId}">
-            </div>
 
             <!-- (4) Keyword -->
             <div class="flex-1 min-w-[240px]">
                 <label class="text-sm text-gray-600">Keywords</label>
-                <input type="text" name="q" placeholder="title/content/user email/product..."
-                       class="w-full border rounded px-2 py-1" th:value="${q}">
+                <input type="text" name="keyword" placeholder="title/content/user email/product..."
+                       class="w-full border rounded px-2 py-1" th:value="${keyword}">
             </div>
 
             <!-- (5) Search -->
