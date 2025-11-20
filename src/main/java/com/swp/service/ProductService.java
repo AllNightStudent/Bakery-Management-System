@@ -15,7 +15,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
@@ -93,8 +97,9 @@ public class ProductService {
     public void updateProduct(Long productId, CreateProductRequest request, CategoryEntity category) {
         ProductEntity product = getProductById(productId);
 
-        // Validate duplicate product name (exclude current product)
-        if (!product.getName().equals(request.getName()) && productRepository.existsByName(request.getName())) {
+        // Validate product name
+        if (!product.getName().equals(request.getName())
+                && productRepository.existsByName(request.getName())) {
             throw new RuntimeException("Tên sản phẩm đã tồn tại: " + request.getName());
         }
 
@@ -105,49 +110,81 @@ public class ProductService {
         product.setCategoryId(category);
         product.setActive(request.getActive());
 
-        // Handle image update
-        if (request.getImageFile() != null && !request.getImageFile().isEmpty()) {
+        if (request.getImageFile() != null && !request.getImageFile().isEmpty() && request.getImageFile().getSize() > 0) {
             String newImagePath = storeImage(request.getImageFile());
             product.setImgUrl(newImagePath);
-        } else {
-            product.setImgUrl("");
         }
 
         productRepository.save(product);
 
-        // Delete existing variants FIRST
-        List<ProductVariantEntity> existingVariants = productVariantRepository.findByProductProductId(productId);
-        productVariantRepository.deleteAll(existingVariants);
+        // ================================
+        //  VARIANT UPDATE WITH CORRECT VALIDATION
+        // ================================
 
-        // Validate duplicate SKUs against ALL other SKUs in database
-        if (request.getVariants() != null && !request.getVariants().isEmpty()) {
-            for (var variant : request.getVariants()) {
-                if (variant.getSku() != null && !variant.getSku().trim().isEmpty()) {
-                    String sku = variant.getSku().trim();
+        List<ProductVariantEntity> existingVariants =
+                productVariantRepository.findByProductProductId(productId);
 
-                    // Check if SKU exists in database (compare with ALL SKUs)
-                    if (productVariantRepository.existsBySku(sku)) {
-                        throw new RuntimeException("SKU đã tồn tại: " + sku);
+        // Convert to map for quick lookup
+        Map<String, ProductVariantEntity> existingMap = existingVariants.stream()
+                .filter(v -> v.getSku() != null)
+                .collect(Collectors.toMap(v -> v.getSku().trim(), v -> v));
+
+        Set<String> requestSkus = new HashSet<>();
+
+        if (request.getVariants() != null) {
+            for (var variantReq : request.getVariants()) {
+
+                String sku = variantReq.getSku() != null ? variantReq.getSku().trim() : null;
+                if (sku == null || sku.isEmpty()) continue;
+
+                requestSkus.add(sku);
+
+                // CASE 1: SKU has existed in THIS product → update
+                if (existingMap.containsKey(sku)) {
+
+                    ProductVariantEntity old = existingMap.get(sku);
+
+                    old.setWeight(variantReq.getWeight());
+                    old.setPrice(variantReq.getPrice());
+                    old.setStock(variantReq.getStock());
+                    old.setExpiryDate(variantReq.getExpiryDate());
+
+                    productVariantRepository.save(old);
+                }
+
+                // CASE 2: SKU not in this product → validate against other products
+                else {
+
+                    // ❗ Validate SKU exists but NOT in this product
+                    if (productVariantRepository.existsBySkuAndProduct_ProductIdNot(sku, productId)) {
+                        throw new RuntimeException("SKU đã tồn tại ở sản phẩm khác: " + sku);
                     }
+
+                    // Create new variant
+                    ProductVariantEntity newVariant = ProductVariantEntity.builder()
+                            .product(product)
+                            .sku(sku)
+                            .weight(variantReq.getWeight())
+                            .price(variantReq.getPrice())
+                            .stock(variantReq.getStock())
+                            .expiryDate(variantReq.getExpiryDate())
+                            .build();
+
+                    productVariantRepository.save(newVariant);
                 }
             }
         }
 
-        // Add new variants
-        if (request.getVariants() != null) {
-            for (var v : request.getVariants()) {
-                ProductVariantEntity variant = ProductVariantEntity.builder()
-                        .product(product)
-                        .sku(v.getSku())
-                        .weight(v.getWeight())
-                        .price(v.getPrice())
-                        .stock(v.getStock())
-                        .expiryDate(v.getExpiryDate())
-                        .build();
-                productVariantRepository.save(variant);
+        // CASE 3: remove variants that were not included in request
+        for (ProductVariantEntity oldVariant : existingVariants) {
+            String oldSku = oldVariant.getSku() != null ? oldVariant.getSku().trim() : null;
+
+            if (oldSku != null && !requestSkus.contains(oldSku)) {
+                productVariantRepository.delete(oldVariant);
             }
         }
     }
+
 
     @Transactional
     public void deleteProduct(Long productId) {

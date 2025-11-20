@@ -15,6 +15,8 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariantEn
     // Search variants by SKU
     @Query("SELECT pv FROM ProductVariantEntity pv WHERE pv.sku LIKE %:sku%")
     List<ProductVariantEntity> findBySkuContaining(@Param("sku") String sku);
+
+    boolean existsBySkuAndProduct_ProductIdNot(String sku, Long productId);
 }
 
 

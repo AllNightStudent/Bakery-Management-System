@@ -316,7 +316,7 @@
 </th:block>
 
 <th:block th:fragment="extraScripts">
-    <script>
+    <script th:inline="javascript">
         let selectedVariantId = null;
         let selectedPrice = 0;
         let selectedStock = 0;
@@ -326,27 +326,22 @@
         }
 
         function selectVariant(button) {
-            // <CHANGE> Lấy variantId, giá và stock từ thuộc tính data
             selectedVariantId = button.getAttribute('data-variant-id');
             selectedPrice = parseFloat(button.getAttribute('data-price'));
             selectedStock = parseInt(button.getAttribute('data-stock'));
 
-            // Bỏ active cũ, thêm active mới
             document.querySelectorAll('.btn-variant').forEach(b => b.classList.remove('active'));
             button.classList.add('active');
 
-            // <CHANGE> hiển thị stock info
             document.getElementById('stockInfo').style.display = 'block';
             document.getElementById('stockAmount').innerText = selectedStock;
 
-            // Reset quantity về 1 khi chọn variant mới
             document.getElementById('quantity').value = 1;
             updateQuantityInput(1);
-            // updateDisplayedPrice();
             checkStockValidity();
+            document.getElementById('displayPrice').innerText = formatPrice(selectedPrice);
         }
 
-        // <CHANGE> hàm kiểm tra xem số lượng có vượt quá stock hay không
         function checkStockValidity() {
             const quantity = parseInt(document.getElementById('quantity').value);
             const warningMsg = document.getElementById('warningMessage');
@@ -354,12 +349,10 @@
             const buyNowBtn = document.getElementById('buyNowBtn');
 
             if (quantity > selectedStock) {
-                // Vượt quá stock - disable buttons và hiển thị warning
                 warningMsg.classList.add('show');
                 addToCartBtn.disabled = true;
                 buyNowBtn.disabled = true;
             } else {
-                // Hợp lệ - enable buttons và ẩn warning
                 warningMsg.classList.remove('show');
                 addToCartBtn.disabled = false;
                 buyNowBtn.disabled = false;
@@ -370,9 +363,7 @@
             const input = document.getElementById('quantity');
             const newValue = parseInt(input.value) + 1;
 
-            // <CHANGE> kiểm tra trước khi tăng
             if (newValue > selectedStock) {
-                // Không cho tăng vượt quá stock
                 document.getElementById('warningMessage').classList.add('show');
                 return;
             }
@@ -380,7 +371,6 @@
             input.value = newValue;
             updateQuantityInput(input.value);
             checkStockValidity();
-            // updateDisplayedPrice();
         }
 
         function decreaseQuantity() {
@@ -389,7 +379,6 @@
                 input.value = parseInt(input.value) - 1;
                 updateQuantityInput(input.value);
                 checkStockValidity();
-                // updateDisplayedPrice();
             }
         }
 
@@ -398,13 +387,6 @@
             document.getElementById('buyNowQuantity').value = value;
         }
 
-        function updateDisplayedPrice() {
-            const qty = parseInt(document.getElementById('quantity').value);
-            const total = selectedPrice * qty;
-            document.getElementById('displayPrice').innerText = formatPrice(total);
-        }
-
-        // Khi submit form thêm vào giỏ hàng
         document.getElementById('addToCartForm').addEventListener('submit', function(e) {
             if (!selectedVariantId) {
                 e.preventDefault();
@@ -413,11 +395,10 @@
             }
             document.getElementById('selectedVariantId').value = selectedVariantId;
 
-            const productId = /*[[${productDetail.productId}]]*/ '1';
+            const productId = /*[[${productDetail.productId}]]*/ 0;
             this.action = `/products/${productId}/add/${selectedVariantId}`;
         });
 
-        // Khi submit form mua ngay
         document.getElementById('buyNowForm').addEventListener('submit', function(e) {
             if (!selectedVariantId) {
                 e.preventDefault();
@@ -432,12 +413,10 @@
         qtyInput.addEventListener('input', function () {
             let value = parseInt(qtyInput.value);
 
-            // Nếu nhập ký tự không phải số → chuyển về 1
             if (isNaN(value) || value < 1) {
                 value = 1;
             }
 
-            // Không cho vượt quá stock
             if (selectedStock && value > selectedStock) {
                 value = selectedStock;
             }
@@ -446,7 +425,6 @@
 
             updateQuantityInput(value);
             checkStockValidity();
-            updateDisplayedPrice();
         });
 
         qtyInput.addEventListener('blur', function () {
@@ -456,6 +434,7 @@
             }
         });
     </script>
+
 
 
 </th:block>
