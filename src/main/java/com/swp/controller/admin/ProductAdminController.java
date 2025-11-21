@@ -2,28 +2,35 @@ package com.swp.controller.admin;
 
 import com.swp.dto.request.CreateProductRequest;
 import com.swp.entity.CategoryEntity;
+import com.swp.entity.ProductEntity;
+import com.swp.entity.ProductVariantEntity;
 import com.swp.entity.enums.TimeUnit;
 import com.swp.repository.CategoryRepository;
+import com.swp.repository.ProductRepository;
+import com.swp.repository.ProductVariantRepository;
 import com.swp.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import com.swp.entity.ProductEntity;
-import com.swp.entity.ProductVariantEntity;
-import com.swp.repository.ProductRepository;
-import com.swp.repository.ProductVariantRepository;
 
 @Controller
 @RequestMapping("/admin/products")
@@ -43,9 +50,8 @@ public class ProductAdminController {
                          org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
         try {
             if (bindingResult.hasErrors()) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Dữ liệu không hợp lệ: " +
-                        bindingResult.getFieldError().getDefaultMessage());
-                return "redirect:/admin/products";
+                model.addAttribute("categories", categoryRepository.findAll());
+                return "admin/products";
             }
             CategoryEntity category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new IllegalArgumentException("Danh mục không tồn tại"));
@@ -120,20 +126,20 @@ public class ProductAdminController {
             }
             CategoryEntity category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new IllegalArgumentException("Danh mục không tồn tại"));
-            TimeUnit timeUnit = category.getTimeUnit();
-            Integer expireTime = category.getExpireTime();
+//            TimeUnit timeUnit = category.getTimeUnit();
+//            Integer expireTime = category.getExpireTime();
             request.getVariants().forEach(product -> {
-                LocalDate expiryDate = null;
-                if (expireTime != null && expireTime > 0 && timeUnit != null) {
-                    LocalDate now = LocalDate.now();
-                    switch (timeUnit) {
-                        case DAY -> expiryDate = now.plusDays(expireTime);
-                        case WEEK -> expiryDate = now.plusWeeks(expireTime);
-                        case MONTH -> expiryDate = now.plusMonths(expireTime);
-                        case YEAR -> expiryDate = now.plusYears(expireTime);
-                    }
-                }
-                product.setExpiryDate(expiryDate);
+                LocalDate expiryDate = LocalDate.now().plus(1, ChronoUnit.MONTHS);
+//                if (expireTime != null && expireTime > 0 && timeUnit != null) {
+//                    LocalDate now = LocalDate.now();
+//                    switch (timeUnit) {
+//                        case DAY -> expiryDate = now.plusDays(expireTime);
+//                        case WEEK -> expiryDate = now.plusWeeks(expireTime);
+//                        case MONTH -> expiryDate = now.plusMonths(expireTime);
+//                        case YEAR -> expiryDate = now.plusYears(expireTime);
+//                    }
+//                }
+                product.setExpiryDate(product.getExpiryDate() == null ? expiryDate : product.getExpiryDate());
             });
             productService.updateProduct(id, request, category);
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật sản phẩm thành công");
@@ -157,6 +163,7 @@ public class ProductAdminController {
         productRepository.save(product);
         return "redirect:/admin/products";
     }
+
 
     @PostMapping("/{id}/delete")
     public String deleteProduct(@PathVariable Long id,

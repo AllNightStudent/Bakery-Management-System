@@ -1,9 +1,13 @@
 package com.swp.controller.cart;
 
+import com.swp.dto.request.CartUpdateDTO;
+import com.swp.dto.response.ResponseDTO;
 import com.swp.entity.CartEntity;
 import com.swp.entity.CartItemEntity;
 import com.swp.service.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -49,6 +53,22 @@ public class CartController {
     public String removeCartItem(@RequestParam("id") Long cartItemId) {
         cartItemService.deleteById(cartItemId);
         return "redirect:/cart";
+    }
+
+    @PostMapping("/update-quantity")
+    public ResponseEntity<?> updateQuantity(@RequestBody CartUpdateDTO cartUpdateDTO) {
+        try {
+            // Gọi service để update quantity
+            cartService.updateCartItemQuantity(cartUpdateDTO.getCartItemId(), cartUpdateDTO.getQuantity());
+
+            return ResponseEntity.ok(new ResponseDTO(true, "Cập nhật số lượng thành công"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ResponseDTO(false, e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseDTO(false, "Lỗi khi cập nhật: " + e.getMessage()));
+        }
     }
 
 

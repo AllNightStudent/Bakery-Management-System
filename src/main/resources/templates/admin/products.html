@@ -920,16 +920,6 @@
                         <label>Mô tả ngắn</label>
                         <input type="text" id="editShortDescription" name="shortDescription">
                     </div>
-                    <!--                <div class="form-row">-->
-                    <!--                    <div class="form-group">-->
-                    <!--                        <label>Trạng thái</label>-->
-                    <!--                        <div style="display: flex; align-items: center; gap: 6px;">-->
-                    <!--                            <input type="checkbox" id="editActive" name="active">-->
-                    <!--                            <label for="editActive" style="margin: 0;">Hoạt động</label>-->
-                    <!--                        </div>-->
-                    <!--                    </div>-->
-                    <!--                </div>-->
-
                 </div>
                 <div class="form-group">
                     <label>Mô tả</label>
@@ -1164,7 +1154,7 @@
                 document.getElementById('editShortDescription').value = shortDescription;
                 document.getElementById('editDescription').value = description;
                 document.getElementById('editCategoryId').value = categoryId;
-                //document.getElementById("editActive").value = active
+                // document.getElementById("editActive").value = active
 
                 // Handle image
                 const imagePreview = document.getElementById('editImagePreview');
@@ -1256,11 +1246,9 @@
                 const existingItems = container.querySelectorAll('.variant-item');
                 index = existingItems.length;
             }
-
             const variantDiv = document.createElement('div');
             variantDiv.className = 'variant-item';
             variantDiv.setAttribute('data-index', index);
-
             variantDiv.innerHTML = `
                 <div class="form-row">
                     <div class="form-group">
@@ -1285,6 +1273,23 @@
                         <input type="number" min="0" name="variants[${index}].stock" required
                                value="${variant ? (variant.stock || '') : ''}">
                     </div>
+                </div>
+                <!-- Thêm trường expiryDate và createdAt -->
+                <div class="form-row">
+
+                    <div class="form-group">
+                        <label>Ngày tạo</label>
+                        <input type="datetime-local" name="variants[${index}].createdAt"
+                               value="${variant && variant.createdAt ? formatDateTimeForInput(variant.createdAt) : ''}"
+                               ${variant ? 'readonly' : ''}>
+                    </div>
+                    <div class="form-group">
+                        <label>Ngày hết hạn</label>
+                        <input type="date" name="variants[${index}].expiryDate"
+                               value="${variant && variant.expiryDate ? variant.expiryDate : ''}">
+                    </div>
+                </div>
+                <div class="form-row">
                     <div class="remove-container">
                         <button type="button" class="btn-danger remove-variant-btn" onclick="removeEditVariantRow(this)">Xóa biến thể</button>
                     </div>
@@ -1294,6 +1299,23 @@
             container.appendChild(variantDiv);
             updateEditRemoveButtons();
         }
+
+
+        function formatDateTimeForInput(dateTimeStr) {
+            if (!dateTimeStr) return '';
+            // Convert từ ISO format sang format cho datetime-local input (YYYY-MM-DDTHH:mm)
+            const date = new Date(dateTimeStr);
+            if (isNaN(date.getTime())) return '';
+
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+
 
         // Remove variant row (same logic as add modal)
         function removeEditVariantRow(btn) {

@@ -1,7 +1,9 @@
 package com.swp.service;
 
 import com.swp.entity.CartEntity;
+import com.swp.entity.CartItemEntity;
 import com.swp.entity.UserEntity;
+import com.swp.repository.CartItemRepository;
 import com.swp.repository.CartRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,7 @@ public class CartService {
 
     private final UserService userService;
     private final CartRepository cartRepository;
+    private final CartItemRepository cartItemRepository;
 
 //    public CartService (UserService userService,  CartRepository cartRepository) {
 //        this.userService = userService;
@@ -35,5 +38,19 @@ public class CartService {
             return cart;
         }
         return cart;
+    }
+
+    public void updateCartItemQuantity(Long cartItemId, Integer newQuantity) {
+        if (newQuantity == null || newQuantity < 1) {
+            throw new IllegalArgumentException("Số lượng phải lớn hơn 0");
+        }
+        CartItemEntity cartItem = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sản phẩm trong giỏ hàng"));
+        int maxStock = cartItem.getProductVariantId().getStock();
+        if (newQuantity > maxStock) {
+            throw new IllegalArgumentException("Số lượng vượt quá hàng có sẵn. Tối đa: " + maxStock);
+        }
+        cartItem.setQuantity(newQuantity);
+        cartItemRepository.save(cartItem);
     }
 }

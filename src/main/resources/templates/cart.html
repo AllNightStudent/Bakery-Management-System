@@ -24,6 +24,10 @@
             .warning-message.show {
                 display: block;
             }
+            .quantity-updating {
+                opacity: 0.6;
+                pointer-events: none;
+            }
         </style>
     </th:block>
 </head>
@@ -67,7 +71,7 @@
                     <!-- Số lượng -->
                     <div class="col-span-2">
                         <div class="flex justify-center items-center gap-2">
-                            <input type="hidden" name="id" th:value="${item.id}"> <!-- gửi ID về server -->
+                            <input type="hidden" name="id" th:value="${item.id}" class="cart-item-id"> <!-- added class for API -->
                             <input type="hidden" name="max-stock" th:value="${item.productVariantId.stock}" class="max-stock">
                             <button type="button" class="btn-minus w-8 h-8 border border-gray-300 rounded">−</button>
                             <input type="number" name="quantity" th:value="${item.quantity}" min="1"
@@ -132,9 +136,37 @@
 
 <th:block th:fragment="extraScripts">
     <script>
+        async function updateQuantityApi(cartItemId, newQuantity) {
+            try {
+                const response = await fetch('/cart/update-quantity', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        cartItemId: cartItemId,
+                        quantity: newQuantity
+                    })
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    if (data.message && data.message.includes('vượt quá')) {
+                        alert('⚠️ ' + data.message);
+                    } else {
+                        alert('Lỗi: ' + (data.message || 'Cập nhật thất bại'));
+                    }
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error('Lỗi khi cập nhật:', error);
+                alert('Lỗi kết nối. Vui lòng thử lại.');
+                return false;
+            }
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
             const cartItems = document.querySelectorAll(".cart-item");
-
             cartItems.forEach(item => {
                 const minusBtn = item.querySelector(".btn-minus");
                 const plusBtn = item.querySelector(".btn-plus");
@@ -143,17 +175,15 @@
                 const totalElement = item.querySelector(".item-total");
                 const maxStockElement = item.querySelector(".max-stock");
                 const warningMessage = item.querySelector(".warning-message");
-
+                const cartItemId = item.querySelector(".cart-item-id").value;
                 const unitPrice = parseInt(priceElement.textContent.replace(/\D/g, ""));
                 const maxStock = parseInt(maxStockElement.value);
-
                 function updateTotal() {
                     const quantity = parseInt(quantityInput.value);
                     const newTotal = unitPrice * quantity;
                     totalElement.textContent = newTotal.toLocaleString("vi-VN") + "₫";
                     updateCartTotal();
                 }
-
                 function checkStock() {
                     const quantity = parseInt(quantityInput.value);
                     if (quantity > maxStock) {
@@ -164,29 +194,73 @@
                         return true;
                     }
                 }
-
-                minusBtn.addEventListener("click", (e) => {
+                minusBtn.addEventListener("click", async (e) => {
                     e.preventDefault();
                     if (quantityInput.value > 1) {
-                        quantityInput.value--;
+                        const newQuantity = parseInt(quantityInput.value) - 1;
+
+                        // Disable button khi đang update
+                        minusBtn.disabled = true;
+
+                        const success = await updateQuantityApi(cartItemId, newQuantity);
+                        if (success) {
+                            quantityInput.value = newQuantity;
+                            warningMessage.classList.remove("show");
+                            updateTotal();
+                        }
+
+                        minusBtn.disabled = false;
+                    }
+                });
+
+                plusBtn.addEventListener("click", async (e) => {
+                    e.preventDefault();
+                    const newQuantity = parseInt(quantityInput.value) + 1;
+
+                    if (newQuantity > maxStock) {
+                        alert('⚠️ Số lượng vượt quá hàng có sẵn. Tối đa: ' + maxStock);
+                        warningMessage.classList.add("show");
+                        return;
+                    }
+
+                    // Disable button khi đang update
+                    plusBtn.disabled = true;
+
+                    const success = await updateQuantityApi(cartItemId, newQuantity);
+                    if (success) {
+                        quantityInput.value = newQuantity;
                         warningMessage.classList.remove("show");
                         updateTotal();
                     }
+
+                    plusBtn.disabled = false;
                 });
 
-                plusBtn.addEventListener("click", (e) => {
-                    e.preventDefault();
-                    quantityInput.value++;
-                    if (checkStock()) {
+                quantityInput.addEventListener("change", async (e) => {
+                    let quantity = parseInt(quantityInput.value);
+
+                    // Validate quantity
+                    if (isNaN(quantity) || quantity < 1) {
+                        quantity = 1;
+                        quantityInput.value = quantity;
+                    }
+
+                    if (quantity > maxStock) {
+                        alert('⚠️ Số lượng vượt quá hàng có sẵn. Tối đa: ' + maxStock);
+                        quantityInput.value = parseInt(quantityInput.value);
+                        warningMessage.classList.add("show");
+                        return;
+                    }
+
+                    // Gọi API để update
+                    const success = await updateQuantityApi(cartItemId, quantity);
+                    if (success) {
+                        warningMessage.classList.remove("show");
                         updateTotal();
                     } else {
-                        quantityInput.value--;
+                        // Revert nếu update thất bại
+                        location.reload();
                     }
-                });
-
-                quantityInput.addEventListener("input", () => {
-                    checkStock();
-                    updateTotal();
                 });
             });
 
@@ -198,7 +272,7 @@
                 document.querySelector(".cart-grand-total").textContent = total.toLocaleString("vi-VN") + "₫";
             }
 
-            // 🟢 Gọi ngay sau khi trang tải xong
+            // Gọi ngay sau khi trang tải xong
             updateCartTotal();
         });
     </script>
