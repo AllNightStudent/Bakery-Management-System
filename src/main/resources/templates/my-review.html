@@ -17,9 +17,7 @@
         <div><span class="text-gray-500">Số sao:</span>
             <span class="font-medium" th:text="${r.rating}"></span> ★
         </div>
-        <div><span class="text-gray-500">Trạng thái:</span>
-            <span class="font-medium" th:text="${r.status}"></span>
-        </div>
+        
         <div><span class="text-gray-500">Ngày tạo:</span>
             <span class="font-medium" th:text="${#temporals.format(r.createdAt,'dd/MM/yyyy HH:mm')}"></span>
         </div>

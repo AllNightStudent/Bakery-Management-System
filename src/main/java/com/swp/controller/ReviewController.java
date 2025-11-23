@@ -58,10 +58,7 @@ public class ReviewController {
             oi = orderItemRepo.findById(orderItemId)
                     .orElseThrow(() -> new IllegalArgumentException("Order item not found"));
 
-            if (!oi.getOrder().getUser().getId().equals(user.getId())) {
-                ra.addFlashAttribute("error", "Sản phẩm này không thuộc đơn hàng của bạn.");
-                return "redirect:/orders/" + oi.getOrder().getOrderId() + "/details";
-            }
+
 
             if (reviewRepository.existsByOrderItemAndUser(oi, user)) {
                 ra.addFlashAttribute("info", "Bạn đã đánh giá sản phẩm này rồi.");
@@ -89,13 +86,7 @@ public class ReviewController {
         UserEntity user = userRepository.findByEmail(email).orElse(null);
 
 
-        if (br.hasErrors()) {
 
-            ra.addFlashAttribute("org.springframework.validation.BindingResult.req", br);
-            ra.addFlashAttribute("req", req);
-            ra.addFlashAttribute("error", "Vui lòng kiểm tra lại các trường nhập.");
-            return "redirect:/products/" + productId + "/reviews/new?orderItemId=" + req.orderItemId();
-        }
 
         Long orderId = null;
         if (req.orderItemId() != null) {
@@ -106,7 +97,7 @@ public class ReviewController {
         }
 
         reviewService.createReview(productId, user, req, photos);
-        ra.addFlashAttribute("success", "Đã gửi đánh giá! Sẽ hiển thị sau khi được duyệt.");
+        ra.addFlashAttribute("success", "Đã gửi đánh giá!");
 
         if (orderId != null) {
             return "redirect:/orders/" + orderId + "/details";

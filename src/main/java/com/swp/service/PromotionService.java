@@ -11,16 +11,51 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class PromotionService {
 
     private final PromotionRepository promotionRepository;
+
+    // =============== PHẦN DÙNG CHO ADMIN (CRUD) ===============
+
+    public List<Promotion> findAll() {
+        return promotionRepository.findAll();
+    }
+
+    public Promotion findByIdOrThrow(Long id) {
+        return promotionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Voucher không tồn tại"));
+    }
+
+    public Promotion save(Promotion promotion) {
+        syncActiveWithDates(promotion);
+        return promotionRepository.save(promotion);
+    }
+
+    public void deleteById(Long id) {
+        promotionRepository.deleteById(id);
+    }
+
+
+    private void syncActiveWithDates(Promotion p) {
+        LocalDateTime now = LocalDateTime.now();
+        boolean isActive = true;
+
+        if (p.getStartDate() != null && p.getStartDate().isAfter(now)) {
+            isActive = false;
+        }
+
+        if (p.getEndDate() != null && p.getEndDate().isBefore(now)) {
+            isActive = false;
+        }
+
+        p.setActive(isActive);
+    }
+
+    // =============== PHẦN ÁP DỤNG VOUCHER CHO CART ===============
 
     public PromotionResult applyBestPromotion(List<CartItemEntity> cartItems) {
         BigDecimal subtotal = calcSubtotal(cartItems);
@@ -54,8 +89,6 @@ public class PromotionService {
         return new PromotionResult(best, subtotal, bestDiscount, finalTotal);
     }
 
-    // ================== PHẦN CHỈNH CHO CARTITEMENTITY ==================
-
     /** Tính tổng tiền hàng (subtotal) = sum(priceVariant * quantity) */
     private BigDecimal calcSubtotal(List<CartItemEntity> items) {
         BigDecimal subtotal = BigDecimal.ZERO;
@@ -87,20 +120,16 @@ public class PromotionService {
             ProductVariantEntity variant = item.getProductVariantId();
             if (variant == null) continue;
 
-            // Lấy product từ variant
-            ProductEntity product = variant.getProduct();   // CHÚ Ý: field này trong ProductVariantEntity
+            ProductEntity product = variant.getProduct();
             if (product == null) continue;
 
-            // Vì field trong ProductEntity là `categoryId`
-            CategoryEntity category = product.getCategoryId();  // ✅ DÙNG getCategoryId(), KHÔNG phải getCategory()
+            CategoryEntity category = product.getCategoryId();
             if (category != null) {
                 result.add(category);
             }
         }
         return result;
     }
-
-    // ================== PHẦN DƯỚI GIỮ NGUYÊN NHƯ CŨ ==================
 
     private boolean isEligible(Promotion p,
                                BigDecimal subtotal,
@@ -165,6 +194,7 @@ public class PromotionService {
         return BigDecimal.ZERO;
     }
 
+    /** Trả về list voucher + trạng thái đủ điều kiện / số tiền giảm để hiển thị cho user chọn */
     public List<VoucherView> getVoucherViews(List<CartItemEntity> cartItems) {
         BigDecimal subtotal = calcSubtotal(cartItems);
         int totalQuantity = calcTotalQuantity(cartItems);
@@ -190,7 +220,7 @@ public class PromotionService {
             return BigDecimal.ZERO;
         }
 
-        BigDecimal subtotal = calcSubtotal(cartItems);             // dùng hàm private đã có
+        BigDecimal subtotal = calcSubtotal(cartItems);
         int totalQuantity = calcTotalQuantity(cartItems);
         Set<CategoryEntity> categoriesInCart = extractCategories(cartItems);
 
@@ -198,7 +228,7 @@ public class PromotionService {
             return BigDecimal.ZERO;
         }
 
-        return calculateDiscount(promotion, subtotal);             // cũng là hàm private đã có
+        return calculateDiscount(promotion, subtotal);
     }
 
 }
