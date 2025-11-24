@@ -60,7 +60,6 @@ public class AdminVoucherController {
         existing.setMinOrderValue(form.getMinOrderValue());
         existing.setMaxOrderValue(form.getMaxOrderValue());
         existing.setMinTotalQuantity(form.getMinTotalQuantity());
-        existing.setProductScopeType(form.getProductScopeType());
         existing.setCategories(form.getCategories());
         existing.setStartDate(form.getStartDate());
         existing.setEndDate(form.getEndDate());

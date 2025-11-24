@@ -1,7 +1,6 @@
 package com.swp.entity;
 
 import com.swp.entity.enums.DiscountType;
-import com.swp.entity.enums.ProductScopeType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -45,9 +44,6 @@ public class Promotion {
     // Điều kiện theo tổng số lượng sản phẩm
     private Integer minTotalQuantity;   // có thể null
 
-    // Điều kiện theo loại sản phẩm
-    @Enumerated(EnumType.STRING)
-    private ProductScopeType productScopeType; // ALL / CATEGORY / PRODUCT
 
     // Ví dụ ManyToMany với Category (điều chỉnh lại tên entity cho khớp)
     @ManyToMany

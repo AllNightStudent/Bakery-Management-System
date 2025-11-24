@@ -4,7 +4,6 @@ import com.swp.dto.PromotionResult;
 import com.swp.dto.VoucherView;
 import com.swp.entity.*;
 import com.swp.entity.enums.DiscountType;
-import com.swp.entity.enums.ProductScopeType;
 import com.swp.repository.PromotionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,7 +18,6 @@ public class PromotionService {
 
     private final PromotionRepository promotionRepository;
 
-    // =============== PHẦN DÙNG CHO ADMIN (CRUD) ===============
 
     public List<Promotion> findAll() {
         return promotionRepository.findAll();
@@ -55,12 +53,10 @@ public class PromotionService {
         p.setActive(isActive);
     }
 
-    // =============== PHẦN ÁP DỤNG VOUCHER CHO CART ===============
 
     public PromotionResult applyBestPromotion(List<CartItemEntity> cartItems) {
         BigDecimal subtotal = calcSubtotal(cartItems);
         int totalQuantity = calcTotalQuantity(cartItems);
-        Set<CategoryEntity> categoriesInCart = extractCategories(cartItems);
 
         if (subtotal.compareTo(BigDecimal.ZERO) <= 0) {
             return new PromotionResult(null, subtotal, BigDecimal.ZERO, subtotal);
@@ -72,7 +68,7 @@ public class PromotionService {
         BigDecimal bestDiscount = BigDecimal.ZERO;
 
         for (Promotion p : promotions) {
-            if (!isEligible(p, subtotal, totalQuantity, categoriesInCart)) continue;
+            if (!isEligible(p, subtotal, totalQuantity)) continue;
 
             BigDecimal discount = calculateDiscount(p, subtotal);
             if (discount.compareTo(bestDiscount) > 0) {
@@ -89,13 +85,12 @@ public class PromotionService {
         return new PromotionResult(best, subtotal, bestDiscount, finalTotal);
     }
 
-    /** Tính tổng tiền hàng (subtotal) = sum(priceVariant * quantity) */
     private BigDecimal calcSubtotal(List<CartItemEntity> items) {
         BigDecimal subtotal = BigDecimal.ZERO;
         for (CartItemEntity item : items) {
             ProductVariantEntity variant = item.getProductVariantId();
             if (variant == null || variant.getPrice() == null) {
-                continue; // hoặc throw nếu bạn muốn bắt buộc phải có giá
+                continue;
             }
             BigDecimal unitPrice = variant.getPrice();
             BigDecimal lineTotal = unitPrice.multiply(BigDecimal.valueOf(item.getQuantity()));
@@ -104,7 +99,6 @@ public class PromotionService {
         return subtotal;
     }
 
-    /** Tổng số lượng sản phẩm trong giỏ */
     private int calcTotalQuantity(List<CartItemEntity> items) {
         int total = 0;
         for (CartItemEntity item : items) {
@@ -113,7 +107,6 @@ public class PromotionService {
         return total;
     }
 
-    /** Lấy tất cả Category xuất hiện trong giỏ hàng */
     private Set<CategoryEntity> extractCategories(List<CartItemEntity> items) {
         Set<CategoryEntity> result = new HashSet<>();
         for (CartItemEntity item : items) {
@@ -133,10 +126,8 @@ public class PromotionService {
 
     private boolean isEligible(Promotion p,
                                BigDecimal subtotal,
-                               int totalQuantity,
-                               Set<CategoryEntity> cartCategories) {
+                               int totalQuantity) {
 
-        // 1. Giá trị đơn hàng
         if (p.getMinOrderValue() != null &&
                 subtotal.compareTo(p.getMinOrderValue()) < 0) {
             return false;
@@ -147,34 +138,12 @@ public class PromotionService {
             return false;
         }
 
-        // 2. Số lượng
         if (p.getMinTotalQuantity() != null &&
                 totalQuantity < p.getMinTotalQuantity()) {
             return false;
         }
 
-        // 3. Loại sản phẩm
-        ProductScopeType scope = p.getProductScopeType();
-        if (scope == null || scope == ProductScopeType.ALL) {
-            return true;
-        }
 
-        if (scope == ProductScopeType.CATEGORY) {
-            if (p.getCategories() == null || p.getCategories().isEmpty()) {
-                return false;
-            }
-            for (CategoryEntity c : cartCategories) {
-                if (p.getCategories().contains(c)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        if (scope == ProductScopeType.PRODUCT) {
-            // TODO: nếu sau này bạn làm khuyến mãi theo từng product cụ thể
-            return false;
-        }
 
         return true;
     }
@@ -194,17 +163,15 @@ public class PromotionService {
         return BigDecimal.ZERO;
     }
 
-    /** Trả về list voucher + trạng thái đủ điều kiện / số tiền giảm để hiển thị cho user chọn */
     public List<VoucherView> getVoucherViews(List<CartItemEntity> cartItems) {
         BigDecimal subtotal = calcSubtotal(cartItems);
         int totalQuantity = calcTotalQuantity(cartItems);
-        Set<CategoryEntity> categoriesInCart = extractCategories(cartItems);
 
         List<Promotion> promotions = promotionRepository.findAllActive(LocalDateTime.now());
 
         List<VoucherView> result = new ArrayList<>();
         for (Promotion p : promotions) {
-            boolean ok = isEligible(p, subtotal, totalQuantity, categoriesInCart);
+            boolean ok = isEligible(p, subtotal, totalQuantity);
             BigDecimal discount = BigDecimal.ZERO;
             if (ok) {
                 discount = calculateDiscount(p, subtotal);
@@ -222,9 +189,8 @@ public class PromotionService {
 
         BigDecimal subtotal = calcSubtotal(cartItems);
         int totalQuantity = calcTotalQuantity(cartItems);
-        Set<CategoryEntity> categoriesInCart = extractCategories(cartItems);
 
-        if (!isEligible(promotion, subtotal, totalQuantity, categoriesInCart)) {
+        if (!isEligible(promotion, subtotal, totalQuantity)) {
             return BigDecimal.ZERO;
         }
 
