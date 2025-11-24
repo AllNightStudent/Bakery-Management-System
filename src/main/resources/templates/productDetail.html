@@ -204,7 +204,7 @@
                     <div th:each="variant : ${productDetail.variants}">
                         <button type="button"
                                 class="btn-variant"
-                                th:text="${variant.weight} + 'gram'"
+                                th:text="${variant.weight} + ' cm'"
                                 th:data-variant-id="${variant.variantId}"
                                 th:data-price="${variant.price}"
                                 th:data-stock="${variant.stock}"

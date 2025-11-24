@@ -37,10 +37,10 @@
     <div class="w-full h-2 bg-gradient-to-r from-green-600 via-red-600 to-gray-800"></div>
     <!--    Main Container-->
     <div class="max-w-6xl mx-auto px-4 py-8">
-        Title
+
         <h1 class="text-3xl font-bold text-center mb-12 tracking-wider">GIỎ HÀNG</h1>
 
-        Table Header
+
         <div class="grid grid-cols-12 gap-4 mb-6 text-sm text-gray-700">
             <div class="col-span-6 text-center">Thông tin chi tiết sản phẩm</div>
             <div class="col-span-2 text-center">Đơn giá</div>
@@ -59,8 +59,8 @@
                                 th:text="${item.productVariantId.product.name}"></h3>
                         </div>
                         <p class="text-sm text-gray-600">
-                            Trọng lượng:
-                            <span th:text="${item.productVariantId.weight + ' g'}"></span>
+                            Kích thước:
+                            <span th:text="${item.productVariantId.weight + ' cm'}"></span>
                         </p>
                     </div>
                     <!-- Giá -->
@@ -125,7 +125,7 @@
             </svg>
         </a>
 
-        Scroll to Top Button
+
         <button class="fixed bottom-8 right-8 w-10 h-10 bg-gray-700 rounded flex items-center justify-center shadow-lg hover:bg-gray-600 transition">
             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
