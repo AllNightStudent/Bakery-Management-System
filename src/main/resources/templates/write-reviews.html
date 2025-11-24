@@ -44,7 +44,7 @@
 
         <!-- Photos -->
         <div>
-            <input type="file" name="photos" accept="image/*" multiple class="block"/>
+            <input type="file" id="photosInput" name="photos" accept="image/*" multiple class="block"/>
         </div>
 
         <div class="pt-2">
@@ -53,6 +53,32 @@
     </form>
 </main>
 
-<th:block th:fragment="extraScripts"></th:block>
+<th:block th:fragment="extraScripts">
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const input = document.getElementById("photosInput");
+
+            if (!input) return;
+
+            input.addEventListener("change", function () {
+                const files = Array.from(this.files);
+
+                if (files.length > 6) {
+                    alert("Bạn chỉ được chọn tối đa 6 ảnh.");
+                    this.value = "";
+                    return;
+                }
+
+                for (const f of files) {
+                    if (!f.type.startsWith("image/")) {
+                        alert("Chỉ được chọn file hình ảnh (JPG, PNG, JPEG, PNG, WEBP, ...).");
+                        this.value = "";
+                        return;
+                    }
+                }
+            });
+        });
+    </script>
+</th:block>
 </body>
 </html>

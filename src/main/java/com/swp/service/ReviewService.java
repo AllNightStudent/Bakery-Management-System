@@ -24,7 +24,9 @@ public class ReviewService {
     private final ReviewMediaRepository mediaRepo;
     private final LocalStorageService storage;
 
-    /** Kiểm tra quyền & tạo review. Ảnh sẽ được lưu sau khi có reviewId */
+    /**
+     * Kiểm tra quyền & tạo review. Ảnh sẽ được lưu sau khi có reviewId
+     */
     @Transactional
     public Long createReview(Long productId, UserEntity user, ReviewCreateRequest req,
                              List<MultipartFile> photos) throws IOException {
@@ -33,20 +35,13 @@ public class ReviewService {
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
 
         OrderItemEntity orderItem = null;
-        boolean verified = false;
-
-        if (req.orderItemId() != null) {
-            orderItem = orderItemRepo.findById(req.orderItemId())
-                    .orElseThrow(() -> new IllegalArgumentException("Order item not found"));
 
 
+        reviewRepo.findByOrderItemAndUser(orderItem, user)
+                .ifPresent(r -> {
+                    throw new IllegalStateException("You already reviewed this item");
+                });
 
-            // Chống trùng: đã từng review orderItem này chưa?
-            reviewRepo.findByOrderItemAndUser(orderItem, user)
-                    .ifPresent(r -> { throw new IllegalStateException("You already reviewed this item"); });
-
-            verified = true;
-        }
 
         Review review = Review.builder()
                 .product(product)
@@ -59,7 +54,6 @@ public class ReviewService {
 
         review = reviewRepo.save(review);
 
-        // Lưu ảnh (tối đa 6, size tuỳ frontend đã validate)
         if (photos != null) {
             int max = Math.min(photos.size(), 6);
             for (int i = 0; i < max; i++) {
@@ -74,7 +68,6 @@ public class ReviewService {
             }
         }
 
-        // TODO: enqueue job cập nhật product_rating_stats nếu có
         return review.getReviewId();
     }
 }

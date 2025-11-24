@@ -26,8 +26,6 @@ public class AdminVoucherController {
     @GetMapping("/create")
     public String createForm(Model model) {
         Promotion voucher = new Promotion();
-        // Có thể set startDate mặc định là bây giờ, endDate null
-        voucher.setStartDate(LocalDateTime.now());
         model.addAttribute("voucher", voucher);
         return "admin/voucher-form";
     }
