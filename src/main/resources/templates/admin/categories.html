@@ -398,7 +398,7 @@
     <!-- Filters -->
     <div class="filters">
       <form class="filter-group" method="get" th:action="@{/admin/categories}">
-        <select name="active" class="filter-select" onchange="this.form.submit()">
+        <select name="active" class="filter-select" onchange="this.form.submit()" hidden="">
           <option value="">Tất cả trạng thái</option>
           <option value="true" th:selected="${activeFilter != null && activeFilter}">Đang hoạt động</option>
           <option value="false" th:selected="${activeFilter != null && !activeFilter}">Tạm ngưng</option>
@@ -423,7 +423,7 @@
               </a>
             </th>
             <th>Mô tả</th>
-            <th>Trạng thái</th>
+            <th hidden="">Trạng thái</th>
             <th>Ngày tạo</th>
             <th>Thao tác</th>
           </tr>
@@ -435,7 +435,7 @@
               <strong th:text="${category.name}">Bánh Trung Thu</strong>
             </td>
             <td th:text="${category.description ?: 'Chưa có mô tả'}">Mô tả danh mục</td>
-            <td>
+            <td hidden="">
                             <span class="status"
                                   th:classappend="${category.active ? 'active' : 'inactive'}"
                                   th:text="${category.active ? 'Đang hoạt động' : 'Tạm ngưng'}">
@@ -457,8 +457,8 @@
                   ✏️
                 </button>
                 <form th:action="@{/admin/categories/toggle-status/{id}(id=${category.id})}"
-                      method="post" style="display: inline;">
-                  <button type="submit" class="btn-toggle"
+                      method="post" style="display: inline;" hidden>
+                  <button type="submit" class="btn-toggle" hidden>
                           th:title="${category.active ? 'Tạm ngưng' : 'Kích hoạt'}">
                     🔄
                   </button>
